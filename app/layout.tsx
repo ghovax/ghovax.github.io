@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import {
   Merriweather,
   Merriweather_Sans,
-  Noto_Sans_Mono
+  Noto_Sans_Mono,
 } from "next/font/google";
 import "@/lib/document.css";
 import "./globals.css";
