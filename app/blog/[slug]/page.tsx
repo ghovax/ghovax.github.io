@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
 import { Cross, X } from 'lucide-react';
+import { Highlighter } from '@/components/ui/highlighter';
 
 interface BlogPostPageProps {
     params: Promise<{
@@ -104,7 +105,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     <h1
                         className="text-3xl md:text-4xl font-bold pb-4 leading-tight border-border"
                     >
-                        {post.metadata.title}
+                        <Highlighter
+                            action="highlight"
+                            color="#3b82f655"
+                            isView={true}
+                            animationDuration={1000}
+                            multiline={true}
+                        >
+                            {post.metadata.title}
+                        </Highlighter>
                     </h1>
                     <span className="text-xs md:text-sm py-0 text-muted-foreground">
                         {post.metadata.tags!.map((tag, index) => (

@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { Highlighter } from './ui/highlighter';
 
 export function BlogHeader() {
     const today = new Date().toLocaleDateString('en-US', {
@@ -21,7 +24,7 @@ export function BlogHeader() {
             <div className="max-w-[1200px] mx-auto px-4 pb-4 text-left">
                 <Link href="/" className="inline-block">
                     <h1 className="text-4xl font-bold tracking-tight">
-                        Giovanni Gravili&rsquo;s Work Portfolio & Blog
+                        Giovanni Gravili&rsquo;s <Highlighter action="highlight" color="#ef444460" isView={false} animationDuration={800}>Work Portfolio</Highlighter> & Blog
                     </h1>
                 </Link>
             </div>

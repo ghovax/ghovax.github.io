@@ -3,6 +3,7 @@ import { PostMetadata } from "@/types/post";
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
+import { PostTitle } from "@/components/post-title";
 // Import timestamp to trigger hot reload when posts change
 import "@/lib/posts-timestamp";
 
@@ -48,7 +49,7 @@ export default function Home() {
 
                 <Link href={`/blog/${featuredPost.slug}`}>
                   <h2 className="text-2xl font-bold leading-tight mb-3 hover:opacity-70 transition-opacity">
-                    {featuredPost.title}
+                    <PostTitle variant="featured">{featuredPost.title}</PostTitle>
                   </h2>
                 </Link>
                 <p className="text-sm leading-relaxed mb-2">
@@ -70,7 +71,7 @@ export default function Home() {
                   </div>
                   <Link href={`/blog/${secondRowPosts[0].slug}`}>
                     <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                      {secondRowPosts[0].title}
+                      <PostTitle>{secondRowPosts[0].title}</PostTitle>
                     </h3>
                   </Link>
                   <p className="text-sm leading-relaxed text-muted-foreground">
@@ -94,7 +95,7 @@ export default function Home() {
                 </div>
                 <Link href={`/blog/${post.slug}`}>
                   <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                    {post.title}
+                    <PostTitle>{post.title}</PostTitle>
                   </h3>
                 </Link>
                 <p className="text-sm leading-relaxed text-muted-foreground">
@@ -120,7 +121,7 @@ export default function Home() {
                 )}
                 <Link href={`/blog/${post.slug}`}>
                   <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                    {post.title}
+                    <PostTitle>{post.title}</PostTitle>
                   </h3>
                 </Link>
                 <p className="text-sm leading-relaxed text-muted-foreground">
@@ -146,7 +147,7 @@ export default function Home() {
                 )}
                 <Link href={`/blog/${post.slug}`}>
                   <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                    {post.title}
+                    <PostTitle>{post.title}</PostTitle>
                   </h3>
                 </Link>
                 <p className="text-sm leading-relaxed text-muted-foreground">
