@@ -3,7 +3,14 @@ title: "Visualizing Quantum Confinement Through Brillouin Zone Analysis"
 date: "2024-10-15"
 excerpt: "Band structure and density of states calculations for quantum-confined systems using Mathematica."
 category: "Computational Physics"
-tags: ["Mathematica", "Solid State Physics", "Quantum Mechanics", "Band Structure", "Density of States"]
+tags:
+  [
+    "Mathematica",
+    "Solid State Physics",
+    "Quantum Mechanics",
+    "Band Structure",
+    "Density of States",
+  ]
 author: "Giovanni Gravili"
 ---
 
@@ -39,7 +46,13 @@ The resulting 3D mesh shows the characteristic shape of the $bcc$ Brillouin zone
 
 Electronic band structure is traditionally plotted along paths connecting high-symmetry points in the Brillouin zone. These points have special labels rooted in group theory: $\Gamma$ is the zone center, $X$, $W$, $L$, $K$, and $U$ are points on zone faces, edges, and corners. The conventional path for $bcc$ crystals follows:
 
-$$\text{L} \to \text{K} \to \text{U} \to \text{W} \to \Gamma \to \text{X} \to \text{W} \to \text{L} \to \Gamma \to \text{K} \to \text{U} \to \text{X}$$
+$$L \to K \to U \to W \to \Gamma \to X \to W \to L \to \Gamma \to K \to U \to X$$
+
+This path can be broken into segments:
+
+- $L \to K \to U \to W \to \Gamma$ (outer boundary sweep)
+- $\Gamma \to X \to W \to L \to \Gamma$ (inner loop)
+- $\Gamma \to K \to U \to X$ (connecting high-symmetry edges)
 
 I define these points in fractional coordinates:
 
