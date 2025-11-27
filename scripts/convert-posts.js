@@ -20,12 +20,13 @@ function ensurePostsDir() {
     }
 }
 
-function convertMarkdownToHTML(filepath) {
+function convertMarkdownToHTML(filepath, folderName) {
     try {
         const content = fs.readFileSync(filepath, 'utf-8');
         const { data: frontmatter, content: markdown } = matter(content);
 
-        const basename = path.basename(filepath, '.md');
+        // Use folder name as the base identifier
+        const basename = folderName || path.basename(filepath, '.md');
         const htmlPath = path.join(HTML_OUTPUT_DIR, `${basename}.html`);
 
         // Convert markdown to HTML using pandoc with mathml
@@ -37,7 +38,7 @@ function convertMarkdownToHTML(filepath) {
                 `pandoc "${tempMdPath}" -f markdown -t html --mathml -o "${htmlPath}"`,
                 { stdio: 'pipe' }
             );
-            console.log(`✓ Converted ${basename}.md → ${basename}.html`);
+            console.log(`✓ Converted ${folderName || basename}/index.md → ${basename}.html`);
         } catch (error) {
             console.error(`✗ Error converting ${basename}.md:`, error.message);
             return null;
@@ -48,13 +49,20 @@ function convertMarkdownToHTML(filepath) {
             }
         }
 
-        // Generate slug from filename if not provided
+        // Validate required frontmatter fields
+        if (!frontmatter.title || !frontmatter.date || !frontmatter.excerpt) {
+            console.warn(`⚠ Skipping ${basename}: Missing required frontmatter (title, date, or excerpt)`);
+            return null;
+        }
+
+        // Generate slug from folder name if not provided
         const slug = frontmatter.slug || basename;
 
         return {
             ...frontmatter,
             slug,
-            htmlFile: `${basename}.html`
+            htmlFile: `${basename}.html`,
+            postFolder: folderName || basename
         };
     } catch (error) {
         console.error(`Error processing ${filepath}:`, error.message);
@@ -65,19 +73,35 @@ function convertMarkdownToHTML(filepath) {
 function generatePostsManifest() {
     ensurePostsDir();
 
-    const markdownFiles = fs.readdirSync(POSTS_DIR)
-        .filter(file => file.endsWith('.md'));
+    const items = fs.readdirSync(POSTS_DIR);
+    const posts = [];
 
-    if (markdownFiles.length === 0) {
+    for (const item of items) {
+        const itemPath = path.join(POSTS_DIR, item);
+        const stat = fs.statSync(itemPath);
+
+        if (stat.isDirectory()) {
+            // Look for index.md in the folder
+            const indexPath = path.join(itemPath, 'index.md');
+            if (fs.existsSync(indexPath)) {
+                const post = convertMarkdownToHTML(indexPath, item);
+                if (post) posts.push(post);
+            }
+        } else if (item.endsWith('.md') && !item.toLowerCase().includes('readme')) {
+            // Support legacy standalone .md files (exclude README files)
+            const post = convertMarkdownToHTML(itemPath, null);
+            if (post) posts.push(post);
+        }
+    }
+
+    if (posts.length === 0) {
         console.log('No markdown files found in posts directory');
         fs.writeFileSync(OUTPUT_JSON, JSON.stringify([], null, 2));
         return;
     }
 
-    const posts = markdownFiles
-        .map(file => convertMarkdownToHTML(path.join(POSTS_DIR, file)))
-        .filter(post => post !== null)
-        .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+    // Sort by date, newest first
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     fs.writeFileSync(OUTPUT_JSON, JSON.stringify(posts, null, 2));
     console.log(`\n✓ Generated posts.json with ${posts.length} post(s)`);
