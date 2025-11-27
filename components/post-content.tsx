@@ -75,17 +75,38 @@ export function PostContent({ htmlContent }: PostContentProps) {
 
       // Convert HSL to RGB
       const h = hue / 60;
-      const c = (1 - Math.abs(2 * lightness / 100 - 1)) * (saturation / 100);
+      const c = (1 - Math.abs((2 * lightness) / 100 - 1)) * (saturation / 100);
       const x = c * (1 - Math.abs((h % 2) - 1));
       const m = lightness / 100 - c / 2;
 
-      let r = 0, g = 0, b = 0;
-      if (h >= 0 && h < 1) { r = c; g = x; b = 0; }
-      else if (h >= 1 && h < 2) { r = x; g = c; b = 0; }
-      else if (h >= 2 && h < 3) { r = 0; g = c; b = x; }
-      else if (h >= 3 && h < 4) { r = 0; g = x; b = c; }
-      else if (h >= 4 && h < 5) { r = x; g = 0; b = c; }
-      else if (h >= 5 && h < 6) { r = c; g = 0; b = x; }
+      let r = 0,
+        g = 0,
+        b = 0;
+      if (h >= 0 && h < 1) {
+        r = c;
+        g = x;
+        b = 0;
+      } else if (h >= 1 && h < 2) {
+        r = x;
+        g = c;
+        b = 0;
+      } else if (h >= 2 && h < 3) {
+        r = 0;
+        g = c;
+        b = x;
+      } else if (h >= 3 && h < 4) {
+        r = 0;
+        g = x;
+        b = c;
+      } else if (h >= 4 && h < 5) {
+        r = x;
+        g = 0;
+        b = c;
+      } else if (h >= 5 && h < 6) {
+        r = c;
+        g = 0;
+        b = x;
+      }
 
       const red = Math.round((r + m) * 255);
       const green = Math.round((g + m) * 255);
@@ -112,7 +133,7 @@ export function PostContent({ htmlContent }: PostContentProps) {
           isView={true}
         >
           {text}
-        </Highlighter>
+        </Highlighter>,
       );
     });
   }, [htmlContent]);

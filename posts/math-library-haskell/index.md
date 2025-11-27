@@ -105,7 +105,7 @@ simplify expr = case expr of
   Pow _ (Real 0) -> Real 1
   Pow (Real a) (Real b) -> Real (a ** b)
   Pow base exponent -> Pow (simplify base) (simplify exponent)
-  
+
   Neg (Real x) -> Real (-x)
   Neg (Neg a) -> simplify a  -- -(-a) = a
   Neg (Sum a b) -> Sum (simplify (Neg a)) (simplify (Neg b))
@@ -113,7 +113,7 @@ simplify expr = case expr of
   Neg (Pow a b) -> Pow (simplify (Neg a)) (simplify b)
   Neg (Inv a) -> Inv (simplify (Neg a))
   Neg a -> Neg (simplify a)
-  
+
   Log (Real 1) _ -> Real 0
   Log _ (Real 1) -> Real 0
   Ln (Real 1) -> Real 0
@@ -144,23 +144,23 @@ derivative var expr = case expr of
   Var v | v == var -> Real 1      -- dx/dx = 1
         | otherwise -> Real 0     -- dy/dx = 0
   Real _ -> Real 0                -- dc/dx = 0
-  
+
   -- Sum rule: d/dx(f + g) = f' + g'
   Sum f g -> Sum (derivative var f) (derivative var g)
-  
+
   -- Product rule: d/dx(f * g) = f' * g + f * g'
   Prod f g -> Sum (Prod (derivative var f) g)
                   (Prod f (derivative var g))
-  
+
   -- Power rule: d/dx(f^n) = n * f^(n-1) * f'
   Pow f n -> Prod n (Prod (Pow f (sub n (Real 1)))
                           (derivative var f))
-  
+
   Neg f -> Neg (derivative var f)
-  
+
   -- Reciprocal rule: d/dx(1/f) = -f' / f²
   Inv f -> Neg (divide (derivative var f) (Pow f (Real 2)))
-  
+
   Log _ arg -> Prod (divide (Real 1) (Prod arg (Ln arg)))
                     (derivative var arg)
   Ln arg -> divide (derivative var arg) arg
@@ -243,7 +243,7 @@ All 11 tests pass, giving confidence that the core algorithms are correct.
 
 # Conclusion
 
-Building this symbolic mathematics engine demonstrates how functional programming naturally expresses mathematical concepts. The elegance is striking: functions like `derivative` are remarkably concise, just dozens of lines, yet handle arbitrarily complex expressions through recursion and pattern matching. 
+Building this symbolic mathematics engine demonstrates how functional programming naturally expresses mathematical concepts. The elegance is striking: functions like `derivative` are remarkably concise, just dozens of lines, yet handle arbitrarily complex expressions through recursion and pattern matching.
 
 The mathematical structure guided the implementation at every step. The rules of calculus naturally map to pattern matching clauses. The tree structure of expressions naturally leads to recursive algorithms. The need for iterative improvement naturally suggests fixed-point iteration. The code practically wrote itself once I understood the mathematical foundations.
 

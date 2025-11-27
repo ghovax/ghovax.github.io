@@ -16,7 +16,7 @@
 }
 
 /* Remove extra space at bottom */
-.document>*:last-child {
+.document > *:last-child {
   margin-bottom: 0 !important;
 }
 
@@ -99,24 +99,24 @@
 }
 
 /* Heading spacing adjustments */
-.document h1~h1 {
+.document h1 ~ h1 {
   margin-top: 2rem;
 }
 
-.document h1+h2,
-.document h2+h3,
-.document h3+h4,
-.document h4+h5,
-.document h5+h6 {
+.document h1 + h2,
+.document h2 + h3,
+.document h3 + h4,
+.document h4 + h5,
+.document h5 + h6 {
   margin-top: 0.5rem;
 }
 
-.document h1+p,
-.document h2+p,
-.document h3+p,
-.document h4+p,
-.document h5+p,
-.document h6+p {
+.document h1 + p,
+.document h2 + p,
+.document h3 + p,
+.document h4 + p,
+.document h5 + p,
+.document h6 + p {
   margin-top: 0.5rem;
 }
 
@@ -440,16 +440,16 @@
   overflow-wrap: break-word;
 }
 
-.document table tr>th[scope="col"] {
+.document table tr > th[scope="col"] {
   border-bottom: 1px solid var(--border);
 }
 
-.document table tr>th[scope="row"] {
+.document table tr > th[scope="row"] {
   border-right: 1px solid var(--border);
 }
 
-.document table>tbody>tr:first-child>td,
-.document table>tbody>tr:first-child>th {
+.document table > tbody > tr:first-child > td,
+.document table > tbody > tr:first-child > th {
   border-top: 1px solid var(--border);
 }
 
@@ -494,7 +494,8 @@ math {
 /* Safe area support for iOS devices (notch, home indicator) */
 .safe-area-fullscreen {
   /* Support for viewport-fit=cover in iOS */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 
   /* Prevent overscroll/bounce effects on iOS */
   overscroll-behavior: none;
