@@ -2,64 +2,42 @@
 title: "Ground-State Energy via DFT for Helium"
 date: "2025-11-27"
 excerpt: "Implementation of ground-state energy of Helium atom computed via the Density Functional Theory (DFT) framework using Julia."
-category: "General"
-tags: ["introduction", "portfolio"]
+category: "Computational Physics"
+tags: ["DFT", "Julia", "Quantum Mechanics", "Computational Physics"]
 author: "Giovanni Gravili"
 ---
 
-# Welcome to My Portfolio
+# Ground-State Energy via DFT for Helium
 
-Welcome to my professional portfolio! This is a space where I share my work, projects, and thoughts on technology and development.
+This post presents an implementation of the ground-state energy of the Helium atom computed using the Density Functional Theory (DFT) framework in Julia.
 
-## About This Blog
+## Overview
 
-This blog is built with a custom markdown-based system that supports:
+Density Functional Theory (DFT) is a computational quantum mechanical modelling method used to investigate the electronic structure of many-body systems. In this implementation, we use the Kohn-Sham approach with Local Density Approximation (LDA) and the Perdew-Zunger correlation functional.
 
-- **Mathematical expressions** using LaTeX notation
-- **Interactive components** embedded directly in posts
-- **Clean, formal typography** optimized for readability
-- **Responsive design** that works on all devices
+## Interactive Pluto Notebook
 
-## Mathematical Examples
+Below is the interactive Pluto.jl notebook containing the full implementation:
 
-Here's an inline equation: $E = mc^2$, and here's a display equation:
+<iframe src="/.posts-build/dft-helium-julia/Important_story.html" width="100%" height="800px" frameborder="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;"></iframe>
 
-$$\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}$$
+## Detailed Report
 
-The quadratic formula is given by:
+The complete analysis and results are available in the detailed report below:
 
-$$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+<iframe src="/.posts-build/dft-helium-julia/dft_HeReport.html" width="100%" height="600px" frameborder="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;"></iframe>
 
-## Interactive Components
+## Key Features
 
-Below is an example of an embedded interactive component. This demonstrates how I can insert visualizations and interactive elements directly into blog posts:
+- **Self-consistent Kohn-Sham DFT** calculation
+- **LDA with Perdew-Zunger** correlation functional
+- **Finite difference methods** for radial Schrödinger and Poisson equations
+- **Shooting method with binary search** for eigenvalue determination
 
-<div data-component="ExampleChart" data-props='{"title":"Sample Data Visualization"}'></div>
+## Results
 
-## Code Examples
-
-Here's some sample code:
-
-```javascript
-function fibonacci(n) {
-  if (n <= 1) return n;
-  return fibonacci(n - 1) + fibonacci(n - 2);
-}
-
-console.log(fibonacci(10)); // 55
-```
-
-## What's Next
-
-In future posts, I'll be sharing:
-
-1. Deep dives into interesting technical problems
-2. Project walkthroughs and case studies
-3. Insights from my development experience
-4. Interactive demonstrations and visualizations
-
-Stay tuned for more content!
+The implementation successfully computes the ground-state energy of the Helium atom, demonstrating the power and accuracy of DFT methods for atomic systems.
 
 ---
 
-*Feel free to explore other posts and reach out if you'd like to discuss any of the topics covered.*
+*For questions or discussions about this implementation, feel free to reach out.*

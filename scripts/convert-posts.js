@@ -7,6 +7,7 @@ const matter = require('gray-matter');
 
 const POSTS_DIR = path.join(__dirname, '../posts');
 const HTML_OUTPUT_DIR = path.join(__dirname, '../.posts-build');
+const PUBLIC_POSTS_DIR = path.join(__dirname, '../public/.posts-build');
 const OUTPUT_JSON = path.join(__dirname, '../posts.json');
 
 function ensurePostsDir() {
@@ -17,6 +18,10 @@ function ensurePostsDir() {
     if (!fs.existsSync(HTML_OUTPUT_DIR)) {
         fs.mkdirSync(HTML_OUTPUT_DIR, { recursive: true });
         console.log('Created HTML output directory');
+    }
+    if (!fs.existsSync(PUBLIC_POSTS_DIR)) {
+        fs.mkdirSync(PUBLIC_POSTS_DIR, { recursive: true });
+        console.log('Created public posts directory');
     }
 }
 
@@ -70,6 +75,38 @@ function convertMarkdownToHTML(filepath, folderName) {
     }
 }
 
+function copyPostAssets(postFolder) {
+    const postPath = path.join(POSTS_DIR, postFolder);
+    const files = fs.readdirSync(postPath);
+
+    for (const file of files) {
+        if (file === 'index.md') continue; // Skip the main markdown file
+
+        const srcPath = path.join(postPath, file);
+        const stat = fs.statSync(srcPath);
+
+        if (stat.isFile()) {
+            // Create a subdirectory in both build and public folders for this post's assets
+            const postBuildDir = path.join(HTML_OUTPUT_DIR, postFolder);
+            const postPublicDir = path.join(PUBLIC_POSTS_DIR, postFolder);
+
+            if (!fs.existsSync(postBuildDir)) {
+                fs.mkdirSync(postBuildDir, { recursive: true });
+            }
+            if (!fs.existsSync(postPublicDir)) {
+                fs.mkdirSync(postPublicDir, { recursive: true });
+            }
+
+            const destPathBuild = path.join(postBuildDir, file);
+            const destPathPublic = path.join(postPublicDir, file);
+
+            fs.copyFileSync(srcPath, destPathBuild);
+            fs.copyFileSync(srcPath, destPathPublic);
+            console.log(`  ↳ Copied ${file} to build and public directories`);
+        }
+    }
+}
+
 function generatePostsManifest() {
     ensurePostsDir();
 
@@ -85,7 +122,11 @@ function generatePostsManifest() {
             const indexPath = path.join(itemPath, 'index.md');
             if (fs.existsSync(indexPath)) {
                 const post = convertMarkdownToHTML(indexPath, item);
-                if (post) posts.push(post);
+                if (post) {
+                    posts.push(post);
+                    // Copy any additional assets from the post folder
+                    copyPostAssets(item);
+                }
             }
         } else if (item.endsWith('.md') && !item.toLowerCase().includes('readme')) {
             // Support legacy standalone .md files (exclude README files)
