@@ -32,7 +32,7 @@ async function getPost(slug: string): Promise<{ metadata: PostMetadata; content:
         }
 
         // Read HTML content
-        const htmlPath = path.join(process.cwd(), 'posts', post.htmlFile);
+        const htmlPath = path.join(process.cwd(), '.posts-build', post.htmlFile);
         if (!fs.existsSync(htmlPath)) {
             return null;
         }

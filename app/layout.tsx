@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className="bg-card dark:bg-card"
+        className="bg-card dark:bg-card font-serif"
       >
         {children}
       </body>

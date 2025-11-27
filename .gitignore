@@ -42,3 +42,5 @@ next-env.d.ts
 
 # Generated blog files
 posts.json
+lib/posts-timestamp.ts
+.posts-build/
