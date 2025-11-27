@@ -79,17 +79,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="min-h-screen bg-background">
             <BlogHeader />
 
-            <article className="max-w-3xl mx-auto px-6 py-12">
-                <Link href="/">
-                    <Button variant="ghost" size="sm" className="mb-8 -ml-2">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to posts
-                    </Button>
-                </Link>
+            <article className="max-w-2xl mx-auto px-6 py-12">
+                <header className="mb-10 pb-8 border-b border-border">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight tracking-tight">
+                        {post.metadata.title}
+                    </h1>
 
-                <header className="mb-8">
-                    <div className="flex items-center gap-3 mb-4">
-                        <time className="text-sm text-muted-foreground">
+                    <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground mb-4">
+                        <time>
                             {new Date(post.metadata.date).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
@@ -98,22 +95,22 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         </time>
                         {post.metadata.category && (
                             <>
-                                <span className="text-muted-foreground">•</span>
-                                <Badge variant="outline">{post.metadata.category}</Badge>
+                                <span>•</span>
+                                <span>{post.metadata.category}</span>
                             </>
                         )}
                     </div>
 
-                    <h1 className="text-4xl font-bold mb-4">{post.metadata.title}</h1>
-
                     {post.metadata.author && (
-                        <p className="text-muted-foreground">By {post.metadata.author}</p>
+                        <p className="text-sm">
+                            By <span className="font-medium">{post.metadata.author}</span>
+                        </p>
                     )}
 
                     {post.metadata.tags && post.metadata.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-4">
+                        <div className="flex flex-wrap gap-2 mt-6">
                             {post.metadata.tags.map((tag) => (
-                                <Badge key={tag} variant="secondary">
+                                <Badge key={tag} variant="outline" className="text-xs font-normal">
                                     {tag}
                                 </Badge>
                             ))}
@@ -122,11 +119,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </header>
 
                 <PostContent htmlContent={post.content} />
+
+                <div className="mt-16 pt-8 border-t border-border">
+                    <Link
+                        href="/"
+                        className="text-xs uppercase tracking-widest font-medium hover:underline inline-flex items-center gap-2"
+                    >
+                        ← Back to Home
+                    </Link>
+                </div>
             </article>
 
-            <footer className="max-w-3xl mx-auto px-6 py-8 mt-16 border-t border-border">
-                <p className="text-sm text-muted-foreground text-center">
-                    © {new Date().getFullYear()} Giovanni Gravili. All rights reserved.
+            <footer className="max-w-2xl mx-auto px-6 py-12 mt-16 text-center border-t border-border">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                    © {new Date().getFullYear()} Giovanni Gravili
                 </p>
             </footer>
         </div>

@@ -24,12 +24,12 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <BlogHeader />
 
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        <div className="grid gap-6 md:grid-cols-2">
-            {posts.map((post) => (
-              <PostCard key={post.slug} post={post} />
-            ))}
-          </div>
+      <main className="max-w-4xl mx-auto px-6 py-6">
+        <div className="divide-y divide-border">
+          {posts.map((post) => (
+            <PostCard key={post.slug} post={post} />
+          ))}
+        </div>
       </main>
     </div>
   );

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PostMetadata } from '@/types/post';
 
@@ -9,36 +8,58 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
     return (
-        <Link href={`/blog/${post.slug}`} className="block">
-            <Card className="h-full transition-all hover:shadow-lg hover:border-primary/50">
-                <CardHeader>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                        <time className="text-sm text-muted-foreground">
-                            {new Date(post.date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}
-                        </time>
-                        {post.category && (
-                            <Badge variant="outline">{post.category}</Badge>
-                        )}
-                    </div>
-                    <CardTitle className="text-xl font-bold">{post.title}</CardTitle>
-                    <CardDescription className="text-base">{post.excerpt}</CardDescription>
-                </CardHeader>
-                {post.tags && post.tags.length > 0 && (
-                    <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                            {post.tags.map((tag) => (
-                                <Badge key={tag} variant="secondary" className="text-xs">
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
-                    </CardContent>
+        <article className="py-8 border-b border-border last:border-b-0">
+            {/* Metadata first - NYT style */}
+            <div className="flex items-center gap-2 mb-3 text-xs uppercase tracking-wide text-muted-foreground">
+                {post.category && (
+                    <>
+                        <span className="font-semibold">{post.category}</span>
+                        <span className="text-border">|</span>
+                    </>
                 )}
-            </Card>
-        </Link>
+                <time>
+                    {new Date(post.date).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric'
+                    })}
+                </time>
+            </div>
+
+            {/* Title - more balanced size */}
+            <h2 className="text-xl font-bold mb-2 leading-snug">
+                <Link
+                    href={`/blog/${post.slug}`}
+                    className="hover:opacity-70 transition-opacity"
+                >
+                    {post.title}
+                </Link>
+            </h2>
+
+            {/* Excerpt */}
+            <p className="text-sm leading-relaxed mb-3 text-foreground/70">
+                {post.excerpt}
+            </p>
+
+            {/* Author byline */}
+            {post.author && (
+                <p className="text-xs text-muted-foreground mb-3">
+                    By <span className="font-medium">{post.author}</span>
+                </p>
+            )}
+
+            {/* Tags - minimal, inline */}
+            {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                    {post.tags.map((tag) => (
+                        <span
+                            key={tag}
+                            className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                        >
+                            #{tag}
+                        </span>
+                    ))}
+                </div>
+            )}
+        </article>
     );
 }
