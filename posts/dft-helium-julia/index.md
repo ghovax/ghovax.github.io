@@ -1,7 +1,7 @@
 ---
-title: "Welcome to My Portfolio"
+title: "Ground-State Energy via DFT for Helium"
 date: "2025-11-27"
-excerpt: "An introduction to my work portfolio, showcasing projects and technical insights with interactive visualizations."
+excerpt: "Implementation of ground-state energy of Helium atom computed via the Density Functional Theory (DFT) framework using Julia."
 category: "General"
 tags: ["introduction", "portfolio"]
 author: "Giovanni Gravili"
