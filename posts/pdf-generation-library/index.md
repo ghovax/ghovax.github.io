@@ -3,14 +3,7 @@ title: "Building a PDF Generation Library from Scratch in Rust"
 date: "2024-05-09"
 excerpt: "Implementing a complete PDF generation library in Rust with JSON document support, TTF font embedding, and low-level PDF spec compliance for deterministic output suitable for regression testing."
 category: "Computer Science"
-tags:
-  [
-    "Rust",
-    "PDF",
-    "Font Rendering",
-    "Document Generation",
-    "Type Systems",
-  ]
+tags: ["Rust", "PDF", "Font Rendering", "Document Generation", "Type Systems"]
 author: "Giovanni Gravili"
 ---
 

@@ -273,6 +273,7 @@ curl -X POST http://localhost:5001/create_entity \
 ```
 
 Response:
+
 ```json
 {
   "status": "success",
@@ -307,6 +308,7 @@ curl -X GET http://localhost:5001/get_entity_components \
 ```
 
 Response:
+
 ```json
 {
   "status": "success",
