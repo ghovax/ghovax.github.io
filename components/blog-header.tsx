@@ -13,7 +13,7 @@ export function BlogHeader() {
             {/* Top bar with date only */}
             <div className="border-border">
                 <div className="max-w-[1200px] mx-auto px-4 py-2">
-                    <time className="text-sm font-medium">{today}</time>
+                    <time className="text-sm text-muted-foreground font-medium">{today}</time>
                 </div>
             </div>
 
@@ -21,7 +21,7 @@ export function BlogHeader() {
             <div className="max-w-[1200px] mx-auto px-4 pb-4 text-left">
                 <Link href="/" className="inline-block">
                     <h1 className="text-4xl font-bold tracking-tight">
-                        Giovanni Gravili&rsquo;s Portfolio
+                        Giovanni Gravili&rsquo;s Work Portfolio & Blog
                     </h1>
                 </Link>
             </div>

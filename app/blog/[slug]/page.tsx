@@ -5,6 +5,7 @@ import { PostMetadata } from '@/types/post';
 import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
+import { Cross, X } from 'lucide-react';
 
 interface BlogPostPageProps {
     params: Promise<{
@@ -87,7 +88,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {/* Close button */}
             <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-0">
                 <Link href="/" className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border hover:bg-muted transition-colors">
-                    <span className="text-lg">×</span>
+                    <span className="text-lg">
+                        <X className="w-4 h-4" />
+                    </span>
                 </Link>
             </div>
 
@@ -99,28 +102,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         {formatDate(post.metadata.date)}
                     </div>
                     <h1
-                        className="text-3xl md:text-4xl font-semibold mb-4 leading-tight border-b border-border pb-6"
+                        className="text-3xl md:text-4xl font-bold mb-4 leading-tight border-border pb-6"
                     >
                         {post.metadata.title}
-                        {/* Byline and metadata */}
                     </h1>
-
-                    {/* Image placeholder */}
-                    <div className="w-full h-80 bg-muted mb-4 border border-border"></div>
-                    <p className="text-xs text-muted-foreground mb-6 italic">
-                        Image caption or credit
-                    </p>
                 </header>
 
                 {/* Article content */}
-                <div className="nyt-article-body">
-                    {/* Lead paragraph */}
-                    {post.metadata.excerpt && (
-                        <p className="text-xl leading-relaxed mb-6 font-bold">
-                            {post.metadata.excerpt}
-                        </p>
-                    )}
-
+                <div className="">
                     <PostContent htmlContent={post.content} />
                 </div>
 
@@ -130,19 +119,19 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
                             @
                         </span>
-                        Email
+                        Write me an e-mail
                     </button>
                     <button className="flex items-center gap-2 text-xs hover:opacity-70">
                         <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
                             in
                         </span>
-                        LinkedIn
+                        Open my LinkedIn
                     </button>
                     <button className="flex items-center gap-2 text-xs hover:opacity-70">
                         <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
                             𝕏
                         </span>
-                        Share
+                        Share on Twitter
                     </button>
                 </div>
             </article>
