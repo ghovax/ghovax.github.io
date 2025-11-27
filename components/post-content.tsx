@@ -14,7 +14,6 @@ export function PostContent({ htmlContent }: PostContentProps) {
 
   useEffect(() => {
     if (!contentRef.current) return;
-
     // Find all component markers in the HTML
     const markers = contentRef.current.querySelectorAll("[data-component]");
 

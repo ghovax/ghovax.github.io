@@ -73,7 +73,7 @@ substitute expr target replacement = case expr of
   _ -> expr
 ```
 
-For compound expressions, recursively substitute in subexpressions. For variables, check if they match the target. For constants, do nothing. Substitution is name-based: if we're substituting $x \rightarrow 5$, we only replace variables named "x".
+For compound expressions, recursively substitute in subexpressions. For variables, check if they match the target. For constants, do nothing. Substitution is name-based: if we're substituting $x \rightarrow 5$, we only replace variables named "$x$".
 
 # Simplification and Derivatives
 
