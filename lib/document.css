@@ -137,7 +137,14 @@
 .document a,
 .document a:visited {
   color: var(--primary);
+  text-decoration: underline;
   text-decoration-skip-ink: auto;
+  cursor: pointer;
+}
+
+.document a:hover {
+  color: var(--primary);
+  opacity: 0.8;
 }
 
 /* Code and Preformatted Text */
