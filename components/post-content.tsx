@@ -52,10 +52,13 @@ export function PostContent({ htmlContent }: PostContentProps) {
     // Wrap all h2 headings with Highlighter component
     const h2Elements = contentRef.current.querySelectorAll("h1");
 
-    // Generate random hues for each heading
-    const hues = Array.from({ length: h2Elements.length }, () =>
-      Math.floor(Math.random() * 360)
-    );
+    // Generate evenly distributed unique hues for each heading
+    const hues = Array.from({ length: h2Elements.length }, (_, index) => {
+      // Distribute hues evenly across the color wheel with golden ratio offset
+      // This ensures maximum color distinction between consecutive headings
+      const goldenRatioConjugate = 0.618033988749895;
+      return Math.floor((index * goldenRatioConjugate * 360) % 360);
+    });
 
     h2Elements.forEach((h1, index) => {
       const text = h1.textContent || "";
