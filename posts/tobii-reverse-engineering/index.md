@@ -182,7 +182,7 @@ The protocol supports 34 different stream types, ranging from basic gaze points 
 - Full 3D gaze with per-eye data
 - Eye camera images
 - Diagnostic images
-- And 30 more specialized streams
+- More than 30 other specialized streams
 
 Commands control device behavior and calibration:
 
@@ -190,7 +190,7 @@ Commands control device behavior and calibration:
 - Begin calibration procedure
 - Collect calibration point
 - Store license for device access
-- And 20 more commands
+- More than 20 other commands
 
 The `prp_client_create` function in the interop library revealed how clients authenticate:
 
