@@ -84,48 +84,39 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="min-h-screen bg-background">
             <BlogHeader />
 
-            {/* Close button - NYT style */}
-            <div className="max-w-[1200px] mx-auto px-6 pt-4">
+            {/* Close button */}
+            <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-0">
                 <Link href="/" className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border hover:bg-muted transition-colors">
                     <span className="text-lg">×</span>
                 </Link>
             </div>
 
-            <article className="max-w-[800px] mx-auto px-6 py-8">
+            <article className="max-w-[800px] mx-auto px-6 pb-6">
                 {/* Article header */}
                 <header className="mb-8">
                     {/* Title */}
-                    <h1
-                        className="text-4xl md:text-5xl font-normal mb-4 leading-tight border-b border-border pb-6"
-                        style={{ fontFamily: 'Georgia, serif' }}
-                    >
-                        {post.metadata.title}
-                    </h1>
-
-                    {/* Image placeholder - matching NYT article view */}
-                    <div className="w-full h-80 bg-muted mb-4 border border-border"></div>
-                    <p className="text-xs text-muted-foreground mb-6 italic">
-                        Caption placeholder / Credit
-                    </p>
-
-                    {/* Byline and metadata */}
-                    <div className="flex items-center gap-2 text-xs mb-6">
-                        {post.metadata.author && (
-                            <>
-                                <span className="font-bold">BY {post.metadata.author.toUpperCase()}</span>
-                            </>
-                        )}
-                    </div>
-                    <div className="text-xs text-muted-foreground mb-6">
+                    <div className="text-xs md:text-sm py-2 text-muted-foreground">
                         {formatDate(post.metadata.date)}
                     </div>
+                    <h1
+                        className="text-3xl md:text-4xl font-semibold mb-4 leading-tight border-b border-border pb-6"
+                    >
+                        {post.metadata.title}
+                        {/* Byline and metadata */}
+                    </h1>
+
+                    {/* Image placeholder */}
+                    <div className="w-full h-80 bg-muted mb-4 border border-border"></div>
+                    <p className="text-xs text-muted-foreground mb-6 italic">
+                        Image caption or credit
+                    </p>
                 </header>
 
-                {/* Article content with NYT styling */}
+                {/* Article content */}
                 <div className="nyt-article-body">
-                    {/* Lead paragraph or excerpt */}
+                    {/* Lead paragraph */}
                     {post.metadata.excerpt && (
-                        <p className="text-xl leading-relaxed mb-6 font-bold" style={{ fontFamily: 'Georgia, serif' }}>
+                        <p className="text-xl leading-relaxed mb-6 font-bold">
                             {post.metadata.excerpt}
                         </p>
                     )}
@@ -133,8 +124,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     <PostContent htmlContent={post.content} />
                 </div>
 
-                {/* Social sharing buttons - NYT style */}
-                <div className="mt-12 pt-6 border-t border-border flex items-center gap-4">
+                {/* Social sharing */}
+                <div className="mt-12 pt-6 border-t border-border flex items-center gap-4 pb-6">
                     <button className="flex items-center gap-2 text-xs hover:opacity-70">
                         <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
                             @
@@ -143,36 +134,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     </button>
                     <button className="flex items-center gap-2 text-xs hover:opacity-70">
                         <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
-                            T
+                            in
                         </span>
-                        Twitter
+                        LinkedIn
                     </button>
                     <button className="flex items-center gap-2 text-xs hover:opacity-70">
                         <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
-                            f
+                            𝕏
                         </span>
-                        Facebook
+                        Share
                     </button>
                 </div>
-
-                {/* Page navigation */}
-                <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Page 1 of 3</span>
-                    <div className="flex gap-4">
-                        <button className="hover:underline">← Previous</button>
-                        <button className="hover:underline">Next →</button>
-                    </div>
-                </div>
             </article>
-
-            {/* Article footer */}
-            <footer className="max-w-[800px] mx-auto px-6 py-8 mt-8 border-t border-border">
-                <div className="text-center">
-                    <p className="text-xs text-muted-foreground">
-                        © {new Date().getFullYear()} The New York Times Company
-                    </p>
-                </div>
-            </footer>
         </div>
     );
 }

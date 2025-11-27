@@ -1,5 +1,4 @@
 import { BlogHeader } from "@/components/blog-header";
-import { PostCard } from "@/components/post-card";
 import { PostMetadata } from "@/types/post";
 import fs from "fs";
 import path from "path";
@@ -21,7 +20,7 @@ export default function Home() {
     console.error('Error loading posts:', error);
   }
 
-  // Split posts for the exact NYT layout
+  // Split posts for the exact layout
   const [featuredPost, ...remainingPosts] = posts;
   const column2Posts = remainingPosts.slice(0, 3);
   const column3Posts = remainingPosts.slice(3, 6);
@@ -34,11 +33,11 @@ export default function Home() {
 
       <main className="max-w-[1200px] mx-auto px-4 py-2">
         {/* Top section label */}
-        <div className="border-b border-foreground mb-3 pb-0.5">
-          <h2 className="text-xs font-bold uppercase tracking-wider">TOP NEWS</h2>
+        <div className="border-b border-foreground mb-3 pb-0.5 pt-4 text-sm">
+          <h2 className="text-xs font-bold uppercase tracking-wide">FEATURED WORK</h2>
         </div>
 
-        {/* Main grid layout - 4 columns matching NYT exactly */}
+        {/* Main grid layout - 4 columns */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-b border-border">
           {/* Column 1 - Featured story with image */}
           <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4">
@@ -48,16 +47,13 @@ export default function Home() {
                 <div className="w-full h-32 bg-muted mb-3 border border-border"></div>
 
                 <Link href={`/blog/${featuredPost.slug}`}>
-                  <h2 className="text-2xl font-bold leading-tight mb-3 hover:opacity-70 transition-opacity" style={{ fontFamily: 'Georgia, serif' }}>
+                  <h2 className="text-2xl font-bold leading-tight mb-3 hover:opacity-70 transition-opacity">
                     {featuredPost.title}
                   </h2>
                 </Link>
-                <p className="text-sm leading-relaxed mb-2" style={{ fontFamily: 'Georgia, serif' }}>
+                <p className="text-sm leading-relaxed mb-2">
                   {featuredPost.excerpt}
                 </p>
-                <div className="text-xs text-muted-foreground">
-                  {featuredPost.author && <span className="font-medium">BY {featuredPost.author.toUpperCase()}</span>}
-                </div>
               </article>
             )}
 
@@ -67,17 +63,17 @@ export default function Home() {
                 <article>
                   <div className="mb-2">
                     {secondRowPosts[0].category && (
-                      <span className="text-xs font-bold uppercase tracking-wider">
+                      <span className="text-xs font-bold uppercase tracking-wide">
                         {secondRowPosts[0].category}
                       </span>
                     )}
                   </div>
                   <Link href={`/blog/${secondRowPosts[0].slug}`}>
-                    <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity" style={{ fontFamily: 'Georgia, serif' }}>
+                    <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                       {secondRowPosts[0].title}
                     </h3>
                   </Link>
-                  <p className="text-sm leading-relaxed text-muted-foreground" style={{ fontFamily: 'Georgia, serif' }}>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {secondRowPosts[0].excerpt}
                   </p>
                 </article>
@@ -91,22 +87,19 @@ export default function Home() {
               <article key={post.slug} className={index > 0 ? "border-t border-border pt-4" : ""}>
                 <div className="mb-2">
                   {post.category && (
-                    <span className="text-xs font-bold uppercase tracking-wider">
+                    <span className="text-xs font-bold uppercase tracking-wide">
                       {post.category}
                     </span>
                   )}
                 </div>
                 <Link href={`/blog/${post.slug}`}>
-                  <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity" style={{ fontFamily: 'Georgia, serif' }}>
+                  <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                     {post.title}
                   </h3>
                 </Link>
-                <p className="text-sm leading-relaxed text-muted-foreground" style={{ fontFamily: 'Georgia, serif' }}>
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {post.excerpt}
                 </p>
-                <div className="text-xs text-muted-foreground mt-2">
-                  {post.author && <span className="font-medium">BY {post.author.toUpperCase()}</span>}
-                </div>
               </article>
             ))}
           </div>
@@ -117,7 +110,7 @@ export default function Home() {
               <article key={post.slug} className={index > 0 ? "border-t border-border pt-4" : ""}>
                 <div className="mb-2">
                   {post.category && (
-                    <span className="text-xs font-bold uppercase tracking-wider">
+                    <span className="text-xs font-bold uppercase tracking-wide">
                       {post.category}
                     </span>
                   )}
@@ -126,16 +119,13 @@ export default function Home() {
                   <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
                 )}
                 <Link href={`/blog/${post.slug}`}>
-                  <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity" style={{ fontFamily: 'Georgia, serif' }}>
+                  <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                     {post.title}
                   </h3>
                 </Link>
-                <p className="text-sm leading-relaxed text-muted-foreground" style={{ fontFamily: 'Georgia, serif' }}>
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {post.excerpt}
                 </p>
-                <div className="text-xs text-muted-foreground mt-2">
-                  {post.author && <span className="font-medium">BY {post.author.toUpperCase()}</span>}
-                </div>
               </article>
             ))}
           </div>
@@ -146,7 +136,7 @@ export default function Home() {
               <article key={post.slug} className={index > 0 ? "border-t border-border pt-4" : ""}>
                 <div className="mb-2">
                   {post.category && (
-                    <span className="text-xs font-bold uppercase tracking-wider">
+                    <span className="text-xs font-bold uppercase tracking-wide">
                       {post.category}
                     </span>
                   )}
@@ -155,16 +145,13 @@ export default function Home() {
                   <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
                 )}
                 <Link href={`/blog/${post.slug}`}>
-                  <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity" style={{ fontFamily: 'Georgia, serif' }}>
+                  <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                     {post.title}
                   </h3>
                 </Link>
-                <p className="text-sm leading-relaxed text-muted-foreground" style={{ fontFamily: 'Georgia, serif' }}>
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {post.excerpt}
                 </p>
-                <div className="text-xs text-muted-foreground mt-2">
-                  {post.author && <span className="font-medium">BY {post.author.toUpperCase()}</span>}
-                </div>
               </article>
             ))}
           </div>
@@ -176,22 +163,19 @@ export default function Home() {
             <article key={post.slug} className="border-t-0">
               <div className="mb-2">
                 {post.category && (
-                  <span className="text-xs font-bold uppercase tracking-wider">
+                  <span className="text-xs font-bold uppercase tracking-wide">
                     {post.category}
                   </span>
                 )}
               </div>
               <Link href={`/blog/${post.slug}`}>
-                <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity" style={{ fontFamily: 'Georgia, serif' }}>
+                <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                   {post.title}
                 </h3>
               </Link>
-              <p className="text-sm leading-relaxed text-muted-foreground" style={{ fontFamily: 'Georgia, serif' }}>
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {post.excerpt}
               </p>
-              <div className="text-xs text-muted-foreground mt-2">
-                {post.author && <span className="font-medium">BY {post.author.toUpperCase()}</span>}
-              </div>
             </article>
           ))}
         </div>
@@ -199,10 +183,41 @@ export default function Home() {
 
       {/* Simplified footer */}
       <footer className="border-t border-border mt-12">
-        <div className="max-w-[1200px] mx-auto px-4 py-6 text-center">
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} The New York Times Company
-          </p>
+        <div className="max-w-[1200px] mx-auto px-4 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+            <div>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">Portfolio</h3>
+              <ul className="space-y-2 text-xs">
+                <li><Link href="/">All Posts</Link></li>
+                <li><Link href="#">Projects</Link></li>
+                <li><Link href="#">Case Studies</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">Topics</h3>
+              <ul className="space-y-2 text-xs">
+                <li><Link href="#">Technology</Link></li>
+                <li><Link href="#">Design</Link></li>
+                <li><Link href="#">Research</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">Connect</h3>
+              <ul className="space-y-2 text-xs">
+                <li><a href="#">LinkedIn</a></li>
+                <li><a href="#">GitHub</a></li>
+                <li><a href="#">Twitter</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">About</h3>
+              <ul className="space-y-2 text-xs">
+                <li><Link href="#">About Me</Link></li>
+                <li><Link href="#">Contact</Link></li>
+                <li><Link href="#">Resume</Link></li>
+              </ul>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

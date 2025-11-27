@@ -9,19 +9,19 @@ export function BlogHeader() {
     });
 
     return (
-        <header className="w-full border-b-2 border-foreground">
+        <header className="w-full border-b-2 border-foreground pt-2">
             {/* Top bar with date only */}
-            <div className="border-b border-border">
+            <div className="border-border">
                 <div className="max-w-[1200px] mx-auto px-4 py-2">
-                    <time className="text-xs font-medium">{today}</time>
+                    <time className="text-sm font-medium">{today}</time>
                 </div>
             </div>
 
-            {/* Masthead - The New York Times style logo */}
-            <div className="max-w-[1200px] mx-auto px-4 py-4 text-left">
+            {/* Masthead - Portfolio style logo */}
+            <div className="max-w-[1200px] mx-auto px-4 pb-4 text-left">
                 <Link href="/" className="inline-block">
-                    <h1 className="text-5xl font-bold tracking-tight" style={{ fontFamily: 'Old English Text MT, Georgia, serif' }}>
-                        The New York Times
+                    <h1 className="text-4xl font-bold tracking-tight">
+                        Giovanni Gravili&rsquo;s Portfolio
                     </h1>
                 </Link>
             </div>
@@ -29,17 +29,15 @@ export function BlogHeader() {
             {/* Sections bar */}
             <div className="border-t border-border">
                 <nav className="max-w-[1200px] mx-auto px-4">
-                    <ul className="flex items-center justify-start gap-6 py-2 text-xs font-semibold overflow-x-auto">
-                        <li><Link href="/" className="hover:underline whitespace-nowrap">TOP NEWS</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">WORLD</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">U.S.</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">POLITICS</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">BUSINESS</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">TECHNOLOGY</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">OPINION</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">ARTS</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">SCIENCE</Link></li>
-                        <li><Link href="#" className="hover:underline whitespace-nowrap">SPORTS</Link></li>
+                    <ul className="flex items-center justify-start tracking-wide gap-6 py-3 text-xs font-semibold overflow-x-auto">
+                        <li><Link href="/" className="whitespace-nowrap">ALL POSTS</Link></li>
+                        <li><Link href="#" className="whitespace-nowrap">PROJECTS</Link></li>
+                        <li><Link href="#" className="whitespace-nowrap">INSIGHTS</Link></li>
+                        <li><Link href="#" className="whitespace-nowrap">TECHNOLOGY</Link></li>
+                        <li><Link href="#" className="whitespace-nowrap">DESIGN</Link></li>
+                        <li><Link href="#" className="whitespace-nowrap">RESEARCH</Link></li>
+                        <li><Link href="#" className="whitespace-nowrap">CASE STUDIES</Link></li>
+                        <li><Link href="#" className="whitespace-nowrap">ABOUT</Link></li>
                     </ul>
                 </nav>
             </div>
