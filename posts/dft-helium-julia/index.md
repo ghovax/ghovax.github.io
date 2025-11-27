@@ -149,7 +149,7 @@ One of the key things I learned during implementation was the importance of nume
 
 After implementing the full self-consistent DFT calculation, I obtained the ground-state energy of Helium. The calculation typically converges in 15-25 iterations depending on the initial guess and mixing parameter. Watching the energy converge iteration by iteration was deeply satisfying.
 
-The final ground-state energy I computed is approximately **-2.86 Hartree** (in atomic units), which compares with the experimental value of $-2.9037$ Hartree and the exact quantum mechanical result of $-2.9037$ Hartree (from high-accuracy variational calculations). My error is $\sim 1.5\%$ or $0.04$ Hartree (about 1 eV).
+The final ground-state energy I computed is approximately $-2.86$ **Hartree** (in atomic units), which compares with the experimental value of $-2.9037$ Hartree and the exact quantum mechanical result of $-2.9037$ Hartree (from high-accuracy variational calculations). My error is $\sim 1.5\%$ or $0.04$ Hartree (about 1 eV).
 
 The small discrepancy is expected and comes primarily from the approximations inherent in DFT, particularly the LDA for the exchange-correlation functional. For a two-electron system like Helium, LDA systematically underestimates the magnitude of the correlation energy. The LDA works best for systems where the electron density varies slowly, which isn't really true for small atoms. Despite this limitation, getting to within $1.5\%$ of the exact answer using such a conceptually simple approach is remarkable.
 
