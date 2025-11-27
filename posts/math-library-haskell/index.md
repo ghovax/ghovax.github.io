@@ -203,16 +203,43 @@ For each term in the series, we need to compute the coefficient $\frac{1}{n!}$, 
 
 $$\text{term}_n = \frac{f^{(n)}(a)}{n!}(x-a)^n$$
 
-# Testing and Lessons Learned
+# Testing and Validation
 
-I built a comprehensive test suite verifying simplification, derivatives, and Taylor series. All 11 tests pass:
+I built a comprehensive test suite to verify the correctness of the implementation. The tests cover three main areas: simplification rules, logarithm identities, and Taylor series expansion.
 
-```
-Simplification Tests: Identity, Addition identity, Constant folding, 
-                      Double negation, Nested simplification
-Logarithm Tests: log₁(x)=0, logₓ(1)=0, ln(1)=0
-Taylor Series Tests: Polynomial approximations at various points
-```
+**Simplification tests** verify that algebraic identities are applied correctly:
+
+$$42 = 42 \quad\text{(identity)}$$
+
+$$5 + 0 = 5 \quad\text{(addition identity)}$$
+
+$$(1 \cdot 3) \cdot x^2 = 3x^2 \quad\text{(constant folding)}$$
+
+$$1 + (-(-(-(-1)))) = 2 \quad\text{(double negation)}$$
+
+$$(x + (1 + 3))^{2 \cdot (0 + 1)} = (x + 4)^2 \quad\text{(nested simplification)}$$
+
+**Logarithm tests** ensure special cases are handled properly:
+
+$$\log_1(x) = 0, \quad \log_x(1) = 0, \quad \ln(1) = 0$$
+
+**Taylor series tests** verify polynomial approximations by computing derivatives and evaluating them at the expansion point. For $f(x) = x^2 - 4x + 1$ expanded around $x = 1$ to degree $n=2$, we compute:
+
+$$f(1) = -2, \quad f'(x) = 2x - 4 \Rightarrow f'(1) = -2, \quad f''(x) = 2 \Rightarrow f''(1) = 2$$
+
+The Taylor series is then:
+
+$$f(x) \approx -2 + (-2)(x-1) + \frac{2}{2!}(x-1)^2 = -2 - 2(x-1) + (x-1)^2$$
+
+For $f(x) = x^3 - 3x^2 + 4$ expanded around $x = 2$ to degree $n=3$:
+
+$$f(2) = 0, \quad f'(2) = 0, \quad f''(x) = 6x - 6 \Rightarrow f''(2) = 6, \quad f'''(x) = 6 \Rightarrow f'''(2) = 6$$
+
+The Taylor series becomes:
+
+$$f(x) \approx 0 + 0 \cdot (x-2) + \frac{6}{2!}(x-2)^2 + \frac{6}{3!}(x-2)^3 = 3(x-2)^2 + (x-2)^3$$
+
+All 11 tests pass, giving confidence that the core algorithms are correct.
 
 This project taught me several important lessons about functional programming and symbolic computation. Haskell's algebraic data types are perfectly suited for representing mathematical expressions. The ability to pattern match on expression structure makes implementing transformations incredibly natural. Each mathematical rule becomes a pattern match clause. Functional programming encourages thinking about transformations rather than mutations, with pure functions making reasoning about correctness much easier. The separation of concerns between operations is crucial: substitution doesn't simplify, differentiation doesn't evaluate. Each function does one thing well. Iterative simplification to a fixed point is essential because one pass is rarely enough. Testing remains critical even with strong static typing, as the type system can't verify that simplification rules actually implement the intended mathematical identities.
 
