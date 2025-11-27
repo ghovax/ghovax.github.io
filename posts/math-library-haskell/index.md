@@ -9,7 +9,11 @@ author: "Giovanni Gravili"
 
 In this post, I'll walk you through my implementation of a symbolic mathematics engine in Haskell. This project demonstrates the elegant intersection of functional programming and computer algebra, showing how algebraic data types and pattern matching naturally express mathematical transformations.
 
-The challenge of symbolic mathematics is fundamentally different from numerical computing. Rather than evaluating $x^2 + 3x + 2$ at $x = 5$ to get $42$, we manipulate the expression itself: factor it into $(x+1)(x+2)$, differentiate it to get $2x + 3$, or substitute $x$ with another expression.
+The challenge of symbolic mathematics is fundamentally different from numerical computing. Rather than evaluating an expression like:
+
+$$f(x) = x^2 + 3x + 2$$
+
+at a specific point $x = 5$ to get $42$, we manipulate the expression itself: factor it into $(x+1)(x+2)$, differentiate it to get $2x + 3$, or substitute $x$ with another expression.
 
 The key insight is that mathematical expressions form a tree structure. The expression $\frac{x^2 + 1}{x - 3}$ is really a division node whose children are an addition node and a subtraction node. By representing expressions as algebraic data types in Haskell, we can use pattern matching to implement mathematical operations as tree transformations. This is the essence of computer algebra systems like Mathematica and SymPy.
 
@@ -173,7 +177,9 @@ nthDerivative n var expr = nthDerivative (n - 1) var (derivative var expr)
 
 # Taylor Series
 
-The Taylor series for $f(x)$ around $x = a$ is: $f(x) \approx \sum_{n=0}^{N} \frac{f^{(n)}(a)}{n!}(x-a)^n$
+The Taylor series approximates any sufficiently smooth function as a polynomial. For a function $f(x)$ expanded around $x = a$:
+
+$$f(x) \approx \sum_{n=0}^{N} \frac{f^{(n)}(a)}{n!}(x-a)^n$$
 
 ```haskell
 taylorSeries :: Expr -> String -> Double -> Int -> Expr
@@ -193,7 +199,9 @@ taylorSeries expr var center degree = foldl1 Sum (map term [0..degree])
       in simplifyFully (Prod (Prod coefficient derivValue) power)
 ```
 
-For each term $n$: compute $\frac{1}{n!}$, construct $(x-a)^n$, compute the $n$th derivative, evaluate it at $a$, and combine.
+For each term in the series, we need to compute the coefficient $\frac{1}{n!}$, construct the power term $(x-a)^n$, compute the $n$th derivative, evaluate it at the center point $a$, and combine everything together. The implementation handles all of this systematically, computing:
+
+$$\text{term}_n = \frac{f^{(n)}(a)}{n!}(x-a)^n$$
 
 # Testing and Lessons Learned
 
