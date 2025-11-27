@@ -7,7 +7,7 @@ tags: ["Haskell", "Symbolic Math", "Functional Programming", "Computer Algebra"]
 author: "Giovanni Gravili"
 ---
 
-In this post, I'll walk you through my implementation of a symbolic mathematics engine in Haskell. This project demonstrates the elegant intersection of functional programming and computer algebra, showing how algebraic data types and pattern matching naturally express mathematical transformations.
+In this post, I'll walk you through my implementation of a symbolic mathematics engine in Haskell. This project taught me that Haskell's algebraic data types are perfectly suited for representing mathematical expressions. The ability to pattern match on expression structure makes implementing transformations incredibly natural, with each mathematical rule becoming a pattern match clause. The separation of concerns between operations proved crucial: substitution doesn't simplify, differentiation doesn't evaluate. Each function does one thing well, and we compose them to achieve complex transformations.
 
 The challenge of symbolic mathematics is fundamentally different from numerical computing. Rather than evaluating an expression like:
 
@@ -241,16 +241,10 @@ $$f(x) \approx 0 + 0 \cdot (x-2) + \frac{6}{2!}(x-2)^2 + \frac{6}{3!}(x-2)^3 = 3
 
 All 11 tests pass, giving confidence that the core algorithms are correct.
 
-This project taught me several important lessons about functional programming and symbolic computation. Haskell's algebraic data types are perfectly suited for representing mathematical expressions. The ability to pattern match on expression structure makes implementing transformations incredibly natural. Each mathematical rule becomes a pattern match clause. Functional programming encourages thinking about transformations rather than mutations, with pure functions making reasoning about correctness much easier. The separation of concerns between operations is crucial: substitution doesn't simplify, differentiation doesn't evaluate. Each function does one thing well. Iterative simplification to a fixed point is essential because one pass is rarely enough. Testing remains critical even with strong static typing, as the type system can't verify that simplification rules actually implement the intended mathematical identities.
-
-Possible extensions include trigonometric functions, exact rational arithmetic, more aggressive simplification, symbolic integration, LaTeX rendering, performance optimization, matrix/vector support, and an interactive REPL.
-
 # Conclusion
 
-Building this symbolic mathematics engine demonstrates how functional programming naturally expresses mathematical concepts. The journey from algebraic data types through substitution, simplification, differentiation, to Taylor series reinforced core functional programming principles at every step.
+Building this symbolic mathematics engine demonstrates how functional programming naturally expresses mathematical concepts. The elegance is striking: functions like `derivative` are remarkably concise, just dozens of lines, yet handle arbitrarily complex expressions through recursion and pattern matching. 
 
-The elegance is striking. Functions like `derivative` are remarkably concise, just dozens of lines, yet handle arbitrarily complex expressions through the power of recursion and pattern matching. Mathematical structure guided implementation. The rules of calculus naturally map to pattern matching clauses. The tree structure of expressions naturally leads to recursive algorithms. The need for iterative improvement naturally suggests fixed-point iteration.
+The mathematical structure guided the implementation at every step. The rules of calculus naturally map to pattern matching clauses. The tree structure of expressions naturally leads to recursive algorithms. The need for iterative improvement naturally suggests fixed-point iteration. The code practically wrote itself once I understood the mathematical foundations.
 
-This project taught me that symbolic computation is fundamentally about representation and transformation. Choose the right representation (algebraic data types), and transformations (pattern matching) become natural. These insights apply beyond mathematics to any domain with structural rules.
-
-The engine is simple compared to Mathematica or SymPy, but captures essential ideas. It computes real derivatives, performs real simplifications, and generates real Taylor series. Understanding how it works, down to every pattern match and recursive call, gives me deep appreciation for the elegant mathematics underlying computer algebra systems.
+The engine is simple compared to Mathematica or SymPy, but it captures the essential ideas. It computes real derivatives, performs real simplifications, and generates real Taylor series. Understanding how it works, down to every pattern match and recursive call, gives me deep appreciation for the elegant mathematics underlying computer algebra systems.

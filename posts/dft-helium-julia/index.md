@@ -7,7 +7,7 @@ tags: ["DFT", "Julia", "Quantum Mechanics", "Computational Physics"]
 author: "Giovanni Gravili"
 ---
 
-In this post, I'll walk you through my implementation of Density Functional Theory (DFT) to compute the ground-state energy of the Helium atom. This project taught me not only about the mathematical foundations of DFT but also about the practical challenges of implementing self-consistent field methods and solving coupled differential equations numerically.
+In this post, I'll walk you through my implementation of Density Functional Theory (DFT) to compute the ground-state energy of the Helium atom. This project taught me that DFT shows how a clever reformulation can make an intractable problem solvable. We don't solve the full many-body problem; we replace it with an equivalent single-particle problem in an effective potential. Much of the implementation effort went into correctly handling numerical boundaries, choosing appropriate mixing schemes for convergence, and balancing grid resolution with computational cost. The combination of clean syntax, good performance, and easy vectorization in Julia made the implementation straightforward, letting me focus on the physics rather than fighting the language.
 
 The Helium atom presents an interesting challenge in quantum mechanics. While we can solve the hydrogen atom exactly using separation of variables, adding just one more electron creates a many-body problem that requires approximations. The key difficulty is the electron-electron interaction term, which prevents us from separating the Schrödinger equation into independent single-particle equations.
 
@@ -132,24 +132,6 @@ Breaking down the total energy into components was enlightening. The kinetic ene
 The converged calculation also gives us the radial probability density and the Kohn-Sham orbital. These show the expected physical behavior. The density is peaked near the nucleus (around $r \approx 0.3$ a.u.) and decays exponentially. The effective nuclear charge seen by the electrons is partially screened by electron-electron repulsion: instead of seeing the full $Z=2$ charge, each electron sees something closer to $Z\approx 1.7$. The radial orbital extends to about 2-3 Bohr radii before becoming negligible. The density is slightly more diffuse than in hydrogen-like atoms due to electron-electron repulsion.
 
 Plotting these functions and seeing them emerge from the self-consistent calculation was one of the most rewarding parts of the project. These aren't input, they're the natural solution that the equations find.
-
-# What I Learned
-
-This project taught me several important lessons about computational quantum mechanics and scientific computing.
-
-DFT shows how a clever reformulation can make an intractable problem solvable. We didn't solve the full many-body problem, we replaced it with an equivalent single-particle problem in an effective potential. The LDA works remarkably well for many systems, but its limitations are clear for small atoms. Understanding when approximations break down is as important as knowing when they work. The circular dependency between density and potential means convergence isn't guaranteed. Mixing schemes and careful initialization are essential.
-
-The shooting method with binary search is conceptually simple but robust. Sometimes straightforward approaches are better than sophisticated ones. Much of the implementation effort went into correctly handling boundaries at $r=0$, at $r=\infty$, in differential equations, in integrations. Getting these right is crucial. Finer grids give better accuracy but slower computation. Finding the right balance required experimentation and convergence testing.
-
-Division by small numbers, exponentials, singularities all required special handling. Robust code needs more than just correct algorithms. I checked my results against known values, tested limiting cases (like Z=1 should give hydrogen), and verified that energy components had reasonable magnitudes. Trust, but verify. The combination of clean syntax, good performance, and easy vectorization in Julia made implementation straightforward. I could focus on the physics rather than fighting the language.
-
-# Extensions
-
-Looking back, implementing DFT from scratch provided deep insight into how modern electronic structure calculations work. While production DFT codes use more sophisticated methods (plane-wave basis sets, pseudopotentials, advanced functionals), the basic principles remain the same: map the many-body problem onto single-particle equations, solve them self-consistently, and approximate the exchange-correlation effects.
-
-Several extensions would be interesting to pursue. Implementing GGA (Generalized Gradient Approximation) functionals like PBE would improve accuracy. These depend on both density and its gradient, capturing more physics. The code could easily be adapted to other spherically symmetric atoms (Li, Be, etc.) or ions. It would be interesting to see how the LDA error scales with atomic number. By computing the energy of He and He$^+$, I could calculate the first ionization energy and compare with experiment (24.6 eV).
-
-Extending to excited states would require solving for higher eigenvalues of the Kohn-Sham equation. Time-dependent DFT (TDDFT) is the proper framework for this. For open-shell systems, we'd need spin-dependent densities $n_\uparrow(r)$ and $n_\downarrow(r)$, leading to spin-polarized DFT. Molecules require handling non-spherical geometries, which means moving to 3D grids or basis set expansions. This dramatically increases complexity. DFT has known limitations for certain properties. Methods like GW (for bandgaps) or quantum Monte Carlo (for high accuracy) could be explored.
 
 ---
 
