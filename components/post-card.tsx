@@ -10,17 +10,18 @@ export function PostCard({ post }: PostCardProps) {
     return (
         <article className="py-8 border-b border-border last:border-b-0">
             {/* Metadata first - NYT style */}
-            <div className="flex items-center gap-2 mb-3 text-xs uppercase tracking-wide text-muted-foreground">
+            <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
                 {post.category && (
                     <>
                         <span className="font-semibold">{post.category}</span>
-                        <span className="text-border">|</span>
+                        <span className="text-muted-foreground">–</span>
                     </>
                 )}
                 <time>
                     {new Date(post.date).toLocaleDateString('en-US', {
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
+                        year: 'numeric'
                     })}
                 </time>
             </div>
@@ -40,13 +41,6 @@ export function PostCard({ post }: PostCardProps) {
                 {post.excerpt}
             </p>
 
-            {/* Author byline */}
-            {post.author && (
-                <p className="text-xs text-muted-foreground mb-3">
-                    By <span className="font-medium">{post.author}</span>
-                </p>
-            )}
-
             {/* Tags - minimal, inline */}
             {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -55,7 +49,7 @@ export function PostCard({ post }: PostCardProps) {
                             key={tag}
                             className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
                         >
-                            #{tag}
+                            {tag}
                         </span>
                     ))}
                 </div>

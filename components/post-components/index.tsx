@@ -1,4 +1,4 @@
-import { ExampleChart } from './ExampleChart';
+import { ExampleChart } from './example-chart';
 
 // Component registry - map component names to React components
 export const componentRegistry: Record<string, React.ComponentType<any>> = {

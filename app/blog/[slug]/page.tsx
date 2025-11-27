@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { BlogHeader } from '@/components/BlogHeader';
-import { PostContent } from '@/components/PostContent';
+import { BlogHeader } from '@/components/blog-header';
+import { PostContent } from '@/components/post-content';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PostMetadata } from '@/types/post';

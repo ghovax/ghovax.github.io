@@ -1,5 +1,5 @@
-import { BlogHeader } from "@/components/BlogHeader";
-import { PostCard } from "@/components/PostCard";
+import { BlogHeader } from "@/components/blog-header";
+import { PostCard } from "@/components/post-card";
 import { PostMetadata } from "@/types/post";
 import fs from "fs";
 import path from "path";
