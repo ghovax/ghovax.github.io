@@ -102,10 +102,21 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                         {formatDate(post.metadata.date)}
                     </div>
                     <h1
-                        className="text-3xl md:text-4xl font-bold mb-4 leading-tight border-border pb-6"
+                        className="text-3xl md:text-4xl font-bold pb-4 leading-tight border-border"
                     >
                         {post.metadata.title}
                     </h1>
+                    <span className="text-xs md:text-sm py-0 text-muted-foreground">
+                        {post.metadata.tags!.map((tag, index) => (
+                            <Link
+                                key={index}
+                                href={`/blog/tags/${tag}`}
+                                className="font-mono inline-block pr-2 mr-2 border-border rounded-full px-2.5 py-1 border-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                {tag}
+                            </Link>
+                        ))}
+                    </span>
                 </header>
 
                 {/* Article content */}
