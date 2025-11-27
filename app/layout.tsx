@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Merriweather, Merriweather_Sans, Noto_Sans_Mono } from "next/font/google";
-import "./document.css";
+import "@/lib/document.css";
 import "./globals.css";
 
 const merriweatherSans = Merriweather_Sans();
