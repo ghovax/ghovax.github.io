@@ -1,13 +1,10 @@
 import { notFound } from 'next/navigation';
 import { BlogHeader } from '@/components/blog-header';
 import { PostContent } from '@/components/post-content';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { PostMetadata } from '@/types/post';
 import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 
 interface BlogPostPageProps {
     params: Promise<{
@@ -75,65 +72,106 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         notFound();
     }
 
+    const formatDate = (date: string) => {
+        return new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
     return (
         <div className="min-h-screen bg-background">
             <BlogHeader />
 
-            <article className="max-w-2xl mx-auto px-6 py-12">
-                <header className="mb-10 pb-8 border-b border-border">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight tracking-tight">
+            {/* Close button - NYT style */}
+            <div className="max-w-[1200px] mx-auto px-6 pt-4">
+                <Link href="/" className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border hover:bg-muted transition-colors">
+                    <span className="text-lg">×</span>
+                </Link>
+            </div>
+
+            <article className="max-w-[800px] mx-auto px-6 py-8">
+                {/* Article header */}
+                <header className="mb-8">
+                    {/* Title */}
+                    <h1
+                        className="text-4xl md:text-5xl font-normal mb-4 leading-tight border-b border-border pb-6"
+                        style={{ fontFamily: 'Georgia, serif' }}
+                    >
                         {post.metadata.title}
                     </h1>
 
-                    <div className="flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground mb-4">
-                        <time>
-                            {new Date(post.metadata.date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}
-                        </time>
-                        {post.metadata.category && (
+                    {/* Image placeholder - matching NYT article view */}
+                    <div className="w-full h-80 bg-muted mb-4 border border-border"></div>
+                    <p className="text-xs text-muted-foreground mb-6 italic">
+                        Caption placeholder / Credit
+                    </p>
+
+                    {/* Byline and metadata */}
+                    <div className="flex items-center gap-2 text-xs mb-6">
+                        {post.metadata.author && (
                             <>
-                                <span>•</span>
-                                <span>{post.metadata.category}</span>
+                                <span className="font-bold">BY {post.metadata.author.toUpperCase()}</span>
                             </>
                         )}
                     </div>
+                    <div className="text-xs text-muted-foreground mb-6">
+                        {formatDate(post.metadata.date)}
+                    </div>
+                </header>
 
-                    {post.metadata.author && (
-                        <p className="text-sm">
-                            By <span className="font-medium">{post.metadata.author}</span>
+                {/* Article content with NYT styling */}
+                <div className="nyt-article-body">
+                    {/* Lead paragraph or excerpt */}
+                    {post.metadata.excerpt && (
+                        <p className="text-xl leading-relaxed mb-6 font-bold" style={{ fontFamily: 'Georgia, serif' }}>
+                            {post.metadata.excerpt}
                         </p>
                     )}
 
-                    {post.metadata.tags && post.metadata.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-6">
-                            {post.metadata.tags.map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs font-normal">
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
-                </header>
+                    <PostContent htmlContent={post.content} />
+                </div>
 
-                <PostContent htmlContent={post.content} />
+                {/* Social sharing buttons - NYT style */}
+                <div className="mt-12 pt-6 border-t border-border flex items-center gap-4">
+                    <button className="flex items-center gap-2 text-xs hover:opacity-70">
+                        <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
+                            @
+                        </span>
+                        Email
+                    </button>
+                    <button className="flex items-center gap-2 text-xs hover:opacity-70">
+                        <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
+                            T
+                        </span>
+                        Twitter
+                    </button>
+                    <button className="flex items-center gap-2 text-xs hover:opacity-70">
+                        <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
+                            f
+                        </span>
+                        Facebook
+                    </button>
+                </div>
 
-                <div className="mt-16 pt-8 border-t border-border">
-                    <Link
-                        href="/"
-                        className="text-xs uppercase tracking-widest font-medium hover:underline inline-flex items-center gap-2"
-                    >
-                        ← Back to Home
-                    </Link>
+                {/* Page navigation */}
+                <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Page 1 of 3</span>
+                    <div className="flex gap-4">
+                        <button className="hover:underline">← Previous</button>
+                        <button className="hover:underline">Next →</button>
+                    </div>
                 </div>
             </article>
 
-            <footer className="max-w-2xl mx-auto px-6 py-12 mt-16 text-center border-t border-border">
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                    © {new Date().getFullYear()} Giovanni Gravili
-                </p>
+            {/* Article footer */}
+            <footer className="max-w-[800px] mx-auto px-6 py-8 mt-8 border-t border-border">
+                <div className="text-center">
+                    <p className="text-xs text-muted-foreground">
+                        © {new Date().getFullYear()} The New York Times Company
+                    </p>
+                </div>
             </footer>
         </div>
     );

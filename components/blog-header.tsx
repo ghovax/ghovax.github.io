@@ -9,30 +9,38 @@ export function BlogHeader() {
     });
 
     return (
-        <header className="w-full pt-4 border-border">
-            {/* Masthead */}
-            <div className="max-w-4xl mx-auto px-6 pt-10 pb-4">
-                <Link href="/" className="transition-all">
-                    <h1 className="text-3xl font-bold mb-1">
-                        Giovanni Gravili
-                    </h1>
-                    <p className="text-sm text-muted-foreground">Work Portfolio & Insights</p>
-                </Link>
+        <header className="w-full border-b-2 border-foreground">
+            {/* Top bar with date only */}
+            <div className="border-b border-border">
+                <div className="max-w-[1200px] mx-auto px-4 py-2">
+                    <time className="text-xs font-medium">{today}</time>
+                </div>
+            </div>
 
-                {/* Navigation */}
-                <nav className="flex gap-6 mt-4 pt-4 text-sm uppercase">
-                    <Link
-                        href="/"
-                        className="font-medium transition-all"
-                    >
-                        Home
-                    </Link>
-                    <Link
-                        href="/about"
-                        className="font-medium transition-all"
-                    >
-                        About
-                    </Link>
+            {/* Masthead - The New York Times style logo */}
+            <div className="max-w-[1200px] mx-auto px-4 py-4 text-left">
+                <Link href="/" className="inline-block">
+                    <h1 className="text-5xl font-bold tracking-tight" style={{ fontFamily: 'Old English Text MT, Georgia, serif' }}>
+                        The New York Times
+                    </h1>
+                </Link>
+            </div>
+
+            {/* Sections bar */}
+            <div className="border-t border-border">
+                <nav className="max-w-[1200px] mx-auto px-4">
+                    <ul className="flex items-center justify-start gap-6 py-2 text-xs font-semibold overflow-x-auto">
+                        <li><Link href="/" className="hover:underline whitespace-nowrap">TOP NEWS</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">WORLD</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">U.S.</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">POLITICS</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">BUSINESS</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">TECHNOLOGY</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">OPINION</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">ARTS</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">SCIENCE</Link></li>
+                        <li><Link href="#" className="hover:underline whitespace-nowrap">SPORTS</Link></li>
+                    </ul>
                 </nav>
             </div>
         </header>
