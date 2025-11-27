@@ -71,7 +71,7 @@ export function PostContent({ htmlContent }: PostContentProps) {
       const hue = hues[index];
       const saturation = 70; // Medium saturation for pleasant colors
       const lightness = 60; // Medium lightness
-      const alpha = 0.53; // Same alpha as #32bc4dbb (which is ~73% opacity)
+      const alpha = 0.33; // Same alpha as #32bc4dbb (which is ~73% opacity)
 
       // Convert HSL to RGB
       const h = hue / 60;

@@ -19,7 +19,11 @@ where the Hamiltonian includes kinetic energy terms for both electrons, their at
 
 $$\hat{H} = -\frac{\hbar^2}{2m}(\nabla_1^2 + \nabla_2^2) - \frac{Ze^2}{r_1} - \frac{Ze^2}{r_2} + \frac{e^2}{|\mathbf{r}_1 - \mathbf{r}_2|}$$
 
-That last term, $\frac{e^2}{|\mathbf{r}_1 - \mathbf{r}_2|}$, is what makes everything difficult. It means we can't write the wavefunction as a simple product of single-electron wavefunctions. The electrons are correlated: knowing where one electron is affects the probability distribution of the other.
+That last term,
+
+$$\frac{e^2}{|\mathbf{r}_1 - \mathbf{r}_2|}$$
+
+is what makes everything difficult. It means we can't write the wavefunction as a simple product of single-electron wavefunctions. The electrons are correlated: knowing where one electron is affects the probability distribution of the other.
 
 # Interactive Implementation
 
@@ -39,7 +43,13 @@ $$E[n] = T_s[n] + E_{ext}[n] + E_H[n] + E_{xc}[n]$$
 
 where $T_s[n]$ is the kinetic energy of non-interacting electrons, $E_{ext}[n]$ is the external potential energy (nuclear attraction), $E_H[n]$ is the Hartree energy (classical electron-electron repulsion), and $E_{xc}[n]$ is the exchange-correlation energy (quantum many-body effects).
 
-Let me break down what each term represents physically. The kinetic energy $T_s[n]$ is the energy associated with the motion of electrons. In the Kohn-Sham scheme, we compute this from fictitious non-interacting electrons that have the same density as the real system. The external potential $E_{ext}[n] = \int V_{ext}(\mathbf{r})n(\mathbf{r})d\mathbf{r}$ represents the attraction between electrons and the nucleus. For a nuclear charge Z, this is $V_{ext}(\mathbf{r}) = -Ze^2/r$.
+Let me break down what each term represents physically. The kinetic energy $T_s[n]$ is the energy associated with the motion of electrons. In the Kohn-Sham scheme, we compute this from fictitious non-interacting electrons that have the same density as the real system. The external potential
+
+$$E_{ext}[n] = \int V_{ext}(\mathbf{r})n(\mathbf{r})d\mathbf{r}$$
+
+represents the attraction between electrons and the nucleus. For a nuclear charge Z, this is
+
+$$V_{ext}(\mathbf{r}) = -Ze^2/r$$
 
 The Hartree energy captures the classical electrostatic repulsion between the electron cloud and itself. If you imagine the electrons as a continuous charge distribution, this is just the Coulomb energy of that distribution:
 
@@ -75,15 +85,27 @@ Here's the iterative procedure I implemented:
 
 1. Start with an initial guess for the density $n(r)$. I typically use an exponential decay $n(r) = n_0 e^{-\alpha r}$ or the density from a hydrogen-like atom.
 
-2. Calculate the effective Kohn-Sham potential: $V_{eff}(r) = V_{ext}(r) + V_H(r) + V_{xc}(r)$, where $V_{ext}(r) = -Ze^2/r$ is the nuclear attraction, $V_H(r)$ is obtained by solving Poisson's equation with the current density, and $V_{xc}(r) = \frac{\delta E_{xc}}{\delta n}$ is the functional derivative of the exchange-correlation energy.
+2. Calculate the effective Kohn-Sham potential:
 
-3. Find the orbital $u(r)$ and energy eigenvalue $E$ that satisfy: $-\frac{\hbar^2}{2m}\frac{d^2u}{dr^2} + V_{eff}(r)u(r) = Eu(r)$. This is a 1D Schrödinger equation with an effective potential.
+$$V_{eff}(r) = V_{ext}(r) + V_H(r) + V_{xc}(r)$$
 
-4. Compute new density from the orbital: $n(r) = \frac{2}{4\pi r^2}\left|\frac{u(r)}{r}\right|^2$.
+where $V_{ext}(r) = -Ze^2/r$ is the nuclear attraction, $V_H(r)$ is obtained by solving Poisson's equation with the current density, and $V_{xc}(r) = \frac{\delta E_{xc}}{\delta n}$ is the functional derivative of the exchange-correlation energy.
+
+3. Find the orbital $u(r)$ and energy eigenvalue $E$ that satisfy:
+
+$$-\frac{\hbar^2}{2m}\frac{d^2u}{dr^2} + V_{eff}(r)u(r) = Eu(r)$$
+
+This is a 1D Schrödinger equation with an effective potential.
+
+4. Compute new density from the orbital:
+
+$$n(r) = \frac{2}{4\pi r^2}\left|\frac{u(r)}{r}\right|^2$$
 
 5. Compare the new density (or total energy) with the previous iteration. If the change is below a threshold (I use $10^{-6}$ atomic units), we've converged. Otherwise, return to step 2.
 
-6. Once converged, calculate the ground-state energy using: $E_{total} = T_s + E_{ext} + E_H + E_{xc}$.
+6. Once converged, calculate the ground-state energy using:
+
+$$E_{total} = T_s + E_{ext} + E_H + E_{xc}$$
 
 One key lesson I learned is the importance of mixing in step 4. If you simply replace the old density with the new one, the iterations often diverge or oscillate. Instead, I use linear mixing:
 
@@ -115,7 +137,11 @@ This two-step integration process was tricky to implement correctly. Initially, 
 
 I chose Julia for this implementation because of its excellent performance for numerical computing and its clean, readable syntax that looks very similar to mathematical notation. The code structure follows the self-consistent field algorithm outlined above. I work in atomic units where $\hbar = m_e = e = 4\pi\epsilon_0 = 1$. This simplifies the equations considerably. The unit of energy is $1~\text{Hartree}\approx 27.2$ eV, and the unit of length is $1~\text{Bohr}\approx 0.529$ Å.
 
-I use a radial grid extending to $r_{max} = 20$ a.u. with 2000 points, giving $h = 0.01$ a.u. This is fine enough to resolve the wavefunction accurately (which has characteristic length scale $\sim 1~\text{Bohr}$ for Helium) while keeping computation fast. The SCF loop continues until the change in total energy between iterations falls below $10^{-6}$ a.u. (about 0.03 meV). After much experimentation, I found that simple linear mixing with $\alpha = 0.3$ works well. Too large $\alpha$ causes oscillations; too small makes convergence very slow. I start with a hydrogen-like density $n(r) = \frac{Z^3}{\pi}e^{-2Zr}$, which is a reasonable first approximation. The SCF typically converges in 15-25 iterations from this starting point.
+I use a radial grid extending to $r_{max} = 20$ a.u. with 2000 points, giving $h = 0.01$ a.u. This is fine enough to resolve the wavefunction accurately (which has characteristic length scale $\sim 1~\text{Bohr}$ for Helium) while keeping computation fast. The SCF loop continues until the change in total energy between iterations falls below $10^{-6}$ a.u. (about 0.03 meV). After much experimentation, I found that simple linear mixing with $\alpha = 0.3$ works well. Too large $\alpha$ causes oscillations; too small makes convergence very slow. I start with a hydrogen-like density
+
+$$n(r) = \frac{Z^3}{\pi}e^{-2Zr}$$
+
+which is a reasonable first approximation. The SCF typically converges in 15-25 iterations from this starting point.
 
 One of the key things I learned during implementation was the importance of numerical stability. Several places in the code require careful handling of division by $r^2$ or $r$ when $r$ is small, exponential functions that can overflow, normalization of wavefunctions on discrete grids, and integration near boundaries. I handled these through careful treatment of boundary conditions and using stable numerical algorithms (like the shooting method which naturally handles the $r=0$ singularity).
 
