@@ -49,6 +49,7 @@ author: "Giovanni Gravili"
 ## Build Process
 
 The build script (`scripts/convert-posts.js`) will:
+
 1. Scan all folders in the `posts/` directory
 2. Look for `index.md` in each folder
 3. Convert markdown to HTML using Pandoc (with LaTeX math support)

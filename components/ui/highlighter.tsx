@@ -181,7 +181,9 @@ export function Highlighter({
     color || "#32bc4dbb",
   );
   const [isDark, setIsDark] = useState(() =>
-    typeof document !== 'undefined' ? document.documentElement.classList.contains("dark") : false,
+    typeof document !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : false,
   );
 
   const isInView = useInView(containerRef, {
@@ -194,7 +196,7 @@ export function Highlighter({
 
   // Inject keyframes into document head once to avoid duplication in rendered content
   useEffect(() => {
-    if (typeof document === 'undefined') return;
+    if (typeof document === "undefined") return;
 
     const styleId = "highlighter-keyframes";
     if (!document.getElementById(styleId)) {
@@ -222,7 +224,7 @@ export function Highlighter({
 
   // Observe theme changes
   useEffect(() => {
-    if (typeof document === 'undefined') return;
+    if (typeof document === "undefined") return;
 
     const observer = new MutationObserver(() => {
       setIsDark(document.documentElement.classList.contains("dark"));

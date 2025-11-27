@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Merriweather, Merriweather_Sans, Noto_Sans_Mono } from "next/font/google";
+import {
+  Merriweather,
+  Merriweather_Sans,
+  Noto_Sans_Mono,
+} from "next/font/google";
 import "@/lib/document.css";
 import "./globals.css";
 
@@ -9,7 +13,8 @@ const notoSansMono = Noto_Sans_Mono();
 
 export const metadata: Metadata = {
   title: "Giovanni Gravili's Portfolio",
-  description: "Collection of my work and projects, together with some personal insights and thoughts.",
+  description:
+    "Collection of my work and projects, together with some personal insights and thoughts.",
 };
 
 export default function RootLayout({
@@ -19,11 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className="bg-card dark:bg-card font-serif"
-      >
-        {children}
-      </body>
+      <body className="bg-card dark:bg-card font-serif">{children}</body>
     </html>
   );
 }

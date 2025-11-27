@@ -62,4 +62,4 @@ Stay tuned for more content!
 
 ---
 
-*Feel free to explore other posts and reach out if you'd like to discuss any of the topics covered.*
+_Feel free to explore other posts and reach out if you'd like to discuss any of the topics covered._

@@ -12,13 +12,13 @@ export default function Home() {
   let posts: PostMetadata[] = [];
 
   try {
-    const postsJsonPath = path.join(process.cwd(), 'posts.json');
+    const postsJsonPath = path.join(process.cwd(), "posts.json");
     if (fs.existsSync(postsJsonPath)) {
-      const postsData = fs.readFileSync(postsJsonPath, 'utf-8');
+      const postsData = fs.readFileSync(postsJsonPath, "utf-8");
       posts = JSON.parse(postsData);
     }
   } catch (error) {
-    console.error('Error loading posts:', error);
+    console.error("Error loading posts:", error);
   }
 
   // Split posts for the exact layout
@@ -35,7 +35,9 @@ export default function Home() {
       <main className="max-w-[1200px] mx-auto px-4 py-2">
         {/* Top section label */}
         <div className="border-b border-foreground mb-3 pb-0.5 pt-4 text-sm">
-          <h2 className="text-xs font-bold uppercase tracking-wide">FEATURED WORK</h2>
+          <h2 className="text-xs font-bold uppercase tracking-wide">
+            FEATURED WORK
+          </h2>
         </div>
 
         {/* Main grid layout - 4 columns */}
@@ -49,7 +51,9 @@ export default function Home() {
 
                 <Link href={`/blog/${featuredPost.slug}`}>
                   <h2 className="text-2xl font-bold leading-tight mb-3 hover:opacity-70 transition-opacity">
-                    <PostTitle variant="featured">{featuredPost.title}</PostTitle>
+                    <PostTitle variant="featured">
+                      {featuredPost.title}
+                    </PostTitle>
                   </h2>
                 </Link>
                 <p className="text-sm leading-relaxed mb-2">
@@ -85,7 +89,10 @@ export default function Home() {
           {/* Column 2 - Multiple stories */}
           <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
             {column2Posts.map((post, index) => (
-              <article key={post.slug} className={index > 0 ? "border-t border-border pt-4" : ""}>
+              <article
+                key={post.slug}
+                className={index > 0 ? "border-t border-border pt-4" : ""}
+              >
                 <div className="mb-2">
                   {post.category && (
                     <span className="text-xs font-bold uppercase tracking-wide">
@@ -108,7 +115,10 @@ export default function Home() {
           {/* Column 3 - Multiple stories */}
           <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
             {column3Posts.map((post, index) => (
-              <article key={post.slug} className={index > 0 ? "border-t border-border pt-4" : ""}>
+              <article
+                key={post.slug}
+                className={index > 0 ? "border-t border-border pt-4" : ""}
+              >
                 <div className="mb-2">
                   {post.category && (
                     <span className="text-xs font-bold uppercase tracking-wide">
@@ -134,7 +144,10 @@ export default function Home() {
           {/* Column 4 - Multiple stories with image */}
           <div className="lg:col-span-1 space-y-4">
             {column4Posts.map((post, index) => (
-              <article key={post.slug} className={index > 0 ? "border-t border-border pt-4" : ""}>
+              <article
+                key={post.slug}
+                className={index > 0 ? "border-t border-border pt-4" : ""}
+              >
                 <div className="mb-2">
                   {post.category && (
                     <span className="text-xs font-bold uppercase tracking-wide">
@@ -187,35 +200,67 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto px-4 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
             <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">Portfolio</h3>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
+                Portfolio
+              </h3>
               <ul className="space-y-2 text-xs">
-                <li><Link href="/">All Posts</Link></li>
-                <li><Link href="#">Projects</Link></li>
-                <li><Link href="#">Case Studies</Link></li>
+                <li>
+                  <Link href="/">All Posts</Link>
+                </li>
+                <li>
+                  <Link href="#">Projects</Link>
+                </li>
+                <li>
+                  <Link href="#">Case Studies</Link>
+                </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">Topics</h3>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
+                Topics
+              </h3>
               <ul className="space-y-2 text-xs">
-                <li><Link href="#">Technology</Link></li>
-                <li><Link href="#">Design</Link></li>
-                <li><Link href="#">Research</Link></li>
+                <li>
+                  <Link href="#">Technology</Link>
+                </li>
+                <li>
+                  <Link href="#">Design</Link>
+                </li>
+                <li>
+                  <Link href="#">Research</Link>
+                </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">Connect</h3>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
+                Connect
+              </h3>
               <ul className="space-y-2 text-xs">
-                <li><a href="#">LinkedIn</a></li>
-                <li><a href="#">GitHub</a></li>
-                <li><a href="#">Twitter</a></li>
+                <li>
+                  <a href="#">LinkedIn</a>
+                </li>
+                <li>
+                  <a href="#">GitHub</a>
+                </li>
+                <li>
+                  <a href="#">Twitter</a>
+                </li>
               </ul>
             </div>
             <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">About</h3>
+              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
+                About
+              </h3>
               <ul className="space-y-2 text-xs">
-                <li><Link href="#">About Me</Link></li>
-                <li><Link href="#">Contact</Link></li>
-                <li><Link href="#">Resume</Link></li>
+                <li>
+                  <Link href="#">About Me</Link>
+                </li>
+                <li>
+                  <Link href="#">Contact</Link>
+                </li>
+                <li>
+                  <Link href="#">Resume</Link>
+                </li>
               </ul>
             </div>
           </div>
