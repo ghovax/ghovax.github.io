@@ -22,9 +22,9 @@ The challenge was to build a complete end-to-end pipeline: Arduino firmware to c
 
 # System Architecture
 
-The system operates as a three-tier pipeline with clear separation of concerns. At the lowest level, the Arduino Nano 33 BLE Sense runs firmware that controls the OV7670 camera module. This camera captures 176x144 pixel grayscale images (QCIF resolution), which strikes a balance between detail and data transfer speed. The firmware is remarkably simple, implementing a command-response protocol: wait for a capture command character 'c' over serial, trigger the camera to capture a frame into a buffer, and stream the raw frame data (25,344 bytes) back over serial at 115200 baud.
+The system operates as a three-tier pipeline with clear separation of concerns. At the lowest level, the Arduino Nano 33 BLE Sense runs firmware that controls the OV7670 camera module. This camera captures $176 \times 144$ pixel grayscale images (QCIF resolution), which strikes a balance between detail and data transfer speed. The firmware is remarkably simple, implementing a command-response protocol: wait for a capture command character 'c' over serial, trigger the camera to capture a frame into a buffer, and stream the raw frame data (25,344 bytes) back over serial at 115200 baud.
 
-The middle tier is a Flask server running on the host computer. This is where the complexity lives. The server manages the serial connection to the Arduino, handling automatic port detection, connection recovery, and thread-safe access. When an image is requested, the server sends the capture command, receives the raw byte stream, reconstructs it into a 2D NumPy array, and passes it through the image processing pipeline. The processing involves thresholding to create transparency masks (lighter pixels become transparent, darker pixels remain), resizing from 176x144 to 28x28 for the MNIST model, normalizing pixel values to the 0-1 range, and inverting colors to match MNIST's white-on-black convention.
+The middle tier is a Flask server running on the host computer. This is where the complexity lives. The server manages the serial connection to the Arduino, handling automatic port detection, connection recovery, and thread-safe access. When an image is requested, the server sends the capture command, receives the raw byte stream, reconstructs it into a 2D NumPy array, and passes it through the image processing pipeline. The processing involves thresholding to create transparency masks (lighter pixels become transparent, darker pixels remain), resizing from $176 \times 144$ to $28 \times 28$ for the MNIST model, normalizing pixel values to the $[0,1]$ range, and inverting colors to match MNIST's white-on-black convention.
 
 The final tier is a Next.js web interface that provides real-time visualization. Built with React and TypeScript, it communicates with the Flask backend via REST endpoints. The interface displays the raw captured image, shows the predicted digit with confidence score, and visualizes the full probability distribution across all 10 digits as a bar chart. This gives immediate feedback on what the model sees and how certain it is about its prediction.
 
@@ -172,7 +172,7 @@ model = Sequential([
 ])
 ```
 
-The first convolutional layer applies 32 filters of size 3x3, learning low-level features like edges and curves. Max pooling reduces spatial dimensions by half, from 26x26 to 13x13. The second convolutional layer applies 64 filters, learning higher-level patterns by combining features from the first layer. Another max pooling layer reduces to 5x5. The fully connected layers combine spatial features into class predictions, with L2 regularization to prevent overfitting. Batch normalization stabilizes training by normalizing layer inputs, and dropout randomly disables 20% of neurons during training to improve generalization.
+The first convolutional layer applies 32 filters of size $3 \times 3$, learning low-level features like edges and curves. Max pooling reduces spatial dimensions by half, from $26 \times 26$ to $13 \times 13$. The second convolutional layer applies 64 filters, learning higher-level patterns by combining features from the first layer. Another max pooling layer reduces to $5 \times 5$. The fully connected layers combine spatial features into class predictions, with L2 regularization to prevent overfitting. Batch normalization stabilizes training by normalizing layer inputs, and dropout randomly disables 20% of neurons during training to improve generalization.
 
 Training uses data augmentation to artificially expand the dataset:
 
@@ -196,7 +196,7 @@ The augmentation randomly rotates digits up to 30 degrees and shifts them up to 
 
 # Image Processing Pipeline
 
-The raw camera output is a 176x144 grayscale image where darker pixels represent ink or markings and lighter pixels represent background. To prepare this for the MNIST model, which expects 28x28 images with white digits on black backgrounds, several transformations are necessary.
+The raw camera output is a $176 \times 144$ grayscale image where darker pixels represent ink or markings and lighter pixels represent background. To prepare this for the MNIST model, which expects $28 \times 28$ images with white digits on black backgrounds, several transformations are necessary.
 
 First, I apply thresholding to create a transparency mask. This removes noise and focuses on the actual writing:
 
@@ -325,7 +325,7 @@ const captureImage = async () => {
 };
 ```
 
-The server returns a JSON response containing the base64-encoded captured image, predicted digit (0-9), confidence score (0-1), and the full probability distribution. The interface displays the raw image (using CSS image-rendering: pixelated to preserve the blocky aesthetic) and renders the probability distribution as a vertical bar chart with 10 columns.
+The server returns a JSON response containing the base64-encoded captured image, predicted digit ($0$-$9$), confidence score ($0$-$1$), and the full probability distribution. The interface displays the raw image (using CSS image-rendering: pixelated to preserve the blocky aesthetic) and renders the probability distribution as a vertical bar chart with 10 columns.
 
 Each bar's height corresponds to the probability of that digit. The bars are implemented as flexbox containers with a colored div positioned at the bottom:
 
@@ -413,13 +413,13 @@ This prevents the common problem of orphaned serial connections that prevent rec
 
 # Performance and Limitations
 
-The system achieves reasonable real-time performance. A complete capture-process-predict cycle takes approximately 2-3 seconds: 2.2 seconds for serial transfer of the image, 0.1-0.3 seconds for image preprocessing, 0.2-0.5 seconds for CNN inference on CPU, and minimal overhead for Flask routing and JSON encoding. On a modern CPU, this is acceptable for interactive use.
+The system achieves reasonable real-time performance. A complete capture-process-predict cycle takes approximately $2$-$3$ seconds: $2.2$ seconds for serial transfer of the image, $0.1$-$0.3$ seconds for image preprocessing, $0.2$-$0.5$ seconds for CNN inference on CPU, and minimal overhead for Flask routing and JSON encoding. On a modern CPU, this is acceptable for interactive use.
 
-The main bottleneck is the serial transfer. At 115200 baud, transferring 25,344 bytes is fundamentally limited by the USB serial bandwidth. Using a higher baud rate (921600 is supported by many Arduino boards) would reduce transfer time to under 0.3 seconds, but the Arduino Nano 33 BLE's USB stack becomes unreliable at those speeds in my testing. An alternative would be to reduce image resolution further, but 176x144 already pushes the lower limit of usable detail for handwritten digits.
+The main bottleneck is the serial transfer. At 115200 baud, transferring 25,344 bytes is fundamentally limited by the USB serial bandwidth. Using a higher baud rate (921600 is supported by many Arduino boards) would reduce transfer time to under $0.3$ seconds, but the Arduino Nano 33 BLE's USB stack becomes unreliable at those speeds in my testing. An alternative would be to reduce image resolution further, but $176 \times 144$ already pushes the lower limit of usable detail for handwritten digits.
 
-Model inference is quite fast even on CPU because the 28x28 input is tiny by modern deep learning standards. The entire network has only about 100,000 parameters. On a GPU, inference would be under 10ms, but for a single-image pipeline, the overhead of GPU memory transfer exceeds the compute savings.
+Model inference is quite fast even on CPU because the $28 \times 28$ input is tiny by modern deep learning standards. The entire network has only about 100,000 parameters. On a GPU, inference would be under 10ms, but for a single-image pipeline, the overhead of GPU memory transfer exceeds the compute savings.
 
-The accuracy in real-world conditions depends heavily on how the digit is presented to the camera. The MNIST dataset consists of centered, normalized digits with good contrast. Real camera images have variable lighting, perspective distortion, shadows, and positioning. The thresholding step helps by removing background, but if lighting is poor or the digit is too small in frame, accuracy suffers. In practice, with reasonable lighting and a black marker on white paper held at the right distance, the system achieves 85-90% accuracy on the first try.
+The accuracy in real-world conditions depends heavily on how the digit is presented to the camera. The MNIST dataset consists of centered, normalized digits with good contrast. Real camera images have variable lighting, perspective distortion, shadows, and positioning. The thresholding step helps by removing background, but if lighting is poor or the digit is too small in frame, accuracy suffers. In practice, with reasonable lighting and a black marker on white paper held at the right distance, the system achieves $85$-$90$% accuracy on the first try.
 
 # Lessons Learned
 
