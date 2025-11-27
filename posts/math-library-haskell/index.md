@@ -1,6 +1,6 @@
 ---
 title: "Symbolic Mathematics Engine in Haskell"
-date: "2025-11-27"
+date: "2024-10-13"
 excerpt: "Building a symbolic mathematics library from scratch in Haskell, exploring algebraic manipulation, differentiation, and Taylor series expansion through functional programming."
 category: "Computer Science"
 tags: ["Haskell", "Symbolic Math", "Functional Programming", "Computer Algebra"]
