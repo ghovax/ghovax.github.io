@@ -7,11 +7,9 @@ tags: ["DFT", "Julia", "Quantum Mechanics", "Computational Physics"]
 author: "Giovanni Gravili"
 ---
 
-# Ground-State Energy via DFT for Helium
-
 In this post, I'll walk you through my implementation of Density Functional Theory (DFT) to compute the ground-state energy of the Helium atom. This project taught me not only about the mathematical foundations of DFT but also about the practical challenges of implementing self-consistent field methods and solving coupled differential equations numerically.
 
-## Introduction to the Problem
+# Introduction to the Problem
 
 The Helium atom presents an interesting challenge in quantum mechanics. While we can solve the hydrogen atom exactly using separation of variables, adding just one more electron creates a many-body problem that requires approximations. The key difficulty is the electron-electron interaction term, which prevents us from separating the Schrödinger equation into independent single-particle equations.
 
@@ -27,13 +25,13 @@ $$\hat{H} = -\frac{\hbar^2}{2m}(\nabla_1^2 + \nabla_2^2) - \frac{Ze^2}{r_1} - \f
 
 That last term, $\frac{e^2}{|\mathbf{r}_1 - \mathbf{r}_2|}$, is what makes everything difficult. It means we can't write the wavefunction as a simple product of single-electron wavefunctions. The electrons are correlated—knowing where one electron is affects the probability distribution of the other.
 
-## The DFT Approach: From Many-Body to Single-Particle
+# The DFT Approach: From Many-Body to Single-Particle
 
 Density Functional Theory provides an elegant solution by reformulating the problem in terms of electron density $n(\mathbf{r})$ rather than many-body wavefunctions $\Psi(\mathbf{r}_1, \mathbf{r}_2, ..., \mathbf{r}_N)$. The key insight, formalized by Kohn and Sham in 1965, is that we can map the interacting many-electron system onto a system of non-interacting electrons moving in an effective potential.
 
 This is profound: instead of tracking the 6N-dimensional wavefunction for N electrons (3 spatial coordinates times 2 for spin), we only need to track the 3-dimensional density function. For Helium with spherical symmetry, this becomes just a 1-dimensional radial function.
 
-### The Kohn-Sham Framework
+## The Kohn-Sham Framework
 
 In the Kohn-Sham approach, we write the total energy as a functional of the density:
 
@@ -58,7 +56,7 @@ $$E_H[n] = \frac{e^2}{2}\int\int\frac{n(\mathbf{r})n(\mathbf{r}')}{|\mathbf{r}-\
 
 The beauty of this formulation is that all the complicated many-body physics—exchange interactions from the Pauli exclusion principle and correlation effects from the actual electron-electron interactions—gets packed into the **exchange-correlation functional** $E_{xc}[n]$. This is the unknown part that we must approximate.
 
-### The Exchange-Correlation Functional
+## The Exchange-Correlation Functional
 
 For the exchange-correlation energy, I use the Local Density Approximation (LDA) with the Perdew-Zunger parametrization. This approximation treats the electron gas locally as if it were uniform, with the exchange-correlation energy per particle depending only on the local density.
 
@@ -70,7 +68,7 @@ where $\epsilon_{xc}(n)$ is the exchange-correlation energy per particle of a un
 
 The key assumption here is that at each point in space, the exchange-correlation energy is approximately what it would be for a uniform gas with that local density. This works surprisingly well, especially for systems where the density varies slowly. For atoms like Helium, it's less accurate but still gives reasonable results.
 
-## Exploiting Spherical Symmetry
+# Exploiting Spherical Symmetry
 
 For the Helium atom in its ground state, we can exploit spherical symmetry to dramatically simplify the problem. The density depends only on the radial coordinate $r$, not on the angular coordinates $\theta$ and $\phi$.
 
@@ -90,7 +88,7 @@ $$n(r) = \frac{2}{4\pi r^2}\left|\frac{u(r)}{r}\right|^2 = \frac{2u^2(r)}{4\pi r
 
 where the factor of 2 accounts for two electrons with opposite spins occupying the same spatial orbital. This reduces our 3D problem to a 1D radial problem, which is much more tractable numerically.
 
-## The Self-Consistent Field Method
+# The Self-Consistent Field Method
 
 The Kohn-Sham equations must be solved self-consistently because the effective potential depends on the density, which in turn depends on the orbitals we're trying to find. This creates a circular dependency that we resolve through iteration.
 
@@ -125,9 +123,9 @@ $$n_{input}^{(i+1)} = \alpha n_{output}^{(i)} + (1-\alpha)n_{input}^{(i)}$$
 
 where $\alpha \approx 0.3$ is a mixing parameter. This damps oscillations and helps convergence. Finding the right mixing parameter was crucial for getting stable iterations.
 
-## Numerical Implementation
+# Numerical Implementation
 
-### Discretization and Finite Differences
+## Discretization and Finite Differences
 
 I discretize the radial coordinate on a uniform grid: $r_i = i \cdot h$ for $i = 0, 1, 2, ..., N$, where $h$ is the grid spacing. Typically I use $h \approx 0.01$ atomic units and extend the grid to $r_{max} = 20$ atomic units.
 
@@ -143,7 +141,7 @@ $$-\frac{\hbar^2}{2m}\frac{u_{i+1} - 2u_i + u_{i-1}}{h^2} + V_{eff}(r_i)u_i = Eu
 
 This transforms our differential equation into a system of algebraic equations. One approach would be to set up a tridiagonal matrix and solve the eigenvalue problem. However, I chose a different method—the shooting method—which is more intuitive and doesn't require large matrix operations.
 
-### The Shooting Method with Binary Search
+## The Shooting Method with Binary Search
 
 To find the eigenvalue $E$ and eigenfunction $u(r)$ of the radial Schrödinger equation, I implemented a shooting method combined with binary search. This was one of the most satisfying parts of the project to implement.
 
@@ -169,7 +167,7 @@ The idea is simple but effective:
 
 This method is robust because it's guaranteed to converge—we're essentially finding the zero of a monotonic function using bisection. The main challenge I encountered was choosing the right convergence criterion. I check both that the energy range is small and that the wavefunction at $r_{max}$ is close to zero.
 
-### Computing the Hartree Potential
+## Computing the Hartree Potential
 
 The Hartree potential represents the classical electrostatic repulsion between electrons. It satisfies Poisson's equation:
 
@@ -195,7 +193,7 @@ I integrate again to get $V_H(r)$, using the boundary condition that $V_H(\infty
 
 This two-step integration process was tricky to implement correctly. Initially, I had stability issues with the $1/r^2$ term, which I resolved by treating the small-$r$ region carefully and using the analytical behavior near the origin.
 
-### The Exchange-Correlation Potential
+## The Exchange-Correlation Potential
 
 The exchange-correlation potential is obtained from the functional derivative of the exchange-correlation energy:
 
@@ -217,7 +215,7 @@ $$V_{xc}(r) = \frac{\partial(\epsilon_{xc}(n)n)}{\partial n}\bigg|_{n=n(r)}$$
 
 Computing this derivative and implementing the Perdew-Zunger parametrization correctly required careful attention to the different density regimes and special cases.
 
-## Implementation Details in Julia
+# Implementation Details in Julia
 
 I chose Julia for this implementation because of its excellent performance for numerical computing and its clean, readable syntax that looks very similar to mathematical notation. The code structure follows the self-consistent field algorithm outlined above.
 
@@ -245,7 +243,7 @@ One of the key things I learned during implementation was the importance of **nu
 
 I handled these through careful treatment of boundary conditions and using stable numerical algorithms (like the shooting method which naturally handles the $r=0$ singularity).
 
-## Results and Validation
+# Results and Validation
 
 After implementing the full self-consistent DFT calculation, I obtained the ground-state energy of Helium. The calculation typically converges in 15-25 iterations depending on the initial guess and mixing parameter. Watching the energy converge iteration by iteration was deeply satisfying!
 
@@ -260,7 +258,7 @@ The small discrepancy is expected and comes primarily from the approximations in
 
 Despite this limitation, getting to within 1.5% of the exact answer using such a conceptually simple approach is remarkable! More sophisticated functionals (like GGA or hybrid functionals) can reduce this error, but they're more complex to implement.
 
-### Energy Components
+## Energy Components
 
 Breaking down the total energy into components was enlightening:
 
@@ -271,7 +269,7 @@ Breaking down the total energy into components was enlightening:
 
 The interplay between these terms is fascinating. The nuclear attraction tries to pull electrons in, but this is balanced by kinetic energy (uncertainty principle—confining electrons increases their kinetic energy) and Hartree repulsion. The exchange-correlation term, though smallest in magnitude, is crucial for accuracy.
 
-### Radial Density and Orbital
+## Radial Density and Orbital
 
 The converged calculation also gives us the radial probability density and the Kohn-Sham orbital. These show the expected physical behavior:
 
@@ -282,11 +280,11 @@ The converged calculation also gives us the radial probability density and the K
 
 Plotting these functions and seeing them emerge from the self-consistent calculation was one of the most rewarding parts of the project. These aren't input—they're the natural solution that the equations find!
 
-## What I Learned
+# What I Learned
 
 This project taught me several important lessons about computational quantum mechanics and scientific computing:
 
-### About DFT and Many-Body Physics
+## About DFT and Many-Body Physics
 
 1. **The power of effective theories**: DFT shows how a clever reformulation can make an intractable problem solvable. We didn't solve the full many-body problem—we replaced it with an equivalent single-particle problem in an effective potential.
 
@@ -294,7 +292,7 @@ This project taught me several important lessons about computational quantum mec
 
 3. **Self-consistency is subtle**: The circular dependency between density and potential means convergence isn't guaranteed. Mixing schemes and careful initialization are essential.
 
-### About Numerical Methods
+## About Numerical Methods
 
 4. **Simple methods can be powerful**: The shooting method with binary search is conceptually simple but robust. Sometimes straightforward approaches are better than sophisticated ones.
 
@@ -302,7 +300,7 @@ This project taught me several important lessons about computational quantum mec
 
 6. **Grid resolution tradeoffs**: Finer grids give better accuracy but slower computation. Finding the right balance required experimentation and convergence testing.
 
-### About Scientific Computing
+## About Scientific Computing
 
 7. **Numerical stability requires care**: Division by small numbers, exponentials, singularities—all these required special handling. Robust code needs more than just correct algorithms.
 
@@ -310,13 +308,13 @@ This project taught me several important lessons about computational quantum mec
 
 9. **Julia is excellent for this work**: The combination of clean syntax, good performance, and easy vectorization made implementation straightforward. I could focus on the physics rather than fighting the language.
 
-## Reflections and Extensions
+# Reflections and Extensions
 
 Looking back, implementing DFT from scratch provided deep insight into how modern electronic structure calculations work. While production DFT codes use more sophisticated methods (plane-wave basis sets, pseudopotentials, advanced functionals), the basic principles remain the same: map the many-body problem onto single-particle equations, solve them self-consistently, and approximate the exchange-correlation effects.
 
 Several extensions would be interesting to pursue:
 
-### Immediate Extensions
+## Immediate Extensions
 
 - **Better functionals**: Implementing GGA (Generalized Gradient Approximation) functionals like PBE would improve accuracy. These depend on both density and its gradient, capturing more physics.
 
@@ -324,7 +322,7 @@ Several extensions would be interesting to pursue:
 
 - **Ionization energies**: By computing the energy of He and $He^+$, I could calculate the first ionization energy and compare with experiment (24.6 eV).
 
-### More Advanced Extensions
+## More Advanced Extensions
 
 - **Excited states**: Extending to excited states would require solving for higher eigenvalues of the Kohn-Sham equation. Time-dependent DFT (TDDFT) is the proper framework for this.
 
@@ -334,13 +332,13 @@ Several extensions would be interesting to pursue:
 
 - **Post-DFT methods**: DFT has known limitations for certain properties. Methods like GW (for bandgaps) or quantum Monte Carlo (for high accuracy) could be explored.
 
-## Interactive Implementation
+# Interactive Implementation
 
 Below is the interactive Pluto.jl notebook containing the full implementation where you can explore the code, modify parameters, and see how the calculation responds:
 
 <iframe src="/.posts-build/dft-helium-julia/Important_story.html" width="100%" height="800px" frameborder="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;"></iframe>
 
-## Conclusion
+# Conclusion
 
 Implementing DFT from scratch has been one of my most educational projects. It bridges abstract quantum mechanics with practical computation, requiring both theoretical understanding and numerical skills.
 
