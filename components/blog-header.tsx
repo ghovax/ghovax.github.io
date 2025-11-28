@@ -43,47 +43,41 @@ export function BlogHeader() {
       {/* Sections bar */}
       <div className="border-t border-border">
         <nav className="max-w-[1200px] mx-auto px-4">
-          <ul className="flex items-center justify-start tracking-wide gap-6 py-3 text-xs font-semibold overflow-x-auto">
-            <li>
-              <Link href="/" className="whitespace-nowrap">
-                ALL POSTS
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="whitespace-nowrap">
-                PROJECTS
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="whitespace-nowrap">
-                INSIGHTS
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="whitespace-nowrap">
-                TECHNOLOGY
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="whitespace-nowrap">
-                DESIGN
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="whitespace-nowrap">
-                RESEARCH
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="whitespace-nowrap">
-                CASE STUDIES
-              </Link>
-            </li>
-            <li>
-              <Link href="#" className="whitespace-nowrap">
-                ABOUT
-              </Link>
-            </li>
+          <ul className="flex items-center justify-between tracking-wide py-3 text-xs font-semibold overflow-x-auto">
+            <div className="flex items-center gap-6">
+              <li>
+                <Link href="/" className="whitespace-nowrap">
+                  ALL POSTS
+                </Link>
+              </li>
+              <li>
+                <Link href="#computational-physics" className="whitespace-nowrap">
+                  COMPUTATIONAL PHYSICS
+                </Link>
+              </li>
+              <li>
+                <Link href="#computer-science" className="whitespace-nowrap">
+                  COMPUTER SCIENCE
+                </Link>
+              </li>
+              <li>
+                <Link href="#software-engineering" className="whitespace-nowrap">
+                  SOFTWARE ENGINEERING
+                </Link>
+              </li>
+            </div>
+            <div className="flex items-center gap-6 ml-auto">
+              <li>
+                <Link href="#about" className="whitespace-nowrap">
+                  ABOUT
+                </Link>
+              </li>
+              <li>
+                <Link href="/cv.pdf" className="whitespace-nowrap font-bold">
+                  CV / RESUME
+                </Link>
+              </li>
+            </div>
           </ul>
         </nav>
       </div>
