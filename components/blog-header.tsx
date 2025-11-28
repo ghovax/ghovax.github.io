@@ -26,7 +26,7 @@ export function BlogHeader() {
       <div className="max-w-[1200px] mx-auto px-4 pb-4 text-left">
         <Link href="/" className="inline-block">
           <h1 className="text-4xl font-bold tracking-tight">
-            Giovanni Gravili&rsquo;s{" "}
+            Giovanni Gravili – {" "}
             <Highlighter
               action="highlight"
               color="#ef444460"
@@ -73,7 +73,7 @@ export function BlogHeader() {
                 </Link>
               </li>
               <li>
-                <Link href="/cv.pdf" className="whitespace-nowrap font-bold">
+                <Link href="/Giovanni_Gravili_CV_0001-7.pdf" className="whitespace-nowrap font-bold">
                   CV / RESUME
                 </Link>
               </li>

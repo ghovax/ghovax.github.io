@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Linkedin, Mail } from "lucide-react";
 
 export function AboutSection() {
   return (
@@ -7,7 +8,6 @@ export function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left side - Bio */}
           <div className="border-r-0 lg:border-r border-border lg:pr-8">
-            <h2 className="text-2xl font-bold mb-4">Giovanni Gravili</h2>
             <p className="text-base mb-4 leading-relaxed">
               Computational physicist specializing in materials science and nanoscale simulations.
               Master's graduate from University of Bologna with expertise in HPC systems,
@@ -21,7 +21,7 @@ export function AboutSection() {
             {/* Prominent CTA Buttons */}
             <div className="flex flex-wrap gap-3 mb-6">
               <a
-                href="/cv.pdf"
+                href="/Giovanni_Gravili_CV_0001-7.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 bg-foreground text-background font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity border-2 border-foreground"
@@ -39,17 +39,27 @@ export function AboutSection() {
             </div>
 
             {/* Contact */}
-            <div className="text-xs space-y-1 text-muted-foreground">
-              <div>
-                <a href="https://linkedin.com/in/giovanni-gravili" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
-                  linkedin.com/in/giovanni-gravili
-                </a>
-              </div>
-              <div>
-                <a href="mailto:giovannigravili112@gmail.com" className="hover:text-foreground">
-                  giovannigravili112@gmail.com
-                </a>
-              </div>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://linkedin.com/in/giovanni-gravili"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity"
+              >
+                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
+                  <Linkedin className="w-4 h-4" />
+                </span>
+                LinkedIn
+              </a>
+              <a
+                href="mailto:giovannigravili112@gmail.com"
+                className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity"
+              >
+                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
+                  <Mail className="w-4 h-4" />
+                </span>
+                Email
+              </a>
             </div>
           </div>
 
