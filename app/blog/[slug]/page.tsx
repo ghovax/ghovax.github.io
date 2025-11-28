@@ -134,6 +134,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Article content */}
         <div className="">
+          {post.metadata.image && (
+            <div className="mb-8">
+              <img
+                src={post.metadata.image}
+                alt={post.metadata.title}
+                className="w-full rounded-lg border border-border"
+              />
+            </div>
+          )}
           <PostContent htmlContent={post.content} />
         </div>
 

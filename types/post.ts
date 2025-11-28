@@ -6,6 +6,7 @@ export interface PostMetadata {
   tags?: string[];
   slug: string;
   author?: string;
+  image?: string;
 }
 
 export interface Post extends PostMetadata {

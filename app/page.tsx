@@ -75,7 +75,17 @@ export default function Home() {
                   : ""
               }`}
             >
-              <div className="w-full h-32 bg-muted mb-3 border border-border"></div>
+              {post.image ? (
+                <div className="w-full h-32 mb-3 border border-border overflow-hidden">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-32 bg-muted mb-3 border border-border"></div>
+              )}
               <div className="mb-2">
                 {post.category && (
                   <span className="text-xs font-bold uppercase tracking-wide">
@@ -122,7 +132,17 @@ export default function Home() {
                       : ""
                   }`}
                 >
-                  <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                  {post.image ? (
+                    <div className="w-full h-24 mb-3 border border-border overflow-hidden">
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                  )}
                   <Link href={`/blog/${post.slug}`}>
                     <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                       <Highlighter
@@ -166,7 +186,17 @@ export default function Home() {
                       : ""
                   }`}
                 >
-                  <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                  {post.image ? (
+                    <div className="w-full h-24 mb-3 border border-border overflow-hidden">
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                  )}
                   <Link href={`/blog/${post.slug}`}>
                     <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                       <Highlighter
@@ -198,7 +228,17 @@ export default function Home() {
                         : ""
                     }`}
                   >
-                    <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                    {post.image ? (
+                      <div className="w-full h-24 mb-3 border border-border overflow-hidden">
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                    )}
                     <Link href={`/blog/${post.slug}`}>
                       <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                         <Highlighter
@@ -243,7 +283,17 @@ export default function Home() {
                       : ""
                   }`}
                 >
-                  <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                  {post.image ? (
+                    <div className="w-full h-24 mb-3 border border-border overflow-hidden">
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+                  )}
                   <Link href={`/blog/${post.slug}`}>
                     <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
                       <Highlighter
