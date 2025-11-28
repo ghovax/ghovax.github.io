@@ -23,23 +23,8 @@ export default function Home() {
     console.error("Error loading posts:", error);
   }
 
-  // Organize posts by category
-  const computationalPhysicsPosts = posts.filter(
-    (post) => post.category === "Computational Physics"
-  );
-  const computerSciencePosts = posts.filter(
-    (post) => post.category === "Computer Science"
-  );
-  const softwareEngineeringPosts = posts.filter(
-    (post) => post.category === "Software Engineering"
-  );
-
-  // Featured posts (most recent from each category)
-  const featuredPosts = [
-    computationalPhysicsPosts[0],
-    computerSciencePosts[0],
-    softwareEngineeringPosts[0],
-  ].filter(Boolean);
+  // Featured posts (first 3 posts)
+  const featuredPosts = posts.slice(0, 3);
 
   // Color palette for highlighting different posts
   const highlightColors = [
@@ -69,11 +54,10 @@ export default function Home() {
           {featuredPosts.map((post, index) => (
             <article
               key={post.slug}
-              className={`${
-                index < featuredPosts.length - 1
-                  ? "border-r-0 lg:border-r border-border lg:pr-4"
-                  : ""
-              }`}
+              className={`${index < featuredPosts.length - 1
+                ? "border-r-0 lg:border-r border-border lg:pr-4"
+                : ""
+                }`}
             >
               {post.image ? (
                 <div className="w-full h-32 mb-3 border border-border overflow-hidden">
@@ -111,27 +95,17 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Computational Physics Section */}
-        {computationalPhysicsPosts.length > 0 && (
+        {/* All Posts Section */}
+        {posts.length > 3 && (
           <>
-            <div
-              id="computational-physics"
-              className="border-b border-foreground mb-3 pb-0.5 pt-4"
-            >
+            <div className="border-b border-foreground mb-3 pb-0.5 pt-4">
               <h2 className="text-xs font-bold uppercase tracking-wide">
-                COMPUTATIONAL PHYSICS
+                ALL POSTS
               </h2>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-b border-border">
-              {computationalPhysicsPosts.slice(0, 4).map((post, index) => (
-                <article
-                  key={post.slug}
-                  className={`${
-                    index < 3
-                      ? "border-r-0 lg:border-r border-border lg:pr-4"
-                      : ""
-                  }`}
-                >
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+              {posts.slice(3).map((post, index) => (
+                <article key={post.slug}>
                   {post.image ? (
                     <div className="w-full h-24 mb-3 border border-border overflow-hidden">
                       <img
@@ -148,157 +122,6 @@ export default function Home() {
                       <Highlighter
                         action="highlight"
                         color={highlightColors[(index + 3) % highlightColors.length]}
-                        isView={true}
-                        animationDuration={800}
-                        multiline={true}
-                      >
-                        {post.title}
-                      </Highlighter>
-                    </h3>
-                  </Link>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Computer Science Section */}
-        {computerSciencePosts.length > 0 && (
-          <>
-            <div
-              id="computer-science"
-              className="border-b border-foreground mb-3 pb-0.5 pt-4"
-            >
-              <h2 className="text-xs font-bold uppercase tracking-wide">
-                COMPUTER SCIENCE
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-b border-border">
-              {computerSciencePosts.slice(0, 4).map((post, index) => (
-                <article
-                  key={post.slug}
-                  className={`${
-                    index < 3
-                      ? "border-r-0 lg:border-r border-border lg:pr-4"
-                      : ""
-                  }`}
-                >
-                  {post.image ? (
-                    <div className="w-full h-24 mb-3 border border-border overflow-hidden">
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
-                  )}
-                  <Link href={`/blog/${post.slug}`}>
-                    <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                      <Highlighter
-                        action="highlight"
-                        color={highlightColors[(index + 1) % highlightColors.length]}
-                        isView={true}
-                        animationDuration={800}
-                        multiline={true}
-                      >
-                        {post.title}
-                      </Highlighter>
-                    </h3>
-                  </Link>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-                </article>
-              ))}
-            </div>
-            {/* Additional Computer Science posts in second row */}
-            {computerSciencePosts.length > 4 && (
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-b border-border">
-                {computerSciencePosts.slice(4, 8).map((post, index) => (
-                  <article
-                    key={post.slug}
-                    className={`${
-                      index < 3
-                        ? "border-r-0 lg:border-r border-border lg:pr-4"
-                        : ""
-                    }`}
-                  >
-                    {post.image ? (
-                      <div className="w-full h-24 mb-3 border border-border overflow-hidden">
-                        <img
-                          src={post.image}
-                          alt={post.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
-                    )}
-                    <Link href={`/blog/${post.slug}`}>
-                      <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                        <Highlighter
-                          action="highlight"
-                          color={highlightColors[(index + 5) % highlightColors.length]}
-                          isView={true}
-                          animationDuration={800}
-                          multiline={true}
-                        >
-                          {post.title}
-                        </Highlighter>
-                      </h3>
-                    </Link>
-                    <p className="text-sm leading-relaxed text-muted-foreground">
-                      {post.excerpt}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Software Engineering Section */}
-        {softwareEngineeringPosts.length > 0 && (
-          <>
-            <div
-              id="software-engineering"
-              className="border-b border-foreground mb-3 pb-0.5 pt-4"
-            >
-              <h2 className="text-xs font-bold uppercase tracking-wide">
-                SOFTWARE ENGINEERING
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-              {softwareEngineeringPosts.slice(0, 4).map((post, index) => (
-                <article
-                  key={post.slug}
-                  className={`${
-                    index < 3
-                      ? "border-r-0 lg:border-r border-border lg:pr-4"
-                      : ""
-                  }`}
-                >
-                  {post.image ? (
-                    <div className="w-full h-24 mb-3 border border-border overflow-hidden">
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
-                  )}
-                  <Link href={`/blog/${post.slug}`}>
-                    <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                      <Highlighter
-                        action="highlight"
-                        color={highlightColors[(index + 2) % highlightColors.length]}
                         isView={true}
                         animationDuration={800}
                         multiline={true}

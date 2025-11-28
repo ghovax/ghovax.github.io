@@ -67,12 +67,12 @@ function convertMarkdownToHTML(filepath, folderName) {
     // Generate slug from folder name if not provided
     const slug = frontmatter.slug || basename;
 
-    // Check for image.jpeg in the post folder
-    let imageUrl = null;
+    // Check for preview.jpeg in the post folder for preview image
+    let previewUrl = null;
     if (folderName) {
-      const imagePath = path.join(POSTS_DIR, folderName, "image.jpeg");
-      if (fs.existsSync(imagePath)) {
-        imageUrl = `/.posts-build/${folderName}/image.jpeg`;
+      const previewPath = path.join(POSTS_DIR, folderName, "preview.jpeg");
+      if (fs.existsSync(previewPath)) {
+        previewUrl = `/.posts-build/${folderName}/preview.jpeg`;
       }
     }
 
@@ -81,7 +81,7 @@ function convertMarkdownToHTML(filepath, folderName) {
       slug,
       htmlFile: `${basename}.html`,
       postFolder: folderName || basename,
-      image: imageUrl,
+      image: previewUrl,
     };
   } catch (error) {
     console.error(`Error processing ${filepath}:`, error.message);
