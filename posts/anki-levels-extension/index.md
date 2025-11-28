@@ -18,13 +18,13 @@ The core idea emerged from a frustration with traditional language learning. Whe
 
 # Architecture and Data Flow
 
-The extension follows a three-component architecture typical of modern browser extensions: a background script that manages data synchronization, a content script that highlights words on pages, and a popup UI for configuration. The separation of concerns is crucial for performance and reliability.
+The extension follows a two-component architecture typical of modern browser extensions: a background script that manages data synchronization and a content script that highlights words on pages. The separation of concerns is crucial for performance and reliability.
 
-The background script (`background.ts`) runs persistently and handles all communication with Anki through the AnkiConnect add-on. AnkiConnect exposes a local HTTP API on `localhost:8765` that allows external applications to query card data. The background script fetches all cards from a specified deck, computes difficulty levels based on card statistics, and caches the results in IndexedDB. This architecture means content scripts never directly communicate with Anki, they simply request pre-processed word data from the background script.
+The background script (`background.ts`) runs persistently and handles all communication with Anki through the AnkiConnect add-on. AnkiConnect exposes a local HTTP API on `localhost:8765` that allows external applications to query card data. The background script fetches all cards from the "Japanese" deck (the default deck name), computes difficulty levels based on card statistics, and caches the results in IndexedDB. This architecture means content scripts never directly communicate with Anki, they simply request pre-processed word data from the background script.
 
 The data flow works like this:
 
-1. Background script connects to AnkiConnect and queries for all cards in the user's deck
+1. Background script connects to AnkiConnect and queries for all cards in the "Japanese" deck
 2. For each card, extract the "Expression" field (the word or phrase) and statistics (interval, lapses, repetitions)
 3. Compute a difficulty level from $0$ to $100$ based on these statistics
 4. Store the word-to-difficulty mapping in IndexedDB for instant retrieval
@@ -43,6 +43,19 @@ The most interesting algorithmic challenge was converting Anki's card statistics
 - **Ease**: Ease factor (how easily you remember the card)
 
 The interval is the most important signal. In spaced repetition, longer intervals indicate stronger memory. A card with a $180$-day interval is firmly in long-term memory, while a $1$-day interval means you just learned it. I designed a scoring function that maps intervals to a $[0, 100]$ scale:
+
+$$
+\text{intervalScore}(i) = \begin{cases}
+90 + \min\left(\frac{i - 180}{365}, 1\right) \cdot 10 & \text{if } i \geq 180 \\
+75 + \frac{i - 90}{90} \cdot 15 & \text{if } 90 \leq i < 180 \\
+50 + \frac{i - 21}{69} \cdot 25 & \text{if } 21 \leq i < 90 \\
+30 + \frac{i - 7}{14} \cdot 20 & \text{if } 7 \leq i < 21 \\
+10 + \frac{i - 1}{6} \cdot 20 & \text{if } 1 \leq i < 7 \\
+0 & \text{if } i < 1
+\end{cases}
+$$
+
+where $i$ is the interval in days.
 
 ```typescript
 let intervalScore = 0;
@@ -65,6 +78,12 @@ This function is piecewise linear, with steeper slopes for shorter intervals whe
 
 Lapses apply a penalty because mistakes indicate difficulty:
 
+$$
+\text{lapsesScore}(l) = -\min(l \cdot 5, 25)
+$$
+
+where $l$ is the number of lapses.
+
 ```typescript
 const lapsesScore = -Math.min(lapses * 5, 25);
 ```
@@ -73,6 +92,15 @@ Each lapse costs $5$ points, capped at $25$ points total. This is intentionally 
 
 Repetitions provide a small bonus:
 
+$$
+\text{repsBonus}(r) = \begin{cases}
+\min(r \cdot 2, 10) & \text{if } r > 0 \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+where $r$ is the number of repetitions.
+
 ```typescript
 const repsBonus = reps > 0 ? Math.min(reps * 2, 10) : 0;
 ```
@@ -80,6 +108,10 @@ const repsBonus = reps > 0 ? Math.min(reps * 2, 10) : 0;
 Even if the interval is short, having reviewed a card multiple times shows engagement. This helps distinguish truly new cards (never reviewed) from young cards (recently started).
 
 The final score combines these:
+
+$$
+\text{difficultyLevel} = \max(0, \min(100, \text{intervalScore} + \text{lapsesScore} + \text{repsBonus}))
+$$
 
 ```typescript
 let difficultyLevel = intervalScore + lapsesScore + repsBonus;
@@ -367,7 +399,7 @@ if (match.overlapping.length > 1) {
   const tooltipLines = match.overlapping
     .map((m) => `${m.word} (${Math.round(m.data.difficultyLevel)}%)`)
     .join("\n");
-  span.title = `Multiple matches:\n${tooltipLines}`;
+  span.title = `${tooltipLines}`;
 } else {
   span.title = `${match.word} (${Math.round(match.data.difficultyLevel)}%)`;
 }
@@ -376,6 +408,12 @@ if (match.overlapping.length > 1) {
 # Color Coding and Visual Design
 
 The color scheme maps difficulty levels to a red-to-green gradient. Red indicates difficult words (low score), green indicates mastered words (high score):
+
+$$
+\text{color}(d) = \text{rgb}\left(\left\lfloor 255 \cdot \left(1 - \frac{d}{100}\right) \right\rfloor, \left\lfloor 255 \cdot \frac{d}{100} \right\rfloor, 0\right)
+$$
+
+where $d$ is the difficulty level in $[0, 100]$.
 
 ```typescript
 function getDifficultyColor(level: number): string {
@@ -425,11 +463,10 @@ WXT automatically generates `manifest.json` for both Manifest V3 (Chrome) and Ma
 
 - `entrypoints/background.ts` → background service worker
 - `entrypoints/content.ts` → content script
-- `entrypoints/popup/` → popup UI (HTML + TypeScript)
 
 TypeScript compilation, bundling, and output directory management are all handled automatically. Development mode (`npm run dev`) watches for changes and rebuilds instantly. This made iteration fast, I could modify the highlighting algorithm and see results immediately without manual reloading.
 
-The permissions are minimal. `storage` is needed for saving the deck name configuration. `tabs` is needed to reload the active tab after changing settings. Notably, I don't request broad permissions like `<all_urls>` for the background script. Only the content script runs on pages, and it only needs `storage` to communicate with the background script.
+The permissions are minimal. `storage` is needed for IndexedDB caching. Notably, I don't request broad permissions like `<all_urls>` for the background script. Only the content script runs on pages, and it communicates with the background script through message passing.
 
 # Real-World Usage and Lessons Learned
 
