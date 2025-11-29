@@ -23,8 +23,11 @@ export default function Home() {
     console.error("Error loading posts:", error);
   }
 
-  // Featured posts (first 3 posts)
-  const featuredPosts = posts.slice(0, 3);
+  // Split posts for columnar layout
+  const column1Posts = posts.slice(0, 3);
+  const column2Posts = posts.slice(3, 6);
+  const column3Posts = posts.slice(6, 9);
+  const column4Posts = posts.slice(9, 12);
 
   // Color palette for highlighting different posts
   const highlightColors = [
@@ -44,100 +47,157 @@ export default function Home() {
       <main className="max-w-[1200px] mx-auto px-4 py-2">
         {/* Featured Work Section */}
         <div className="border-b border-foreground mb-3 pb-0.5 pt-4">
-          <h2 className="text-xs font-bold uppercase tracking-wide">
+          <h2 className="text-sm font-bold uppercase tracking-wide">
             FEATURED WORK
           </h2>
         </div>
 
-        {/* Featured posts grid - 3 columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 pb-6 border-b border-border">
-          {featuredPosts.map((post, index) => (
-            <article
-              key={post.slug}
-              className={`${index < featuredPosts.length - 1
-                ? "border-r-0 lg:border-r border-border lg:pr-4"
-                : ""
-                }`}
-            >
-              {post.image ? (
-                <div className="w-full h-32 mb-3 border border-border overflow-hidden">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-32 bg-muted mb-3 border border-border"></div>
-              )}
-              <div className="mb-2">
-                {post.category && (
-                  <span className="text-xs font-bold uppercase tracking-wide">
-                    {post.category}
-                  </span>
-                )}
-              </div>
-              <Link href={`/blog/${post.slug}`}>
-                <h2 className="text-2xl font-bold leading-tight mb-3 hover:opacity-70 transition-opacity">
-                  <Highlighter
-                    action="highlight"
-                    color={highlightColors[index % highlightColors.length]}
-                    isView={true}
-                    animationDuration={1000}
-                    multiline={true}
-                  >
-                    {post.title}
-                  </Highlighter>
-                </h2>
-              </Link>
-              <p className="text-sm leading-relaxed">{post.excerpt}</p>
-            </article>
-          ))}
-        </div>
-
-        {/* All Posts Section */}
-        {posts.length > 3 && (
-          <>
-            <div className="border-b border-foreground mb-3 pb-0.5 pt-4">
-              <h2 className="text-xs font-bold uppercase tracking-wide">
-                ALL POSTS
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-              {posts.slice(3).map((post, index) => (
-                <article key={post.slug}>
-                  {post.image ? (
-                    <div className="w-full h-24 mb-3 border border-border overflow-hidden">
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-24 bg-muted mb-3 border border-border"></div>
+        {/* Offset columnar layout - 4 columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-b border-border">
+          {/* Column 1 */}
+          <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
+            {column1Posts.map((post, index) => (
+              <article
+                key={post.slug}
+                className={index > 0 ? "border-t border-border pt-4" : ""}
+              >
+                <div className="mb-1">
+                  {post.category && (
+                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      {post.category}
+                    </span>
                   )}
-                  <Link href={`/blog/${post.slug}`}>
-                    <h3 className="text-lg font-bold leading-snug mb-2 hover:opacity-70 transition-opacity">
-                      <Highlighter
-                        action="highlight"
-                        color={highlightColors[(index + 3) % highlightColors.length]}
-                        isView={true}
-                        animationDuration={800}
-                        multiline={true}
-                      >
-                        {post.title}
-                      </Highlighter>
-                    </h3>
-                  </Link>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </>
-        )}
+                </div>
+                <Link href={`/blog/${post.slug}`}>
+                  <h3
+                    className={`font-bold leading-tight mb-2 hover:opacity-70 transition-opacity ${index === 0 ? "text-2xl" : "text-lg"}`}
+                  >
+                    <Highlighter
+                      action="highlight"
+                      color={highlightColors[index % highlightColors.length]}
+                      isView={true}
+                      animationDuration={800}
+                      multiline={true}
+                    >
+                      {post.title}
+                    </Highlighter>
+                  </h3>
+                </Link>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {post.excerpt}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          {/* Column 2 */}
+          <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
+            {column2Posts.map((post, index) => (
+              <article
+                key={post.slug}
+                className={index > 0 ? "border-t border-border pt-4" : ""}
+              >
+                <div className="mb-1">
+                  {post.category && (
+                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      {post.category}
+                    </span>
+                  )}
+                </div>
+                <Link href={`/blog/${post.slug}`}>
+                  <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
+                    <Highlighter
+                      action="highlight"
+                      color={
+                        highlightColors[(index + 3) % highlightColors.length]
+                      }
+                      isView={true}
+                      animationDuration={800}
+                      multiline={true}
+                    >
+                      {post.title}
+                    </Highlighter>
+                  </h3>
+                </Link>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {post.excerpt}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          {/* Column 3 */}
+          <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
+            {column3Posts.map((post, index) => (
+              <article
+                key={post.slug}
+                className={index > 0 ? "border-t border-border pt-4" : ""}
+              >
+                <div className="mb-1">
+                  {post.category && (
+                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      {post.category}
+                    </span>
+                  )}
+                </div>
+                <Link href={`/blog/${post.slug}`}>
+                  <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
+                    <Highlighter
+                      action="highlight"
+                      color={
+                        highlightColors[(index + 6) % highlightColors.length]
+                      }
+                      isView={true}
+                      animationDuration={800}
+                      multiline={true}
+                    >
+                      {post.title}
+                    </Highlighter>
+                  </h3>
+                </Link>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {post.excerpt}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          {/* Column 4 */}
+          <div className="lg:col-span-1 space-y-4">
+            {column4Posts.map((post, index) => (
+              <article
+                key={post.slug}
+                className={index > 0 ? "border-t border-border pt-4" : ""}
+              >
+                <div className="mb-1">
+                  {post.category && (
+                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      {post.category}
+                    </span>
+                  )}
+                </div>
+                <Link href={`/blog/${post.slug}`}>
+                  <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
+                    <Highlighter
+                      action="highlight"
+                      color={
+                        highlightColors[(index + 9) % highlightColors.length]
+                      }
+                      isView={true}
+                      animationDuration={800}
+                      multiline={true}
+                    >
+                      {post.title}
+                    </Highlighter>
+                  </h3>
+                </Link>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {post.excerpt}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
       </main>
 
       {/* Simplified footer */}

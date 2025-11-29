@@ -9,19 +9,22 @@ export function AboutSection() {
           {/* Left side - Bio */}
           <div className="border-r-0 lg:border-r border-border lg:pr-8">
             <p className="text-base mb-4 leading-relaxed">
-              Computational physicist specializing in materials science and nanoscale simulations.
-              Master's graduate from University of Bologna with expertise in HPC systems,
-              molecular dynamics, and full-stack development.
+              Computational physicist specializing in materials science and
+              nanoscale simulations. Master's graduate from University of
+              Bologna with expertise in HPC systems, molecular dynamics, and
+              full-stack development.
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              Currently seeking research or industry roles combining computational methods
-              with software engineering.
+              Currently seeking research or industry roles combining
+              computational methods with software engineering and related
+              fields. Open to different positions and remote opportunities.
+              Flexible with relocation.
             </p>
 
             {/* Prominent CTA Buttons */}
             <div className="flex flex-wrap gap-3 mb-6">
               <a
-                href="/Giovanni_Gravili_CV_0001-7.pdf"
+                href="https://drive.google.com/file/d/1G-KILQNpoLOk75gSCfRzYdH4CvNd1OFj/view?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 bg-foreground text-background font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity border-2 border-foreground"
@@ -29,7 +32,7 @@ export function AboutSection() {
                 View CV / Resume
               </a>
               <a
-                href="https://github.com/yourusername"
+                href="https://github.com/ghovax"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 border-2 border-foreground font-bold text-sm uppercase tracking-wide hover:bg-foreground hover:text-background transition-colors"
@@ -82,14 +85,30 @@ export function AboutSection() {
                 Tech Stack
               </h3>
               <div className="flex flex-wrap gap-2">
-                <span className="text-xs px-2 py-1 border border-border">Python</span>
-                <span className="text-xs px-2 py-1 border border-border">C++</span>
-                <span className="text-xs px-2 py-1 border border-border">TypeScript</span>
-                <span className="text-xs px-2 py-1 border border-border">React</span>
-                <span className="text-xs px-2 py-1 border border-border">VASP</span>
-                <span className="text-xs px-2 py-1 border border-border">LAMMPS</span>
-                <span className="text-xs px-2 py-1 border border-border">PyTorch</span>
-                <span className="text-xs px-2 py-1 border border-border">Julia</span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  Python
+                </span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  C++
+                </span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  TypeScript
+                </span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  React
+                </span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  VASP
+                </span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  LAMMPS
+                </span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  PyTorch
+                </span>
+                <span className="text-xs px-2 py-1 border border-border">
+                  Julia
+                </span>
               </div>
             </div>
 
@@ -99,12 +118,18 @@ export function AboutSection() {
               </h3>
               <div className="text-xs space-y-2">
                 <div>
-                  <div className="font-medium">M.S. Material Physics & Nanoscience</div>
-                  <div className="text-muted-foreground">University of Bologna, 2023–2025</div>
+                  <div className="font-medium">
+                    M.S. Material Physics & Nanoscience
+                  </div>
+                  <div className="text-muted-foreground">
+                    University of Bologna, 2023–2025
+                  </div>
                 </div>
                 <div>
                   <div className="font-medium">B.S. Physics</div>
-                  <div className="text-muted-foreground">University of Bologna, 2019–2023</div>
+                  <div className="text-muted-foreground">
+                    University of Bologna, 2019–2023
+                  </div>
                 </div>
               </div>
             </div>

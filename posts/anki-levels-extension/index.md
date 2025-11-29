@@ -131,7 +131,9 @@ class AnkiDB {
   private dbName = "AnkiLevelsDB";
   private storeName = "words";
 
-  async saveWords(words: Map<string, { difficultyLevel: number }>): Promise<void> {
+  async saveWords(
+    words: Map<string, { difficultyLevel: number }>,
+  ): Promise<void> {
     const transaction = this.db!.transaction([this.storeName], "readwrite");
     const store = transaction.objectStore(this.storeName);
 
@@ -206,7 +208,7 @@ const MAX_CONCURRENT = 5;
 for (let i = 0; i < batches.length; i += MAX_CONCURRENT) {
   const batchGroup = batches.slice(i, i + MAX_CONCURRENT);
   const results = await Promise.all(
-    batchGroup.map((batch) => callAnkiConnect("cardsInfo", { cards: batch }))
+    batchGroup.map((batch) => callAnkiConnect("cardsInfo", { cards: batch })),
   );
   results.forEach((result) => allCardsInfo.push(...result));
 }
@@ -223,22 +225,22 @@ The solution uses several optimizations:
 **TreeWalker API**: Instead of recursively walking the DOM tree manually, I use the built-in `TreeWalker` API to efficiently find all text nodes:
 
 ```typescript
-const walker = document.createTreeWalker(
-  document.body,
-  NodeFilter.SHOW_TEXT,
-  {
-    acceptNode: (node) => {
-      const parent = node.parentElement;
-      const tagName = parent.tagName;
-      // Skip script, style, textarea, input
-      if (tagName === "SCRIPT" || tagName === "STYLE" ||
-          tagName === "TEXTAREA" || tagName === "INPUT") {
-        return NodeFilter.FILTER_REJECT;
-      }
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  }
-);
+const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+  acceptNode: (node) => {
+    const parent = node.parentElement;
+    const tagName = parent.tagName;
+    // Skip script, style, textarea, input
+    if (
+      tagName === "SCRIPT" ||
+      tagName === "STYLE" ||
+      tagName === "TEXTAREA" ||
+      tagName === "INPUT"
+    ) {
+      return NodeFilter.FILTER_REJECT;
+    }
+    return NodeFilter.FILTER_ACCEPT;
+  },
+});
 
 const textNodes: Text[] = [];
 let node;
@@ -292,7 +294,7 @@ The `includes` check is a fast native string search. For text that doesn't conta
 
 ```typescript
 const sortedWords = Array.from(wordsMap.entries()).sort(
-  (a, b) => b[0].length - a[0].length
+  (a, b) => b[0].length - a[0].length,
 );
 ```
 
@@ -317,7 +319,7 @@ for (const match of matches) {
       (match.index >= existing.index &&
         match.index < existing.index + existing.length) ||
       (match.index + match.length > existing.index &&
-        match.index < existing.index)
+        match.index < existing.index),
   );
 
   if (existingGroup) {
@@ -424,6 +426,7 @@ function getDifficultyColor(level: number): string {
 ```
 
 This produces a smooth gradient:
+
 - $0\%$ → `rgb(255, 0, 0)` (red)
 - $25\%$ → `rgb(191, 64, 0)` (orange)
 - $50\%$ → `rgb(127, 127, 0)` (yellow)
@@ -453,7 +456,8 @@ The configuration is minimal:
 export default defineConfig({
   manifest: {
     name: "Anki Levels",
-    description: "Highlight words on web pages based on your Anki card difficulty levels",
+    description:
+      "Highlight words on web pages based on your Anki card difficulty levels",
     permissions: ["storage", "tabs"],
   },
 });

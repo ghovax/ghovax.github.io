@@ -3,7 +3,8 @@ title: "Building an AI-Powered Document Generation System"
 date: "2025-11-28"
 excerpt: "Designing and implementing a full-stack application that transforms lectures and reference materials into structured study documents using LLM orchestration, custom Markdown parsing, and sequential content generation."
 category: "Software Engineering"
-tags: ["Full-Stack Development", "AI", "TypeScript", "React", "System Architecture"]
+tags:
+  ["Full-Stack Development", "AI", "TypeScript", "React", "System Architecture"]
 author: "Giovanni Gravili"
 ---
 
