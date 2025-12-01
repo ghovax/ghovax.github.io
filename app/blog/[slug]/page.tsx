@@ -87,8 +87,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <BlogHeader />
-
       {/* Close button */}
       <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-0">
         <Link
