@@ -59,23 +59,23 @@ export default function Home() {
                 key={post.slug}
                 className={index > 0 ? "border-t border-border pt-4" : ""}
               >
-                <div className="mb-1">
-                  {post.category && (
-                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                      {post.category}
-                    </span>
-                  )}
-                </div>
-                <Link href={`/blog/${post.slug}`}>
+                <Link href={`/blog/${post.slug}`} className="block group">
+                  <div className="mb-1">
+                    {post.category && (
+                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                        {post.category}
+                      </span>
+                    )}
+                  </div>
                   <h3
-                    className={`font-bold leading-tight mb-2 hover:opacity-70 transition-opacity ${index === 0 ? "text-2xl" : "text-lg"}`}
+                    className={`font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity ${index === 0 ? "text-2xl" : "text-lg"}`}
                   >
                     {post.title}
                   </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {post.excerpt}
+                  </p>
                 </Link>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {post.excerpt}
-                </p>
               </article>
             ))}
           </div>
@@ -87,21 +87,21 @@ export default function Home() {
                 key={post.slug}
                 className={index > 0 ? "border-t border-border pt-4" : ""}
               >
-                <div className="mb-1">
-                  {post.category && (
-                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                      {post.category}
-                    </span>
-                  )}
-                </div>
-                <Link href={`/blog/${post.slug}`}>
-                  <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
+                <Link href={`/blog/${post.slug}`} className="block group">
+                  <div className="mb-1">
+                    {post.category && (
+                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                        {post.category}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity">
                     {post.title}
                   </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {post.excerpt}
+                  </p>
                 </Link>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {post.excerpt}
-                </p>
               </article>
             ))}
           </div>
@@ -113,21 +113,21 @@ export default function Home() {
                 key={post.slug}
                 className={index > 0 ? "border-t border-border pt-4" : ""}
               >
-                <div className="mb-1">
-                  {post.category && (
-                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                      {post.category}
-                    </span>
-                  )}
-                </div>
-                <Link href={`/blog/${post.slug}`}>
-                  <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
+                <Link href={`/blog/${post.slug}`} className="block group">
+                  <div className="mb-1">
+                    {post.category && (
+                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                        {post.category}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity">
                     {post.title}
                   </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {post.excerpt}
+                  </p>
                 </Link>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {post.excerpt}
-                </p>
               </article>
             ))}
           </div>
@@ -139,21 +139,21 @@ export default function Home() {
                 key={post.slug}
                 className={index > 0 ? "border-t border-border pt-4" : ""}
               >
-                <div className="mb-1">
-                  {post.category && (
-                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                      {post.category}
-                    </span>
-                  )}
-                </div>
-                <Link href={`/blog/${post.slug}`}>
-                  <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
+                <Link href={`/blog/${post.slug}`} className="block group">
+                  <div className="mb-1">
+                    {post.category && (
+                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                        {post.category}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity">
                     {post.title}
                   </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {post.excerpt}
+                  </p>
                 </Link>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {post.excerpt}
-                </p>
               </article>
             ))}
           </div>

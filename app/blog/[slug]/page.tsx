@@ -140,7 +140,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
 
         {/* Social sharing */}
-        <div className="mt-12 pt-6 border-t border-border flex items-center gap-4 pb-6">
+        <div className="mt-12 pt-6 border-t border-border flex flex-col items-start gap-4 md:flex-row md:items-center pb-6">
           <button className="flex items-center gap-2 text-xs hover:opacity-70">
             <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
               @
