@@ -44,7 +44,7 @@ export function AboutSection() {
           {/* Column 3: Machine Learning & Education */}
           <div className="space-y-6">
             <h3 className="text-sm font-bold uppercase tracking-wide mb-3 border-b border-border pb-1">
-              Machine Learning & Education
+              Education
             </h3>
             <div className="space-y-4">
               <div>

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Linkedin, Mail } from "lucide-react";
+import { Mail, Linkedin } from "lucide-react";
+import { Highlighter } from "./ui/highlighter";
 
 export function BlogHeader() {
   const today = new Date().toLocaleDateString("en-US", {
@@ -62,7 +63,9 @@ export function BlogHeader() {
               rel="noopener noreferrer"
               className="px-6 py-3 bg-foreground text-background font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity border-2 border-foreground"
             >
-              View My CV / Resume
+              <Highlighter action="highlight" color="#32bc4dbb">
+                View My CV / Resume
+              </Highlighter>
             </a>
             <a
               href="https://github.com/ghovax"
