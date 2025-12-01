@@ -61,7 +61,7 @@ export function AboutSection() {
                 <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
                   <Mail className="w-4 h-4" />
                 </span>
-                Email
+                <span className="text-foreground font-mono">giovannigravili112@gmail.com</span>
               </a>
             </div>
           </div>
@@ -69,7 +69,7 @@ export function AboutSection() {
           {/* Right side - Skills & Quick Facts */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide mb-3 border-b border-border pb-1">
+              <h3 className="text-sm font-bold uppercase tracking-wide mb-3 border-b border-border pb-0.5">
                 Core Expertise
               </h3>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
@@ -81,7 +81,7 @@ export function AboutSection() {
             </div>
 
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide mb-3 border-b border-border pb-1">
+              <h3 className="text-sm font-bold uppercase tracking-wide mb-3 border-b border-border pb-0.5">
                 Tech Stack
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -113,21 +113,21 @@ export function AboutSection() {
             </div>
 
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide mb-3 border-b border-border pb-1">
+              <h3 className="text-sm font-bold uppercase tracking-wide mb-3 border-b border-border pb-0.5">
                 Education
               </h3>
-              <div className="text-xs space-y-2">
+              <div className="text-[0.8125rem] space-y-2">
                 <div>
                   <div className="font-medium">
-                    M.S. Material Physics & Nanoscience
+                    M.Sc. Material Physics & Nanoscience
                   </div>
-                  <div className="text-muted-foreground">
+                  <div className="text-xs text-muted-foreground">
                     University of Bologna, 2023–2025
                   </div>
                 </div>
                 <div>
-                  <div className="font-medium">B.S. Physics</div>
-                  <div className="text-muted-foreground">
+                  <div className="font-medium">B.Sc. Physics</div>
+                  <div className="text-xs text-muted-foreground">
                     University of Bologna, 2019–2023
                   </div>
                 </div>

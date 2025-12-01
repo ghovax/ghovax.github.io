@@ -42,7 +42,7 @@ One of the most challenging technical aspects was building a Markdown parser rob
 
 The custom parser I implemented takes a fundamentally different approach. Rather than expecting perfect input, it's designed to interpret and correct common malformations. The parsing happens in multiple passes, each addressing a specific concern.
 
-The first pass applies transformations to normalize content. Dollar signs in non-math contexts get escaped (since $20 shouldn't trigger LaTeX parsing). LaTeX delimiters get standardized: `\[...\]` and `\(...\)` are converted to `$$...$$` and `$...$` respectively, because these are what the renderer expects. Backtick code blocks sometimes contain extra backticks from the LLM's "thinking" process; these get unwrapped.
+The first pass applies transformations to normalize content. Dollar signs in non-math contexts get escaped (since \$20 shouldn't trigger LaTeX parsing). LaTeX delimiters get standardized: `\[...\]` and `\(...\)` are converted to `$$...$$` and `$...$` respectively, because these are what the renderer expects. Backtick code blocks sometimes contain extra backticks from the LLM's "thinking" process; these get unwrapped.
 
 The second pass parses individual elements line by line. Each line is classified: is it a heading, list item, code fence, table row, blockquote, horizontal rule, or paragraph? Special handling applies to multi-line structures like tables (which can span dozens of lines) and display equations (which might contain newlines). The parser maintains state about indentation levels to correctly identify nested list items, which is critical for building hierarchy.
 
