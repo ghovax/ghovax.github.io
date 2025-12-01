@@ -78,17 +78,18 @@ export function AboutSection() {
           {/* Right side - Bio & Contact */}
           <div>
             <p className="text-base mb-4 leading-relaxed">
-              Computational physicist with proven expertise in materials science,
-              HPC systems, and full-stack development. Delivered high-impact
-              research in nanoscale simulations and molecular dynamics, with
-              hands-on experience in production-grade scientific software and
-              modern web technologies.
+              As a computational physicist with a Master's in Material Physics and
+              Nanoscience, I specialize in materials modeling, molecular
+              dynamics, and machine learning. My recent work includes a thesis on
+              nanoscale tribology using HPC, alongside leading technical
+              development for an EdTech startup.
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              Seeking opportunities to apply computational methods and software
-              engineering skills to solve complex technical challenges. Proven
-              ability to bridge theoretical research with practical
-              implementation. Available for remote work and open to relocation.
+              I am passionate about connecting theory with practical application,
+              from coding physical simulations to building software products and
+              visualizing complex data. I am seeking research or industry roles
+              where I can apply my programming and development skills to solve
+              real-world problems in materials science.
             </p>
 
             {/* Prominent CTA Buttons */}

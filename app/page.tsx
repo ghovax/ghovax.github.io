@@ -72,15 +72,7 @@ export default function Home() {
                   <h3
                     className={`font-bold leading-tight mb-2 hover:opacity-70 transition-opacity ${index === 0 ? "text-2xl" : "text-lg"}`}
                   >
-                    <Highlighter
-                      action="highlight"
-                      color={highlightColors[index % highlightColors.length]}
-                      isView={true}
-                      animationDuration={800}
-                      multiline={true}
-                    >
-                      {post.title}
-                    </Highlighter>
+                    {post.title}
                   </h3>
                 </Link>
                 <p className="text-sm leading-relaxed text-muted-foreground">
