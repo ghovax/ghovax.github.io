@@ -89,29 +89,28 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     });
   };
 
+  // Color palette for highlighting different posts
+  const highlightColors = [
+    "#3b82f655", // blue
+    "#8b5cf655", // purple
+    "#ec489955", // pink
+    "#f59e0b55", // amber
+    "#10b98155", // emerald
+    "#06b6d455", // cyan
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Close button */}
-      <div className="max-w-[1200px] mx-auto px-4 pt-6 pb-0">
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border hover:bg-muted transition-colors"
-        >
-          <span className="text-lg">
-            <X className="w-4 h-4" />
-          </span>
-        </Link>
-      </div>
 
-      <article className="max-w-[800px] mx-auto px-6 pb-6">
+      <article className="max-w-[800px] mx-auto px-6 md:px-8 pb-6 pt-4 md:pt-6">
         {/* Article header */}
         <header className="mb-8">
           {/* Title */}
-          <div className="text-xs md:text-sm py-2 text-muted-foreground">
-            {formatDate(post.metadata.date)}
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold pb-4 leading-tight border-border">
-            {post.metadata.title}
+          <h1 className="text-3xl md:text-4xl font-bold py-4 leading-tight border-border">
+            <Highlighter action="highlight" color={highlightColors[Math.floor(Math.random() * highlightColors.length)]}>
+              {post.metadata.title}
+            </Highlighter>
           </h1>
           <span className="text-xs md:text-sm py-0 text-muted-foreground">
             {post.metadata.tags!.map((tag, index) => (

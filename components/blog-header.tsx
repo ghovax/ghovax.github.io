@@ -15,7 +15,7 @@ export function BlogHeader() {
   return (
     <header className="w-full">
       {/* Masthead & Bio */}
-      <div className="max-w-[1200px] mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 pb-12 pt-8">
         <div className="pb-6 text-left">
           <Link href="/" className="inline-block">
             <h1 className="text-5xl font-bold tracking-tight">

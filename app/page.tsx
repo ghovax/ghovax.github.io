@@ -38,13 +38,13 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background px-4">
+    <div className="min-h-screen bg-background px-2 md:px-4 max-w-6xl mx-auto">
       <BlogHeader />
       <AboutSection />
 
-      <main className="max-w-[1200px] mx-auto px-3 py-2">
+      <main className="mx-auto px-3 py-2">
         {/* Featured Work Section */}
-        <div className="border-b border-foreground/30 mb-3 pb-1 pt-4">
+        <div className="border-b border-foreground/30 mb-3 pb-1 pt-2">
           <h2 className="text-sm font-bold uppercase tracking-wide">
             TECHNICAL PROJECTS & CASE STUDIES
           </h2>
