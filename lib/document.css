@@ -2,7 +2,7 @@
 
 .document {
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   color: var(--foreground);
   text-rendering: optimizeLegibility;
 
@@ -153,6 +153,7 @@
 .document pre,
 .document kbd {
   font-family: var(--font-mono);
+  font-size: var(--text-xs);
   hyphens: none;
   scrollbar-width: none;
   /* Firefox */

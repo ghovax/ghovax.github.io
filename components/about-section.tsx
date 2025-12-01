@@ -2,7 +2,7 @@ import { MarqueeSection } from "./marquee";
 
 export function AboutSection() {
   return (
-    <section id="skills" className="border-b border-border mb-6">
+    <section id="skills" className=" mb-6">
       <div className="max-w-[1200px] mx-auto px-4 pb-12">
         <MarqueeSection />
 

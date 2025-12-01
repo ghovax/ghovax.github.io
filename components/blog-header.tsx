@@ -14,20 +14,11 @@ export function BlogHeader() {
 
   return (
     <header className="w-full pt-8">
-      {/* Top bar with date only */}
-      <div className="border-b border-border">
-        <div className="max-w-[1200px] mx-auto px-4 py-2">
-          <time className="text-sm text-muted-foreground font-medium">
-            {today}
-          </time>
-        </div>
-      </div>
-
       {/* Masthead & Bio */}
-      <div className="max-w-[1200px] mx-auto px-4 py-8">
+      <div className="max-w-[1200px] mx-auto px-4 py-12">
         <div className="pb-6 text-left">
           <Link href="/" className="inline-block">
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="text-5xl font-bold tracking-tight">
               Giovanni Gravili
             </h1>
           </Link>
