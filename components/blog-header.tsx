@@ -13,7 +13,7 @@ export function BlogHeader() {
   });
 
   return (
-    <header className="w-full pt-8">
+    <header className="w-full">
       {/* Masthead & Bio */}
       <div className="max-w-[1200px] mx-auto px-4 py-12">
         <div className="pb-6 text-left">
