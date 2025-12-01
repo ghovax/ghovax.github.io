@@ -5,7 +5,7 @@ import { PostMetadata } from "@/types/post";
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
-import { Cross, X } from "lucide-react";
+import { Cross, Linkedin, X } from "lucide-react";
 import { Highlighter } from "@/components/ui/highlighter";
 
 interface BlogPostPageProps {
@@ -146,11 +146,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
               @
             </span>
-            Write me an e-mail
+            Write me via e-mail
           </button>
           <button className="flex items-center gap-2 text-xs hover:opacity-70">
             <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
-              in
+              <Linkedin className="w-4 h-4" />
             </span>
             Open my LinkedIn
           </button>
