@@ -109,15 +109,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {formatDate(post.metadata.date)}
           </div>
           <h1 className="text-3xl md:text-4xl font-bold pb-4 leading-tight border-border">
-            <Highlighter
-              action="highlight"
-              color="#3b82f655"
-              isView={true}
-              animationDuration={1000}
-              multiline={true}
-            >
-              {post.metadata.title}
-            </Highlighter>
+            {post.metadata.title}
           </h1>
           <span className="text-xs md:text-sm py-0 text-muted-foreground">
             {post.metadata.tags!.map((tag, index) => (

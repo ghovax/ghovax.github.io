@@ -6,68 +6,8 @@ export function AboutSection() {
     <section id="about" className="border-b border-border py-8 mb-6">
       <div className="max-w-[1200px] mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left side - Bio */}
-          <div className="border-r-0 lg:border-r border-border lg:pr-8">
-            <p className="text-base mb-4 leading-relaxed">
-              Computational physicist specializing in materials science and
-              nanoscale simulations. Master's graduate from University of
-              Bologna with expertise in HPC systems, molecular dynamics, and
-              full-stack development.
-            </p>
-            <p className="text-sm text-muted-foreground mb-6">
-              Currently seeking research or industry roles combining
-              computational methods with software engineering and related
-              fields. Open to different positions and remote opportunities.
-              Flexible with relocation.
-            </p>
-
-            {/* Prominent CTA Buttons */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              <a
-                href="https://drive.google.com/file/d/1G-KILQNpoLOk75gSCfRzYdH4CvNd1OFj/view?usp=sharing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-foreground text-background font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity border-2 border-foreground"
-              >
-                View CV / Resume
-              </a>
-              <a
-                href="https://github.com/ghovax"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 border-2 border-foreground font-bold text-sm uppercase tracking-wide hover:bg-foreground hover:text-background transition-colors"
-              >
-                GitHub
-              </a>
-            </div>
-
-            {/* Contact */}
-            <div className="flex items-center gap-4">
-              <a
-                href="https://linkedin.com/in/giovanni-gravili"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity"
-              >
-                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
-                  <Linkedin className="w-4 h-4" />
-                </span>
-                LinkedIn
-              </a>
-              <a
-                href="mailto:giovannigravili112@gmail.com"
-                className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity"
-              >
-                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
-                  <Mail className="w-4 h-4" />
-                </span>
-                <span className="text-foreground font-mono">giovannigravili112@gmail.com</span>
-              </a>
-            </div>
-          </div>
-
-          {/* Right side - Skills & Quick Facts */}
-          <div className="space-y-6">
+          {/* Left side - Skills & Expertise */}
+          <div className="border-r-0 lg:border-r border-border lg:pr-8 space-y-6">
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wide mb-3 border-b border-border pb-0.5">
                 Core Expertise
@@ -132,6 +72,67 @@ export function AboutSection() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Right side - Bio & Contact */}
+          <div>
+            <p className="text-base mb-4 leading-relaxed">
+              Computational physicist with proven expertise in materials science,
+              HPC systems, and full-stack development. Delivered high-impact
+              research in nanoscale simulations and molecular dynamics, with
+              hands-on experience in production-grade scientific software and
+              modern web technologies.
+            </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              Seeking opportunities to apply computational methods and software
+              engineering skills to solve complex technical challenges. Proven
+              ability to bridge theoretical research with practical
+              implementation. Available for remote work and open to relocation.
+            </p>
+
+            {/* Prominent CTA Buttons */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              <a
+                href="https://drive.google.com/file/d/1G-KILQNpoLOk75gSCfRzYdH4CvNd1OFj/view?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 bg-foreground text-background font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity border-2 border-foreground"
+              >
+                View CV / Resume
+              </a>
+              <a
+                href="https://github.com/ghovax"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 border-2 border-foreground font-bold text-sm uppercase tracking-wide hover:bg-foreground hover:text-background transition-colors"
+              >
+                GitHub
+              </a>
+            </div>
+
+            {/* Contact */}
+            <div className="flex items-center gap-4">
+              <a
+                href="https://linkedin.com/in/giovanni-gravili"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity"
+              >
+                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
+                  <Linkedin className="w-4 h-4" />
+                </span>
+                LinkedIn
+              </a>
+              <a
+                href="mailto:giovannigravili112@gmail.com"
+                className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity"
+              >
+                <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
+                  <Mail className="w-4 h-4" />
+                </span>
+                <span className="text-foreground font-mono">giovannigravili112@gmail.com</span>
+              </a>
             </div>
           </div>
         </div>

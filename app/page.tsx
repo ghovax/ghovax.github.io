@@ -48,7 +48,7 @@ export default function Home() {
         {/* Featured Work Section */}
         <div className="border-b border-foreground mb-3 pb-0.5 pt-4">
           <h2 className="text-sm font-bold uppercase tracking-wide">
-            FEATURED WORK
+            TECHNICAL PROJECTS & CASE STUDIES
           </h2>
         </div>
 
@@ -106,17 +106,7 @@ export default function Home() {
                 </div>
                 <Link href={`/blog/${post.slug}`}>
                   <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
-                    <Highlighter
-                      action="highlight"
-                      color={
-                        highlightColors[(index + 3) % highlightColors.length]
-                      }
-                      isView={true}
-                      animationDuration={800}
-                      multiline={true}
-                    >
-                      {post.title}
-                    </Highlighter>
+                    {post.title}
                   </h3>
                 </Link>
                 <p className="text-sm leading-relaxed text-muted-foreground">
@@ -142,17 +132,7 @@ export default function Home() {
                 </div>
                 <Link href={`/blog/${post.slug}`}>
                   <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
-                    <Highlighter
-                      action="highlight"
-                      color={
-                        highlightColors[(index + 6) % highlightColors.length]
-                      }
-                      isView={true}
-                      animationDuration={800}
-                      multiline={true}
-                    >
-                      {post.title}
-                    </Highlighter>
+                    {post.title}
                   </h3>
                 </Link>
                 <p className="text-sm leading-relaxed text-muted-foreground">
@@ -178,17 +158,7 @@ export default function Home() {
                 </div>
                 <Link href={`/blog/${post.slug}`}>
                   <h3 className="text-lg font-bold leading-tight mb-2 hover:opacity-70 transition-opacity">
-                    <Highlighter
-                      action="highlight"
-                      color={
-                        highlightColors[(index + 9) % highlightColors.length]
-                      }
-                      isView={true}
-                      animationDuration={800}
-                      multiline={true}
-                    >
-                      {post.title}
-                    </Highlighter>
+                    {post.title}
                   </h3>
                 </Link>
                 <p className="text-sm leading-relaxed text-muted-foreground">

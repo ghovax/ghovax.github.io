@@ -33,9 +33,8 @@ export function BlogHeader() {
               isView={false}
               animationDuration={800}
             >
-              Work Portfolio
-            </Highlighter>{" "}
-            & Blog
+              Professional Portfolio
+            </Highlighter>
           </h1>
         </Link>
       </div>

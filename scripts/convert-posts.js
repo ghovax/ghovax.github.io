@@ -67,12 +67,12 @@ function convertMarkdownToHTML(filepath, folderName) {
     // Generate slug from folder name if not provided
     const slug = frontmatter.slug || basename;
 
-    // Check for image.jpeg in the post folder
+    // Check for image.png in the post folder
     let imageUrl = null;
     if (folderName) {
-      const imagePath = path.join(POSTS_DIR, folderName, "image.jpeg");
+      const imagePath = path.join(POSTS_DIR, folderName, "image.png");
       if (fs.existsSync(imagePath)) {
-        imageUrl = `/.posts-build/${folderName}/image.jpeg`;
+        imageUrl = `/.posts-build/${folderName}/image.png`;
       }
     }
 
