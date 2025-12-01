@@ -118,7 +118,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <Link
                 key={index}
                 href={`/blog/tags/${tag}`}
-                className="font-mono inline-block pr-2 mr-2 border-border rounded-full px-2.5 py-1 border-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="font-mono inline-block pr-2 mr-2 border-border rounded-full px-2.5 py-1 border-1 text-[0.75rem] font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 {tag}
               </Link>

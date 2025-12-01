@@ -79,7 +79,7 @@ export function BlogHeader() {
               <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
                 <Linkedin className="w-4 h-4" />
               </span>
-              LinkedIn
+              <span className="text-sm">LinkedIn</span>
             </a>
             <a
               href="mailto:giovannigravili112@gmail.com"
