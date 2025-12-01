@@ -29,9 +29,9 @@ const logos = [
 export function MarqueeSection() {
   return (
     <div className="py-12">
-      <Marquee className="overflow-hidden">
+      <Marquee className="overflow-y-hidden" autoFill>
         {logos.map((logo) => (
-          <div key={logo.name} className="mx-7 my-4">
+          <div key={logo.name} className="mx-4 md:mx-7 my-4">
             <img
               src={logo.src}
               alt={logo.name}
