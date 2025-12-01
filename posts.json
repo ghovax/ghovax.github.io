@@ -1,0 +1,182 @@
+[
+  {
+    "title": "Building an AI-Powered Document Generation System",
+    "date": "2025-11-28",
+    "excerpt": "Designing and implementing a full-stack application that transforms lectures and reference materials into structured study documents using LLM orchestration, custom Markdown parsing, and sequential content generation.",
+    "category": "Software Engineering",
+    "tags": [
+      "Full-Stack Development",
+      "AI",
+      "TypeScript",
+      "React",
+      "System Architecture"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "bequire-full-stack",
+    "htmlFile": "bequire-full-stack.html",
+    "postFolder": "bequire-full-stack",
+    "image": "/.posts-build/bequire-full-stack/image.png"
+  },
+  {
+    "title": "Ground-State Energy via DFT for Helium",
+    "date": "2025-11-27",
+    "excerpt": "Implementation of ground-state energy of Helium atom computed via the Density Functional Theory (DFT) framework using Julia.",
+    "category": "Computational Physics",
+    "tags": [
+      "DFT",
+      "Julia",
+      "Quantum Mechanics",
+      "Computational Physics"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "dft-helium-julia",
+    "htmlFile": "dft-helium-julia.html",
+    "postFolder": "dft-helium-julia",
+    "image": "/.posts-build/dft-helium-julia/image.png"
+  },
+  {
+    "title": "Reverse Engineering the Tobii Eye Tracker 5 Protocol",
+    "date": "2025-11-27",
+    "excerpt": "A deep dive into reverse engineering the Tobii Eye Tracker 5 SDK using Ghidra, exploring USB protocols, encrypted payloads, and the challenges of breaking commercial eye tracking systems.",
+    "category": "Computer Science",
+    "tags": [
+      "Reverse Engineering",
+      "Ghidra",
+      "USB Protocol",
+      "Eye Tracking",
+      "Binary Analysis"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "tobii-reverse-engineering",
+    "htmlFile": "tobii-reverse-engineering.html",
+    "postFolder": "tobii-reverse-engineering",
+    "image": "/.posts-build/tobii-reverse-engineering/image.png"
+  },
+  {
+    "title": "Real-Time Digit Recognition on Arduino with TensorFlow",
+    "date": "2025-05-06",
+    "excerpt": "Building a complete handwritten digit recognition system using Arduino Nano 33 BLE Sense camera and a trained CNN model, bridging embedded vision with machine learning inference.",
+    "category": "Computer Science",
+    "tags": [
+      "Machine Learning",
+      "Arduino",
+      "TensorFlow",
+      "Embedded Systems",
+      "Computer Vision"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "mnist-arduino",
+    "htmlFile": "mnist-arduino.html",
+    "postFolder": "mnist-arduino",
+    "image": "/.posts-build/mnist-arduino/image.png"
+  },
+  {
+    "title": "Building a Networked Game Engine with Entity-Component Architecture",
+    "date": "2024-12-13",
+    "excerpt": "Implementing a RESTful game engine server using the Entity-Component-System pattern, Flask for HTTP control, and VisPy for real-time 3D rendering with thread-safe concurrent operations.",
+    "category": "Computer Science",
+    "tags": [
+      "Game Engine",
+      "Entity-Component-System",
+      "Flask",
+      "3D Graphics",
+      "Concurrent Programming",
+      "REST API"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "game-engine-server",
+    "htmlFile": "game-engine-server.html",
+    "postFolder": "game-engine-server",
+    "image": "/.posts-build/game-engine-server/image.png"
+  },
+  {
+    "title": "Visualizing Quantum Confinement Through Brillouin Zone Analysis",
+    "date": "2024-10-15",
+    "excerpt": "Band structure and density of states calculations for quantum-confined systems using Mathematica.",
+    "category": "Computational Physics",
+    "tags": [
+      "Mathematica",
+      "Solid State Physics",
+      "Quantum Mechanics",
+      "Band Structure",
+      "Density of States"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "lattice-plot-mathematica",
+    "htmlFile": "lattice-plot-mathematica.html",
+    "postFolder": "lattice-plot-mathematica",
+    "image": "/.posts-build/lattice-plot-mathematica/image.png"
+  },
+  {
+    "title": "Symbolic Mathematics Engine in Haskell",
+    "date": "2024-10-13",
+    "excerpt": "Building a symbolic mathematics library from scratch in Haskell, exploring algebraic manipulation, differentiation, and Taylor series expansion through functional programming.",
+    "category": "Computer Science",
+    "tags": [
+      "Haskell",
+      "Symbolic Math",
+      "Functional Programming",
+      "Computer Algebra"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "math-library-haskell",
+    "htmlFile": "math-library-haskell.html",
+    "postFolder": "math-library-haskell",
+    "image": "/.posts-build/math-library-haskell/image.png"
+  },
+  {
+    "title": "Building a Browser Extension to Visualize Anki Learning Progress",
+    "date": "2024-10-01",
+    "excerpt": "A Chrome extension that highlights words on web pages based on Anki card difficulty levels, combining spaced repetition data with real-world reading to visualize vocabulary mastery.",
+    "category": "Computer Science",
+    "tags": [
+      "Browser Extension",
+      "TypeScript",
+      "Anki",
+      "WXT",
+      "IndexedDB"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "anki-levels-extension",
+    "htmlFile": "anki-levels-extension.html",
+    "postFolder": "anki-levels-extension",
+    "image": "/.posts-build/anki-levels-extension/image.png"
+  },
+  {
+    "title": "Building a PDF Generation Library from Scratch in Rust",
+    "date": "2024-05-09",
+    "excerpt": "Implementing a complete PDF generation library in Rust with JSON document support, TTF font embedding, and low-level PDF spec compliance for deterministic output suitable for regression testing.",
+    "category": "Computer Science",
+    "tags": [
+      "Rust",
+      "PDF",
+      "Font Rendering",
+      "Document Generation",
+      "Type Systems"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "pdf-generation-library",
+    "htmlFile": "pdf-generation-library.html",
+    "postFolder": "pdf-generation-library",
+    "image": "/.posts-build/pdf-generation-library/image.png"
+  },
+  {
+    "title": "Bringing Desktop Mascots to macOS with Swift",
+    "date": "2024-03-25",
+    "excerpt": "Implementing two desktop mascot applications in Swift: a modern recreation of the classic Neko cat that chases the mouse cursor, and a physics-based pendulum mascot using SpriteKit for realistic swinging motion.",
+    "category": "Computer Science",
+    "tags": [
+      "Swift",
+      "macOS",
+      "SpriteKit",
+      "Animation",
+      "Physics Simulation",
+      "Desktop Applications"
+    ],
+    "author": "Giovanni Gravili",
+    "slug": "desktop-mascots-macos",
+    "htmlFile": "desktop-mascots-macos.html",
+    "postFolder": "desktop-mascots-macos",
+    "image": "/.posts-build/desktop-mascots-macos/image.png"
+  }
+]

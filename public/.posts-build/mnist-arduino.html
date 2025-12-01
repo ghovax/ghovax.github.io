@@ -1,0 +1,564 @@
+<p>In this post, I’ll walk you through my implementation of a real-time
+handwritten digit recognition system using the Arduino Nano 33 BLE Sense
+and a trained convolutional neural network. This project taught me that
+bridging the gap between embedded systems and machine learning requires
+careful attention to the entire pipeline: camera interfacing, serial
+communication protocols, image preprocessing, and model inference. The
+technical challenge lies not in any single component but in making them
+all work together reliably. I learned that embedded vision is
+fundamentally about constraints (limited memory, processing power, and
+bandwidth), which forces you to make deliberate choices about image
+resolution, data formats, and communication protocols. The combination
+of Arduino’s low-level hardware control and Python’s rich ML ecosystem
+proved ideal, letting me focus on the system architecture rather than
+fighting language limitations.</p>
+<p>The MNIST dataset of handwritten digits is the “Hello World” of
+machine learning. While most implementations run on desktop computers or
+cloud servers, I wanted to build something that captures images in the
+real world and processes them in real-time. The Arduino Nano 33 BLE
+Sense with its built-in camera support provides just enough capability
+to make this interesting: capturing grayscale images at reasonable
+resolution while maintaining a clean USB serial interface for
+communication.</p>
+<p>The challenge was to build a complete end-to-end pipeline: Arduino
+firmware to control the OV7670 camera module and stream raw image data
+over serial, Flask backend to manage Arduino communication, receive
+image data, and run TensorFlow inference, and a Next.js web interface to
+visualize predictions and probability distributions in real-time. Each
+component presented its own technical challenges, from managing serial
+port timing to preprocessing images for the CNN.</p>
+<h1 id="system-architecture">System Architecture</h1>
+<p>The system operates as a three-tier pipeline with clear separation of
+concerns. At the lowest level, the Arduino Nano 33 BLE Sense runs
+firmware that controls the OV7670 camera module. This camera captures
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>176</mn><mo>×</mo><mn>144</mn></mrow><annotation encoding="application/x-tex">176 \times 144</annotation></semantics></math>
+pixel grayscale images (QCIF resolution), which strikes a balance
+between detail and data transfer speed. The firmware is remarkably
+simple, implementing a command-response protocol: wait for a capture
+command character ‘c’ over serial, trigger the camera to capture a frame
+into a buffer, and stream the raw frame data (25,344 bytes) back over
+serial at 115200 baud.</p>
+<p>The middle tier is a Flask server running on the host computer. This
+is where the complexity lives. The server manages the serial connection
+to the Arduino, handling automatic port detection, connection recovery,
+and thread-safe access. When an image is requested, the server sends the
+capture command, receives the raw byte stream, reconstructs it into a 2D
+NumPy array, and passes it through the image processing pipeline. The
+processing involves thresholding to create transparency masks (lighter
+pixels become transparent, darker pixels remain), resizing from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>176</mn><mo>×</mo><mn>144</mn></mrow><annotation encoding="application/x-tex">176 \times 144</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>28</mn><mo>×</mo><mn>28</mn></mrow><annotation encoding="application/x-tex">28 \times 28</annotation></semantics></math>
+for the MNIST model, normalizing pixel values to the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math>
+range, and inverting colors to match MNIST’s white-on-black
+convention.</p>
+<p>The final tier is a Next.js web interface that provides real-time
+visualization. Built with React and TypeScript, it communicates with the
+Flask backend via REST endpoints. The interface displays the raw
+captured image, shows the predicted digit with confidence score, and
+visualizes the full probability distribution across all 10 digits as a
+bar chart. This gives immediate feedback on what the model sees and how
+certain it is about its prediction.</p>
+<h1 id="camera-control-and-serial-communication">Camera Control and
+Serial Communication</h1>
+<p>The Arduino firmware demonstrates how little code is needed when you
+have the right hardware abstraction. The Arduino_OV767X library handles
+all the camera initialization and configuration, exposing a simple API
+for capturing frames. The entire firmware is fewer than 50 lines:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;Arduino_OV767X.h&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#define IMAGE_WIDTH </span><span class="dv">176</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#define IMAGE_HEIGHT </span><span class="dv">144</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#define BYTES_PER_PIXEL </span><span class="dv">1</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="pp">#define BYTES_PER_FRAME </span><span class="op">(</span>IMAGE_WIDTH<span class="pp"> </span><span class="op">*</span><span class="pp"> </span>IMAGE_HEIGHT<span class="pp"> </span><span class="op">*</span><span class="pp"> </span>BYTES_PER_PIXEL<span class="op">)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="dt">uint8_t</span> frame_buffer<span class="op">[</span>BYTES_PER_FRAME<span class="op">];</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> setup<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  Serial<span class="op">.</span>begin<span class="op">(</span><span class="dv">115200</span><span class="op">);</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(!</span>Serial<span class="op">)</span> <span class="op">{</span> <span class="op">;</span> <span class="op">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(!</span>Camera<span class="op">.</span>begin<span class="op">(</span>QCIF<span class="op">,</span> GRAYSCALE<span class="op">,</span> <span class="dv">1</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span><span class="dv">1</span><span class="op">);</span>  <span class="co">// Halt on camera initialization failure</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> loop<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>Serial<span class="op">.</span>available<span class="op">()</span> <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> command <span class="op">=</span> Serial<span class="op">.</span>read<span class="op">();</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>command <span class="op">==</span> <span class="ch">&#39;c&#39;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      Camera<span class="op">.</span>readFrame<span class="op">(</span>frame_buffer<span class="op">);</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      Serial<span class="op">.</span>write<span class="op">(</span>frame_buffer<span class="op">,</span> BYTES_PER_FRAME<span class="op">);</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      Serial<span class="op">.</span>flush<span class="op">();</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The protocol is synchronous and simple. The host initiates all
+transfers by sending ‘c’, the Arduino responds with exactly 25,344
+bytes, and the host waits until all bytes are received. This simplicity
+is deliberate: no framing overhead, no checksums, no acknowledgments. At
+115200 baud with 8N1 encoding, transferring 25,344 bytes takes
+approximately 2.2 seconds, which is acceptable for this application.</p>
+<p>On the Python side, receiving the image requires careful buffer
+management. The serial port delivers data in chunks of unpredictable
+size, so I implemented a receive loop with timeout protection:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> receive_image_data(arduino_connection, width<span class="op">=</span><span class="dv">176</span>, height<span class="op">=</span><span class="dv">144</span>, timeout<span class="op">=</span><span class="dv">5</span>):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    expected_bytes <span class="op">=</span> width <span class="op">*</span> height</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    image_buffer <span class="op">=</span> <span class="bu">bytearray</span>(expected_bytes)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    received_bytes <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    start_time <span class="op">=</span> time.time()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> received_bytes <span class="op">&lt;</span> expected_bytes:</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> time.time() <span class="op">-</span> start_time <span class="op">&gt;</span> timeout:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>            logging.error(<span class="st">&quot;Timeout waiting for image data&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        data_chunk <span class="op">=</span> arduino_connection.read(</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="bu">min</span>(<span class="dv">4096</span>, expected_bytes <span class="op">-</span> received_bytes)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> data_chunk:</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        chunk_size <span class="op">=</span> <span class="bu">len</span>(data_chunk)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        image_buffer[received_bytes:received_bytes <span class="op">+</span> chunk_size] <span class="op">=</span> data_chunk</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        received_bytes <span class="op">+=</span> chunk_size</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    image_array <span class="op">=</span> np.frombuffer(image_buffer, dtype<span class="op">=</span>np.uint8)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> image_array.reshape((height, width))</span></code></pre></div>
+<p>The function reads in chunks of up to 4096 bytes, accumulating them
+into a pre-allocated buffer. Once all bytes are received, it reshapes
+the flat byte array into a 2D image matrix. The timeout prevents the
+system from hanging indefinitely if the Arduino fails to respond.</p>
+<h1 id="building-and-deploying-arduino-firmware">Building and Deploying
+Arduino Firmware</h1>
+<p>One of the project’s more interesting technical aspects is the
+automated build system. Rather than requiring manual compilation and
+flashing through the Arduino IDE, I integrated arduino-cli into the
+workflow. The Flask server detects whether the Arduino sketch has
+changed since the last deployment by maintaining a SHA-256 hash of the
+source file. If the sketch is modified (or if forced by command-line
+flag), the server automatically compiles and flashes the updated
+firmware before attempting to capture images.</p>
+<p>The compilation process uses arduino-cli with the Arduino Mbed OS
+Nano board core:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compile_sketch():</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    sketch_path <span class="op">=</span> <span class="st">&quot;camera/camera.ino&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    build_path <span class="op">=</span> os.path.join(os.getcwd(), <span class="st">&quot;build&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    os.makedirs(build_path, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">=</span> [</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;arduino-cli&quot;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;compile&quot;</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;--fqbn&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;arduino:mbed_nano:nano33ble&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;--build-path&quot;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        build_path,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;camera&quot;</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> subprocess.run(cmd, capture_output<span class="op">=</span><span class="va">True</span>, text<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> result.returncode <span class="op">!=</span> <span class="dv">0</span>:</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        logging.error(<span class="ss">f&quot;Compilation failed: </span><span class="sc">{</span>result<span class="sc">.</span>stderr<span class="sc">.</span>strip()<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">True</span></span></code></pre></div>
+<p>This generates a .hex file with bootloader that can be uploaded to
+the Arduino. The upload process is similarly automated:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flash_arduino(port, hex_file, timeout<span class="op">=</span><span class="dv">30</span>):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> os.path.exists(hex_file):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        logging.error(<span class="st">&quot;Cannot find hex file&quot;</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">=</span> [</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;arduino-cli&quot;</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;upload&quot;</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;-p&quot;</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        port,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;--fqbn&quot;</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;arduino:mbed_nano:nano33ble&quot;</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;--input-dir&quot;</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        os.path.dirname(hex_file),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;camera&quot;</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> subprocess.run(cmd, capture_output<span class="op">=</span><span class="va">True</span>, text<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result.returncode <span class="op">==</span> <span class="dv">0</span></span></code></pre></div>
+<p>After flashing, the serial connection must be re-established because
+the Arduino resets during the upload process. The server handles this by
+closing any existing connection before flashing and then waiting for the
+Arduino to enumerate on the USB bus again.</p>
+<h1 id="training-the-cnn-model">Training the CNN Model</h1>
+<p>The digit recognition model is a standard convolutional neural
+network trained on the MNIST dataset. The architecture consists of two
+convolutional blocks followed by fully connected layers with dropout for
+regularization:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Sequential([</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    Conv2D(<span class="dv">32</span>, (<span class="dv">3</span>, <span class="dv">3</span>), activation<span class="op">=</span><span class="st">&quot;relu&quot;</span>, input_shape<span class="op">=</span>(<span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>)),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    MaxPooling2D((<span class="dv">2</span>, <span class="dv">2</span>)),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    Conv2D(<span class="dv">64</span>, (<span class="dv">3</span>, <span class="dv">3</span>), activation<span class="op">=</span><span class="st">&quot;relu&quot;</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    MaxPooling2D((<span class="dv">2</span>, <span class="dv">2</span>)),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    Flatten(input_shape<span class="op">=</span>(<span class="dv">28</span>, <span class="dv">28</span>)),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">128</span>, activation<span class="op">=</span><span class="st">&quot;relu&quot;</span>, kernel_regularizer<span class="op">=</span>l2(<span class="fl">0.01</span>)),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    BatchNormalization(),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    Dropout(<span class="fl">0.2</span>),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">32</span>, activation<span class="op">=</span><span class="st">&quot;relu&quot;</span>, kernel_regularizer<span class="op">=</span>l2(<span class="fl">0.01</span>)),</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    BatchNormalization(),</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    Dropout(<span class="fl">0.2</span>),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    Dense(<span class="dv">10</span>, activation<span class="op">=</span><span class="st">&quot;softmax&quot;</span>),</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div>
+<p>The first convolutional layer applies 32 filters of size
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>×</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">3 \times 3</annotation></semantics></math>,
+learning low-level features like edges and curves. Max pooling reduces
+spatial dimensions by half, from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>26</mn><mo>×</mo><mn>26</mn></mrow><annotation encoding="application/x-tex">26 \times 26</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>13</mn><mo>×</mo><mn>13</mn></mrow><annotation encoding="application/x-tex">13 \times 13</annotation></semantics></math>.
+The second convolutional layer applies 64 filters, learning higher-level
+patterns by combining features from the first layer. Another max pooling
+layer reduces to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo>×</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">5 \times 5</annotation></semantics></math>.
+The fully connected layers combine spatial features into class
+predictions, with L2 regularization to prevent overfitting. Batch
+normalization stabilizes training by normalizing layer inputs, and
+dropout randomly disables 20% of neurons during training to improve
+generalization.</p>
+<p>Training uses data augmentation to artificially expand the
+dataset:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>datagen <span class="op">=</span> ImageDataGenerator(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    rotation_range<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    width_shift_range<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    height_shift_range<span class="op">=</span><span class="fl">0.2</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>datagen.fit(x_train)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> model.fit(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    datagen.flow(x_train, y_train, batch_size<span class="op">=</span><span class="dv">32</span>),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    validation_data<span class="op">=</span>(x_test, y_test),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">15</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    callbacks<span class="op">=</span>[LearningRateScheduler(lr_schedule)]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>The augmentation randomly rotates digits up to 30 degrees and shifts
+them up to 20% horizontally or vertically. This helps the model
+generalize to variations in how digits are written or positioned in the
+camera frame. After 15 epochs, the model achieves approximately 99%
+accuracy on the test set. The trained model is saved as a Keras file
+(mnist_cnn_model.keras) that the Flask server loads for inference.</p>
+<h1 id="image-processing-pipeline">Image Processing Pipeline</h1>
+<p>The raw camera output is a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>176</mn><mo>×</mo><mn>144</mn></mrow><annotation encoding="application/x-tex">176 \times 144</annotation></semantics></math>
+grayscale image where darker pixels represent ink or markings and
+lighter pixels represent background. To prepare this for the MNIST
+model, which expects
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>28</mn><mo>×</mo><mn>28</mn></mrow><annotation encoding="application/x-tex">28 \times 28</annotation></semantics></math>
+images with white digits on black backgrounds, several transformations
+are necessary.</p>
+<p>First, I apply thresholding to create a transparency mask. This
+removes noise and focuses on the actual writing:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> threshold_image(input_image, threshold: <span class="bu">int</span> <span class="op">=</span> <span class="dv">100</span>):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    input_array <span class="op">=</span> np.array(input_image)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    height, width <span class="op">=</span> input_array.shape</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    output_array <span class="op">=</span> np.zeros((height, width, <span class="dv">4</span>), dtype<span class="op">=</span>np.uint8)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    output_array[..., <span class="dv">0</span>:<span class="dv">3</span>] <span class="op">=</span> <span class="dv">0</span>  <span class="co"># RGB channels set to black</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    output_array[..., <span class="dv">3</span>] <span class="op">=</span> np.where(input_array <span class="op">&lt;</span> threshold, <span class="dv">255</span>, <span class="dv">0</span>)  <span class="co"># Alpha channel</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    processed_image <span class="op">=</span> Image.fromarray(output_array, mode<span class="op">=</span><span class="st">&quot;RGBA&quot;</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> processed_image</span></code></pre></div>
+<p>Pixels darker than the threshold (100 out of 255) become opaque
+black, while lighter pixels become fully transparent. This RGBA image is
+then composited onto a white background before being converted to
+grayscale for the model.</p>
+<p>The inference function handles all the preprocessing:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate_digit(input_image):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> tf.keras.models.load_model(<span class="st">&quot;mnist_cnn_model.keras&quot;</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Composite transparent image onto white background</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    processed_image <span class="op">=</span> input_image.convert(<span class="st">&quot;RGBA&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    background <span class="op">=</span> Image.new(<span class="st">&quot;RGBA&quot;</span>, processed_image.size, (<span class="dv">255</span>, <span class="dv">255</span>, <span class="dv">255</span>, <span class="dv">255</span>))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    background.paste(processed_image, mask<span class="op">=</span>processed_image)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    processed_image <span class="op">=</span> background.convert(<span class="st">&quot;L&quot;</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Resize to 28x28</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    processed_image <span class="op">=</span> processed_image.resize((<span class="dv">28</span>, <span class="dv">28</span>), Image.Resampling.BICUBIC)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Normalize and invert colors</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    image_array <span class="op">=</span> np.array(processed_image, dtype<span class="op">=</span>np.float32)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    image_array <span class="op">=</span> <span class="dv">255</span> <span class="op">-</span> image_array  <span class="co"># Invert: white digit on black background</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    image_array <span class="op">=</span> image_array <span class="op">/</span> <span class="fl">255.0</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reshape for model input</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    image_array <span class="op">=</span> image_array.reshape((<span class="dv">1</span>, <span class="dv">28</span>, <span class="dv">28</span>, <span class="dv">1</span>))</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get predictions</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    probabilities <span class="op">=</span> model.predict(image_array, verbose<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    predicted_digit <span class="op">=</span> <span class="bu">int</span>(np.argmax(probabilities[<span class="dv">0</span>]))</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    confidence <span class="op">=</span> <span class="bu">float</span>(probabilities[<span class="dv">0</span>][predicted_digit])</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> predicted_digit, confidence, probabilities[<span class="dv">0</span>].tolist()</span></code></pre></div>
+<p>The model returns a 10-element probability array, one for each digit.
+The predicted digit is the index with the highest probability. The
+confidence is simply that maximum probability value. Returning the full
+probability distribution allows the web interface to visualize how
+certain the model is about each possible digit.</p>
+<h1 id="web-interface-and-real-time-visualization">Web Interface and
+Real-Time Visualization</h1>
+<p>The Next.js interface provides a clean, responsive UI for interacting
+with the system. Built with TypeScript and React, it manages three main
+states: connection status (disconnected, connecting, or connected),
+capture status (idle or loading), and prediction results (image, digit,
+confidence, and probabilities).</p>
+<p>The connection flow begins when the user clicks “Connect Device”. The
+frontend sends a POST request to the Flask server’s /connect
+endpoint:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> connectArduino <span class="op">=</span> <span class="kw">async</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setConnectionStatus</span>(<span class="st">&quot;connecting&quot;</span>)<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setError</span>(<span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(<span class="st">&quot;/api/connect&quot;</span><span class="op">,</span> {</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      method<span class="op">:</span> <span class="st">&quot;POST&quot;</span><span class="op">,</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      headers<span class="op">:</span> { Accept<span class="op">:</span> <span class="st">&quot;application/json&quot;</span> }<span class="op">,</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> data <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (data<span class="op">.</span><span class="at">success</span>) {</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setConnectionStatus</span>(<span class="st">&quot;connected&quot;</span>)<span class="op">;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">toast</span>({</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        title<span class="op">:</span> <span class="st">&quot;Connected&quot;</span><span class="op">,</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        description<span class="op">:</span> <span class="vs">`Successfully connected to port </span><span class="sc">${</span>data<span class="op">.</span><span class="at">portName</span><span class="sc">}</span><span class="vs">`</span><span class="op">,</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(data<span class="op">.</span><span class="at">errorMessage</span> <span class="op">||</span> <span class="st">&quot;Failed to connect&quot;</span>)<span class="op">;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setConnectionStatus</span>(<span class="st">&quot;disconnected&quot;</span>)<span class="op">;</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setError</span>(</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>      <span class="vs">`Connection error: </span><span class="sc">${</span>error <span class="kw">instanceof</span> <span class="bu">Error</span> <span class="op">?</span> error<span class="op">.</span><span class="at">message</span> <span class="op">:</span> <span class="bu">String</span>(error)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<p>The server responds with the detected port name if successful. Once
+connected, the “Capture Image” button becomes enabled. Clicking it
+triggers the full capture and inference pipeline:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> captureImage <span class="op">=</span> <span class="kw">async</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (connectionStatus <span class="op">!==</span> <span class="st">&quot;connected&quot;</span>) <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setIsLoading</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setError</span>(<span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> response <span class="op">=</span> <span class="cf">await</span> <span class="fu">fetch</span>(<span class="st">&quot;/api/capture&quot;</span><span class="op">,</span> {</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      method<span class="op">:</span> <span class="st">&quot;POST&quot;</span><span class="op">,</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>      headers<span class="op">:</span> {</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        Accept<span class="op">:</span> <span class="st">&quot;application/json&quot;</span><span class="op">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Content-Type&quot;</span><span class="op">:</span> <span class="st">&quot;application/json&quot;</span><span class="op">,</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>      }<span class="op">,</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> data <span class="op">=</span> <span class="cf">await</span> response<span class="op">.</span><span class="fu">json</span>()<span class="op">;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (data<span class="op">.</span><span class="at">success</span> <span class="op">&amp;&amp;</span> data<span class="op">.</span><span class="at">originalImage</span>) {</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setImageUrl</span>(data<span class="op">.</span><span class="at">originalImage</span>)<span class="op">;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setProbabilities</span>(data<span class="op">.</span><span class="at">probabilities</span>)<span class="op">;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setPredictedDigit</span>(data<span class="op">.</span><span class="at">predictedDigit</span>)<span class="op">;</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">setConfidence</span>(data<span class="op">.</span><span class="at">confidence</span>)<span class="op">;</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">toast</span>({</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>        title<span class="op">:</span> <span class="st">&quot;Success&quot;</span><span class="op">,</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        description<span class="op">:</span> <span class="st">&quot;Image captured and processed successfully&quot;</span><span class="op">,</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setError</span>(</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>      <span class="vs">`Capture error: </span><span class="sc">${</span>error <span class="kw">instanceof</span> <span class="bu">Error</span> <span class="op">?</span> error<span class="op">.</span><span class="at">message</span> <span class="op">:</span> <span class="bu">String</span>(error)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">finally</span> {</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setIsLoading</span>(<span class="kw">false</span>)<span class="op">;</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<p>The server returns a JSON response containing the base64-encoded
+captured image, predicted digit
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>9</mn><annotation encoding="application/x-tex">9</annotation></semantics></math>),
+confidence score
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>),
+and the full probability distribution. The interface displays the raw
+image (using CSS image-rendering: pixelated to preserve the blocky
+aesthetic) and renders the probability distribution as a vertical bar
+chart with 10 columns.</p>
+<p>Each bar’s height corresponds to the probability of that digit. The
+bars are implemented as flexbox containers with a colored div positioned
+at the bottom:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  probabilities<span class="op">.</span><span class="fu">map</span>((prob<span class="op">,</span> index) <span class="kw">=&gt;</span> (</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="ot">key</span><span class="op">=</span><span class="va">{</span>index<span class="va">}</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;relative flex flex-col h-full&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;flex-1 relative bg-secondary&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;div</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>          <span class="ot">className</span><span class="op">=</span><span class="va">{</span>prob <span class="op">&gt;</span> <span class="fl">0.05</span> <span class="op">?</span> <span class="st">&quot;bg-foreground&quot;</span> <span class="op">:</span> <span class="st">&quot;bg-transparent&quot;</span><span class="va">}</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>          <span class="ot">style</span><span class="op">=</span><span class="va">{</span>{ <span class="dt">height</span><span class="op">:</span> <span class="vs">`</span><span class="sc">${</span>prob <span class="op">*</span> <span class="dv">100</span><span class="sc">}</span><span class="vs">%`</span> }<span class="va">}</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">/&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;span</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;text-center text-xs&quot;</span><span class="kw">&gt;</span><span class="va">{</span>index<span class="va">}</span><span class="kw">&lt;/span&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  ))<span class="op">;</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>This gives an immediate visual indication of the model’s certainty.
+If the model predicts “7” with 95% confidence, the bar for 7 will be
+nearly full while the others remain near empty. If the model is
+uncertain (perhaps the digit is ambiguous or poorly formed), multiple
+bars will show significant heights.</p>
+<h1 id="system-integration-and-error-handling">System Integration and
+Error Handling</h1>
+<p>A critical aspect of the implementation is robust error handling
+throughout the pipeline. Embedded systems are inherently unreliable:
+serial connections drop, USB cables get jostled, Arduinos reset
+unexpectedly. The Flask server must handle these failures
+gracefully.</p>
+<p>Serial connection management uses thread-safe locking to prevent race
+conditions when multiple requests arrive simultaneously:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>serial_connection <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>serial_lock <span class="op">=</span> Lock()</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_serial_connection():</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> serial_connection</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> serial_lock:</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> serial_connection <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> serial_connection.is_open:</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> serial_connection</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        port <span class="op">=</span> find_arduino_port()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> port:</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            connection <span class="op">=</span> serial.Serial(</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                port<span class="op">=</span>port,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                baudrate<span class="op">=</span><span class="dv">115200</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>                timeout<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>                write_timeout<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> connection.is_open:</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>                connection.reset_input_buffer()</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>                connection.reset_output_buffer()</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>                time.sleep(<span class="fl">0.5</span>)  <span class="co"># Allow Arduino to settle after reset</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>                serial_connection <span class="op">=</span> connection</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> connection</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> serial.SerialException <span class="im">as</span> e:</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>            logging.error(<span class="ss">f&quot;Connection failed: </span><span class="sc">{</span><span class="bu">str</span>(e)<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
+<p>If a connection fails during capture, the server attempts to recover
+by closing and reopening the connection. If that fails, it returns an
+error to the frontend, which displays it to the user. The frontend
+provides clear visual feedback at each stage: connection status is shown
+with a colored indicator (green for connected, red for disconnected),
+capture operations display a loading spinner, and errors are shown in
+alert boxes with specific messages.</p>
+<p>The cleanup function registered with atexit ensures the serial port
+is properly released when the server shuts down:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cleanup():</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> serial_connection</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> serial_lock:</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> serial_connection <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                serial_connection.close()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                logging.info(<span class="st">&quot;Closed serial connection&quot;</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span>:</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>                <span class="cf">pass</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            serial_connection <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> atexit</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>atexit.register(cleanup)</span></code></pre></div>
+<p>This prevents the common problem of orphaned serial connections that
+prevent reconnection until the system is rebooted.</p>
+<h1 id="performance-and-limitations">Performance and Limitations</h1>
+<p>The system achieves reasonable real-time performance. A complete
+capture-process-predict cycle takes approximately
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>3</mn><annotation encoding="application/x-tex">3</annotation></semantics></math>
+seconds:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2.2</mn><annotation encoding="application/x-tex">2.2</annotation></semantics></math>
+seconds for serial transfer of the image,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.1</mn><annotation encoding="application/x-tex">0.1</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.3</mn><annotation encoding="application/x-tex">0.3</annotation></semantics></math>
+seconds for image preprocessing,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.2</mn><annotation encoding="application/x-tex">0.2</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>
+seconds for CNN inference on CPU, and minimal overhead for Flask routing
+and JSON encoding. On a modern CPU, this is acceptable for interactive
+use.</p>
+<p>The main bottleneck is the serial transfer. At 115200 baud,
+transferring 25,344 bytes is fundamentally limited by the USB serial
+bandwidth. Using a higher baud rate (921600 is supported by many Arduino
+boards) would reduce transfer time to under
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.3</mn><annotation encoding="application/x-tex">0.3</annotation></semantics></math>
+seconds, but the Arduino Nano 33 BLE’s USB stack becomes unreliable at
+those speeds in my testing. An alternative would be to reduce image
+resolution further, but
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>176</mn><mo>×</mo><mn>144</mn></mrow><annotation encoding="application/x-tex">176 \times 144</annotation></semantics></math>
+already pushes the lower limit of usable detail for handwritten
+digits.</p>
+<p>Model inference is quite fast even on CPU because the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>28</mn><mo>×</mo><mn>28</mn></mrow><annotation encoding="application/x-tex">28 \times 28</annotation></semantics></math>
+input is tiny by modern deep learning standards. The entire network has
+only about 100,000 parameters. On a GPU, inference would be under 10ms,
+but for a single-image pipeline, the overhead of GPU memory transfer
+exceeds the compute savings.</p>
+<p>The accuracy in real-world conditions depends heavily on how the
+digit is presented to the camera. The MNIST dataset consists of
+centered, normalized digits with good contrast. Real camera images have
+variable lighting, perspective distortion, shadows, and positioning. The
+thresholding step helps by removing background, but if lighting is poor
+or the digit is too small in frame, accuracy suffers. In practice, with
+reasonable lighting and a black marker on white paper held at the right
+distance, the system achieves
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>85</mn><annotation encoding="application/x-tex">85</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>90</mn><annotation encoding="application/x-tex">90</annotation></semantics></math>%
+accuracy on the first try.</p>
+<h1 id="lessons-learned">Lessons Learned</h1>
+<p>Building this system reinforced several important lessons about
+embedded ML systems. First, the entire pipeline matters. A highly
+accurate model is useless if the image preprocessing doesn’t match the
+training distribution. I initially forgot to invert the colors (camera
+sees black ink as dark pixels, but MNIST has white digits on black),
+which caused the model to predict random garbage until I realized the
+mismatch.</p>
+<p>Second, serial communication is more subtle than it appears. Early
+versions of the code didn’t properly flush buffers or handle partial
+reads, leading to intermittent failures where the first few hundred
+bytes of the image were correct but the rest was garbage. Adding
+explicit buffer resets and handling chunked reads solved this.</p>
+<p>Third, automated deployment is worth the effort. Being able to modify
+the Arduino code and have it automatically compile and flash on the next
+capture attempt made iteration much faster. Without this, I would have
+spent significant time manually compiling and uploading through the
+Arduino IDE.</p>
+<p>Finally, visualization is crucial for debugging ML systems. The
+probability distribution view immediately revealed when the model was
+confused (multiple high-probability predictions) versus when
+preprocessing was wrong (uniform random probabilities). Without this
+feedback, diagnosing issues would have been much harder.</p>
+<hr />
+<p>Implementing real-time digit recognition on Arduino demonstrates how
+accessible embedded machine learning has become. The Arduino Nano 33 BLE
+Sense provides just enough capability to capture images, while modern ML
+frameworks like TensorFlow handle the complex inference. Bridging these
+two worlds requires careful attention to data pipelines, communication
+protocols, and error handling, but the result is a satisfying end-to-end
+system that captures, processes, and classifies images in real-time. The
+project serves as a foundation for more complex embedded vision
+applications, from gesture recognition to quality inspection systems.
+Understanding how each layer works, from camera registers to
+convolutional filters, provides deep appreciation for the engineering
+that makes these systems possible.</p>

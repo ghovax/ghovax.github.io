@@ -1,0 +1,273 @@
+<p>In this post, I’ll walk you through my implementation of a symbolic
+mathematics engine in Haskell. This project taught me that Haskell’s
+algebraic data types are perfectly suited for representing mathematical
+expressions. The ability to pattern match on expression structure makes
+implementing transformations incredibly natural, with each mathematical
+rule becoming a pattern match clause. The separation of concerns between
+operations proved crucial: substitution doesn’t simplify,
+differentiation doesn’t evaluate. Each function does one thing well, and
+we compose them to achieve complex transformations.</p>
+<p>The challenge of symbolic mathematics is fundamentally different from
+numerical computing. Rather than evaluating an expression like:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>3</mn><mi>x</mi><mo>+</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">f(x) = x^2 + 3x + 2</annotation></semantics></math></p>
+<p>at a specific point
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">x = 5</annotation></semantics></math>
+to get
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>42</mn><annotation encoding="application/x-tex">42</annotation></semantics></math>,
+we manipulate the expression itself: factor it into
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>2</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(x+1)(x+2)</annotation></semantics></math>,
+differentiate it to get
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>x</mi><mo>+</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">2x + 3</annotation></semantics></math>,
+or substitute
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+with another expression.</p>
+<p>The key insight is that mathematical expressions form a tree
+structure. The expression
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></mrow><mrow><mi>x</mi><mo>−</mo><mn>3</mn></mrow></mfrac><annotation encoding="application/x-tex">\frac{x^2 + 1}{x - 3}</annotation></semantics></math>
+is really a division node whose children are an addition node and a
+subtraction node. By representing expressions as algebraic data types in
+Haskell, we can use pattern matching to implement mathematical
+operations as tree transformations. This is the essence of computer
+algebra systems like Mathematica and SymPy.</p>
+<h1 id="expression-representation-and-substitution">Expression
+Representation and Substitution</h1>
+<p>The foundation is an algebraic data type capturing essential
+operations:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">Expr</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="ot">=</span> <span class="dt">Sum</span> <span class="dt">Expr</span> <span class="dt">Expr</span>      <span class="co">-- Addition: a + b</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Prod</span> <span class="dt">Expr</span> <span class="dt">Expr</span>     <span class="co">-- Multiplication: a * b</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Pow</span> <span class="dt">Expr</span> <span class="dt">Expr</span>      <span class="co">-- Exponentiation: a^b</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Real</span> <span class="dt">Double</span>        <span class="co">-- Numeric constants</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Var</span> <span class="dt">String</span>         <span class="co">-- Variables like &quot;x&quot;, &quot;y&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">List</span> [<span class="dt">Expr</span>]        <span class="co">-- Lists of expressions</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Neg</span> <span class="dt">Expr</span>           <span class="co">-- Negation: -a</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Inv</span> <span class="dt">Expr</span>           <span class="co">-- Reciprocal: 1/a</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Log</span> <span class="dt">Expr</span> <span class="dt">Expr</span>      <span class="co">-- Logarithm with base: log_b(a)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="dt">Ln</span> <span class="dt">Expr</span>            <span class="co">-- Natural logarithm: ln(a)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">deriving</span> (<span class="dt">Show</span>, <span class="dt">Eq</span>)</span></code></pre></div>
+<p>I use binary operators exclusively. Addition and multiplication
+always have exactly two children, making pattern matching predictable. I
+represent subtraction and division as derived operations:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Subtraction: a - b = a + (-b)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ot">sub ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>sub a b <span class="ot">=</span> <span class="dt">Sum</span> a (<span class="dt">Neg</span> b)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- Division: a / b = a * (1/b)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ot">divide ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>divide a b <span class="ot">=</span> <span class="dt">Prod</span> a (<span class="dt">Inv</span> b)</span></code></pre></div>
+<p>This reduces cases to handle. Instead of separate rules for
+<code>Sum</code> and <code>Sub</code>, we only handle <code>Sum</code>.
+The expression
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">x - 2</annotation></semantics></math>
+becomes <code>Sum (Var "x") (Neg (Real 2))</code> internally.</p>
+<p>Substitution is a straightforward recursive tree traversal:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ot">substitute ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>substitute expr target replacement <span class="ot">=</span> <span class="kw">case</span> expr <span class="kw">of</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Sum</span> a b <span class="ot">-&gt;</span> <span class="dt">Sum</span> (substitute a target replacement)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                 (substitute b target replacement)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> a b <span class="ot">-&gt;</span> <span class="dt">Prod</span> (substitute a target replacement)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                   (substitute b target replacement)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> a b <span class="ot">-&gt;</span> <span class="dt">Pow</span> (substitute a target replacement)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                 (substitute b target replacement)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> a <span class="ot">-&gt;</span> <span class="dt">Neg</span> (substitute a target replacement)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Inv</span> a <span class="ot">-&gt;</span> <span class="dt">Inv</span> (substitute a target replacement)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Var</span> v <span class="ot">-&gt;</span> <span class="kw">case</span> target <span class="kw">of</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Var</span> x <span class="op">|</span> x <span class="op">==</span> v <span class="ot">-&gt;</span> replacement</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    _ <span class="ot">-&gt;</span> <span class="dt">Var</span> v</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">List</span> items <span class="ot">-&gt;</span> <span class="dt">List</span> (<span class="fu">map</span> (\x <span class="ot">-&gt;</span> substitute x target replacement) items)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Log</span> base arg <span class="ot">-&gt;</span> <span class="dt">Log</span> (substitute base target replacement)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                      (substitute arg target replacement)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Ln</span> arg <span class="ot">-&gt;</span> <span class="dt">Ln</span> (substitute arg target replacement)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  _ <span class="ot">-&gt;</span> expr</span></code></pre></div>
+<p>For compound expressions, recursively substitute in subexpressions.
+For variables, check if they match the target. For constants, do
+nothing. Substitution is name-based: if we’re substituting
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>→</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">x \rightarrow 5</annotation></semantics></math>,
+we only replace variables named
+“<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>”.</p>
+<h1 id="simplification-and-derivatives">Simplification and
+Derivatives</h1>
+<p>Simplification applies algebraic identities to reduce expressions:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>+</mo><mn>0</mn><mo>=</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">x + 0 = x</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>⋅</mo><mn>1</mn><mo>=</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">x \cdot 1 = x</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>x</mi><mn>0</mn></msup><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x^0 = 1</annotation></semantics></math>,
+and evaluates constants:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">simplify ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>simplify expr <span class="ot">=</span> <span class="kw">case</span> expr <span class="kw">of</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Addition identities</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Sum</span> (<span class="dt">Real</span> <span class="dv">0</span>) a <span class="ot">-&gt;</span> simplify a</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Sum</span> a (<span class="dt">Real</span> <span class="dv">0</span>) <span class="ot">-&gt;</span> simplify a</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Sum</span> a b <span class="op">|</span> a <span class="op">==</span> b <span class="ot">-&gt;</span> <span class="dt">Prod</span> (<span class="dt">Real</span> <span class="dv">2</span>) (simplify a)  <span class="co">-- a + a = 2a</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Sum</span> (<span class="dt">Real</span> a) (<span class="dt">Real</span> b) <span class="ot">-&gt;</span> <span class="dt">Real</span> (a <span class="op">+</span> b)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Sum</span> a b <span class="ot">-&gt;</span> <span class="dt">Sum</span> (simplify a) (simplify b)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Multiplication identities</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> (<span class="dt">Real</span> <span class="dv">0</span>) _ <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">0</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> _ (<span class="dt">Real</span> <span class="dv">0</span>) <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">0</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> (<span class="dt">Real</span> <span class="dv">1</span>) a <span class="ot">-&gt;</span> simplify a</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> a (<span class="dt">Real</span> <span class="dv">1</span>) <span class="ot">-&gt;</span> simplify a</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> (<span class="dt">Real</span> a) (<span class="dt">Real</span> b) <span class="ot">-&gt;</span> <span class="dt">Real</span> (a <span class="op">*</span> b)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> a b <span class="op">|</span> a <span class="op">==</span> b <span class="ot">-&gt;</span> <span class="dt">Pow</span> (simplify a) (<span class="dt">Real</span> <span class="dv">2</span>)  <span class="co">-- a * a = a²</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> a b <span class="ot">-&gt;</span> <span class="dt">Prod</span> (simplify a) (simplify b)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Exponentiation, negation, logarithms...</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> (<span class="dt">Real</span> x) (<span class="dt">Real</span> <span class="dv">0</span>) <span class="op">|</span> x <span class="op">&gt;</span> <span class="dv">0</span> <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">1</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> x (<span class="dt">Real</span> <span class="dv">1</span>) <span class="ot">-&gt;</span> simplify x</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> (<span class="dt">Real</span> <span class="dv">1</span>) _ <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">1</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> _ (<span class="dt">Real</span> <span class="dv">0</span>) <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">1</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> (<span class="dt">Real</span> a) (<span class="dt">Real</span> b) <span class="ot">-&gt;</span> <span class="dt">Real</span> (a <span class="op">**</span> b)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> base <span class="fu">exponent</span> <span class="ot">-&gt;</span> <span class="dt">Pow</span> (simplify base) (simplify <span class="fu">exponent</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> (<span class="dt">Real</span> x) <span class="ot">-&gt;</span> <span class="dt">Real</span> (<span class="op">-</span>x)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> (<span class="dt">Neg</span> a) <span class="ot">-&gt;</span> simplify a  <span class="co">-- -(-a) = a</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> (<span class="dt">Sum</span> a b) <span class="ot">-&gt;</span> <span class="dt">Sum</span> (simplify (<span class="dt">Neg</span> a)) (simplify (<span class="dt">Neg</span> b))</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> (<span class="dt">Prod</span> a b) <span class="ot">-&gt;</span> <span class="dt">Prod</span> (simplify (<span class="dt">Neg</span> a)) (simplify b)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> (<span class="dt">Pow</span> a b) <span class="ot">-&gt;</span> <span class="dt">Pow</span> (simplify (<span class="dt">Neg</span> a)) (simplify b)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> (<span class="dt">Inv</span> a) <span class="ot">-&gt;</span> <span class="dt">Inv</span> (simplify (<span class="dt">Neg</span> a))</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> a <span class="ot">-&gt;</span> <span class="dt">Neg</span> (simplify a)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Log</span> (<span class="dt">Real</span> <span class="dv">1</span>) _ <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">0</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Log</span> _ (<span class="dt">Real</span> <span class="dv">1</span>) <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">0</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Ln</span> (<span class="dt">Real</span> <span class="dv">1</span>) <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">0</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>  <span class="dt">List</span> items <span class="ot">-&gt;</span> <span class="dt">List</span> (<span class="fu">map</span> simplify items)</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>  _ <span class="ot">-&gt;</span> expr</span></code></pre></div>
+<p>One pass isn’t always enough. We need iterative simplification to a
+fixed point:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ot">simplifyFully ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>simplifyFully <span class="ot">=</span> simplifyWithLimit <span class="dv">100</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ot">    simplifyWithLimit ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    simplifyWithLimit <span class="dv">0</span> expr <span class="ot">=</span> expr</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    simplifyWithLimit n expr <span class="ot">=</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">let</span> simplified <span class="ot">=</span> simplify expr</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="kw">in</span> <span class="kw">if</span> simplified <span class="op">==</span> expr</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>         <span class="kw">then</span> expr</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>         <span class="kw">else</span> simplifyWithLimit (n <span class="op">-</span> <span class="dv">1</span>) simplified</span></code></pre></div>
+<p>Computing derivatives symbolically implements standard calculus rules
+via pattern matching:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ot">derivative ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>derivative var expr <span class="ot">=</span> <span class="kw">case</span> expr <span class="kw">of</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Var</span> v <span class="op">|</span> v <span class="op">==</span> var <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">1</span>      <span class="co">-- dx/dx = 1</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> <span class="fu">otherwise</span> <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">0</span>     <span class="co">-- dy/dx = 0</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Real</span> _ <span class="ot">-&gt;</span> <span class="dt">Real</span> <span class="dv">0</span>                <span class="co">-- dc/dx = 0</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Sum rule: d/dx(f + g) = f&#39; + g&#39;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Sum</span> f g <span class="ot">-&gt;</span> <span class="dt">Sum</span> (derivative var f) (derivative var g)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Product rule: d/dx(f * g) = f&#39; * g + f * g&#39;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Prod</span> f g <span class="ot">-&gt;</span> <span class="dt">Sum</span> (<span class="dt">Prod</span> (derivative var f) g)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                  (<span class="dt">Prod</span> f (derivative var g))</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Power rule: d/dx(f^n) = n * f^(n-1) * f&#39;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Pow</span> f n <span class="ot">-&gt;</span> <span class="dt">Prod</span> n (<span class="dt">Prod</span> (<span class="dt">Pow</span> f (sub n (<span class="dt">Real</span> <span class="dv">1</span>)))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                          (derivative var f))</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Neg</span> f <span class="ot">-&gt;</span> <span class="dt">Neg</span> (derivative var f)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Reciprocal rule: d/dx(1/f) = -f&#39; / f²</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Inv</span> f <span class="ot">-&gt;</span> <span class="dt">Neg</span> (divide (derivative var f) (<span class="dt">Pow</span> f (<span class="dt">Real</span> <span class="dv">2</span>)))</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Log</span> _ arg <span class="ot">-&gt;</span> <span class="dt">Prod</span> (divide (<span class="dt">Real</span> <span class="dv">1</span>) (<span class="dt">Prod</span> arg (<span class="dt">Ln</span> arg)))</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>                    (derivative var arg)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Ln</span> arg <span class="ot">-&gt;</span> divide (derivative var arg) arg</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">List</span> items <span class="ot">-&gt;</span> <span class="dt">List</span> (<span class="fu">map</span> (derivative var) items)</span></code></pre></div>
+<p>The chain rule emerges naturally from the recursive structure. Higher
+derivatives are trivial:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ot">nthDerivative ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>nthDerivative <span class="dv">0</span> _ expr <span class="ot">=</span> expr</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>nthDerivative n var expr <span class="ot">=</span> nthDerivative (n <span class="op">-</span> <span class="dv">1</span>) var (derivative var expr)</span></code></pre></div>
+<h1 id="taylor-series">Taylor Series</h1>
+<p>The Taylor series approximates any sufficiently smooth function as a
+polynomial. For a function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math>
+expanded around
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>a</mi></mrow><annotation encoding="application/x-tex">x = a</annotation></semantics></math>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><munderover><mo>∑</mo><mrow><mi>n</mi><mo>=</mo><mn>0</mn></mrow><mi>N</mi></munderover><mfrac><mrow><msup><mi>f</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>n</mi><mi>!</mi></mrow></mfrac><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>a</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">f(x) \approx \sum_{n=0}^{N} \frac{f^{(n)}(a)}{n!}(x-a)^n</annotation></semantics></math></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ot">taylorSeries ::</span> <span class="dt">Expr</span> <span class="ot">-&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>taylorSeries expr var center degree <span class="ot">=</span> <span class="fu">foldl1</span> <span class="dt">Sum</span> (<span class="fu">map</span> term [<span class="dv">0</span><span class="op">..</span>degree])</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ot">    factorial ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    factorial n <span class="ot">=</span> <span class="fu">product</span> [<span class="dv">1</span> <span class="op">..</span> <span class="fu">toInteger</span> n]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="ot">    term ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Expr</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    term n <span class="ot">=</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">let</span> coefficient <span class="ot">=</span> <span class="dt">Real</span> (<span class="dv">1</span> <span class="op">/</span> <span class="fu">fromIntegral</span> (factorial n))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>          offset <span class="ot">=</span> <span class="dt">Sum</span> (<span class="dt">Var</span> var) (<span class="dt">Real</span> (<span class="op">-</span>center))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>          power <span class="ot">=</span> <span class="dt">Pow</span> offset (<span class="dt">Real</span> (<span class="fu">fromIntegral</span> n))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>          derivSimplified <span class="ot">=</span> simplifyFully (nthDerivative n var expr)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>          derivAtCenter <span class="ot">=</span> substitute derivSimplified (<span class="dt">Var</span> var) (<span class="dt">Real</span> center)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>          derivValue <span class="ot">=</span> simplifyFully derivAtCenter</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="kw">in</span> simplifyFully (<span class="dt">Prod</span> (<span class="dt">Prod</span> coefficient derivValue) power)</span></code></pre></div>
+<p>For each term in the series, we need to compute the coefficient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac><mn>1</mn><mrow><mi>n</mi><mi>!</mi></mrow></mfrac><annotation encoding="application/x-tex">\frac{1}{n!}</annotation></semantics></math>,
+construct the power term
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>a</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">(x-a)^n</annotation></semantics></math>,
+compute the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>th
+derivative, evaluate it at the center point
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>,
+and combine everything together. The implementation handles all of this
+systematically, computing:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext mathvariant="normal">term</mtext><mi>n</mi></msub><mo>=</mo><mfrac><mrow><msup><mi>f</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>n</mi><mi>!</mi></mrow></mfrac><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>a</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">\text{term}_n = \frac{f^{(n)}(a)}{n!}(x-a)^n</annotation></semantics></math></p>
+<h1 id="testing-and-validation">Testing and Validation</h1>
+<p>I built a comprehensive test suite to verify the correctness of the
+implementation. The tests cover three main areas: simplification rules,
+logarithm identities, and Taylor series expansion.</p>
+<p><strong>Simplification tests</strong> verify that algebraic
+identities are applied correctly:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>42</mn><mo>=</mo><mn>42</mn><mspace width="1.0em"></mspace><mtext mathvariant="normal">(identity)</mtext></mrow><annotation encoding="application/x-tex">42 = 42 \quad\text{(identity)}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo>+</mo><mn>0</mn><mo>=</mo><mn>5</mn><mspace width="1.0em"></mspace><mtext mathvariant="normal">(addition identity)</mtext></mrow><annotation encoding="application/x-tex">5 + 0 = 5 \quad\text{(addition identity)}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>⋅</mo><mn>3</mn><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><msup><mi>x</mi><mn>2</mn></msup><mo>=</mo><mn>3</mn><msup><mi>x</mi><mn>2</mn></msup><mspace width="1.0em"></mspace><mtext mathvariant="normal">(constant folding)</mtext></mrow><annotation encoding="application/x-tex">(1 \cdot 3) \cdot x^2 = 3x^2 \quad\text{(constant folding)}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>2</mn><mspace width="1.0em"></mspace><mtext mathvariant="normal">(double negation)</mtext></mrow><annotation encoding="application/x-tex">1 + (-(-(-(-1)))) = 2 \quad\text{(double negation)}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mn>3</mn><mo stretchy="false" form="postfix">)</mo><msup><mo stretchy="false" form="postfix">)</mo><mrow><mn>2</mn><mo>⋅</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>4</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mspace width="1.0em"></mspace><mtext mathvariant="normal">(nested simplification)</mtext></mrow><annotation encoding="application/x-tex">(x + (1 + 3))^{2 \cdot (0 + 1)} = (x + 4)^2 \quad\text{(nested simplification)}</annotation></semantics></math></p>
+<p><strong>Logarithm tests</strong> ensure special cases are handled
+properly:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">log</mi><mo>&#8289;</mo></mrow><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn><mo>,</mo><mspace width="1.0em"></mspace><msub><mrow><mi mathvariant="normal">log</mi><mo>&#8289;</mo></mrow><mi>x</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn><mo>,</mo><mspace width="1.0em"></mspace><mrow><mi mathvariant="normal">ln</mi><mo>&#8289;</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\log_1(x) = 0, \quad \log_x(1) = 0, \quad \ln(1) = 0</annotation></semantics></math></p>
+<p><strong>Taylor series tests</strong> verify polynomial approximations
+by computing derivatives and evaluating them at the expansion point. For
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>x</mi><mn>2</mn></msup><mo>−</mo><mn>4</mn><mi>x</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">f(x) = x^2 - 4x + 1</annotation></semantics></math>
+expanded around
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x = 1</annotation></semantics></math>
+to degree
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">n=2</annotation></semantics></math>,
+we compute:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mn>2</mn><mo>,</mo><mspace width="1.0em"></mspace><msup><mi>f</mi><mo>′</mo></msup><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>2</mn><mi>x</mi><mo>−</mo><mn>4</mn><mo>⇒</mo><msup><mi>f</mi><mo>′</mo></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mn>2</mn><mo>,</mo><mspace width="1.0em"></mspace><msup><mi>f</mi><mo>″</mo></msup><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>2</mn><mo>⇒</mo><msup><mi>f</mi><mo>″</mo></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">f(1) = -2, \quad f&#39;(x) = 2x - 4 \Rightarrow f&#39;(1) = -2, \quad f&#39;&#39;(x) = 2 \Rightarrow f&#39;&#39;(1) = 2</annotation></semantics></math></p>
+<p>The Taylor series is then:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mi>−</mi><mn>2</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mfrac><mn>2</mn><mrow><mn>2</mn><mi>!</mi></mrow></mfrac><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo>=</mo><mi>−</mi><mn>2</mn><mo>−</mo><mn>2</mn><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">f(x) \approx -2 + (-2)(x-1) + \frac{2}{2!}(x-1)^2 = -2 - 2(x-1) + (x-1)^2</annotation></semantics></math></p>
+<p>For
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>x</mi><mn>3</mn></msup><mo>−</mo><mn>3</mn><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">f(x) = x^3 - 3x^2 + 4</annotation></semantics></math>
+expanded around
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">x = 2</annotation></semantics></math>
+to degree
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">n=3</annotation></semantics></math>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn><mo>,</mo><mspace width="1.0em"></mspace><msup><mi>f</mi><mo>′</mo></msup><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn><mo>,</mo><mspace width="1.0em"></mspace><msup><mi>f</mi><mo>″</mo></msup><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>6</mn><mi>x</mi><mo>−</mo><mn>6</mn><mo>⇒</mo><msup><mi>f</mi><mo>″</mo></msup><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>6</mn><mo>,</mo><mspace width="1.0em"></mspace><msup><mi>f</mi><mo>‴</mo></msup><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>6</mn><mo>⇒</mo><msup><mi>f</mi><mo>‴</mo></msup><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>6</mn></mrow><annotation encoding="application/x-tex">f(2) = 0, \quad f&#39;(2) = 0, \quad f&#39;&#39;(x) = 6x - 6 \Rightarrow f&#39;&#39;(2) = 6, \quad f&#39;&#39;&#39;(x) = 6 \Rightarrow f&#39;&#39;&#39;(2) = 6</annotation></semantics></math></p>
+<p>The Taylor series becomes:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>⋅</mo><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mfrac><mn>6</mn><mrow><mn>2</mn><mi>!</mi></mrow></mfrac><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>2</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo>+</mo><mfrac><mn>6</mn><mrow><mn>3</mn><mi>!</mi></mrow></mfrac><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>2</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>3</mn></msup><mo>=</mo><mn>3</mn><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>2</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>2</mn><msup><mo stretchy="false" form="postfix">)</mo><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">f(x) \approx 0 + 0 \cdot (x-2) + \frac{6}{2!}(x-2)^2 + \frac{6}{3!}(x-2)^3 = 3(x-2)^2 + (x-2)^3</annotation></semantics></math></p>
+<p>All 11 tests pass, giving confidence that the core algorithms are
+correct.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Building this symbolic mathematics engine demonstrates how functional
+programming naturally expresses mathematical concepts. The elegance is
+striking: functions like <code>derivative</code> are remarkably concise,
+just dozens of lines, yet handle arbitrarily complex expressions through
+recursion and pattern matching.</p>
+<p>The mathematical structure guided the implementation at every step.
+The rules of calculus naturally map to pattern matching clauses. The
+tree structure of expressions naturally leads to recursive algorithms.
+The need for iterative improvement naturally suggests fixed-point
+iteration. The code practically wrote itself once I understood the
+mathematical foundations.</p>
+<p>The engine is simple compared to Mathematica or SymPy, but it
+captures the essential ideas. It computes real derivatives, performs
+real simplifications, and generates real Taylor series. Understanding
+how it works, down to every pattern match and recursive call, gives me
+deep appreciation for the elegant mathematics underlying computer
+algebra systems.</p>

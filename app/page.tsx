@@ -6,8 +6,6 @@ import path from "path";
 import Link from "next/link";
 import { PostTitle } from "@/components/post-title";
 import { Highlighter } from "@/components/ui/highlighter";
-// Import timestamp to trigger hot reload when posts change
-import "@/lib/posts-timestamp";
 
 export default function Home() {
   // Read posts from the generated JSON manifest

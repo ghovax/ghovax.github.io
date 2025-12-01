@@ -1,0 +1,715 @@
+<p>In this post, I’ll walk you through my implementation of TeXtr, a PDF
+generation library written in Rust that converts JSON documents into
+fully-formatted PDF files. This project taught me that building a PDF
+generator is fundamentally about understanding binary file formats and
+coordinate systems. The technical challenge lies in correctly encoding
+every detail according to the PDF specification: font metrics, glyph
+mappings, character positioning, and page structure. I learned that the
+PDF format is deceptively complex, with layers of indirection (object
+references, stream encoding, resource dictionaries) that must all align
+perfectly for readers to parse the file correctly. Working in Rust
+proved ideal because the type system catches encoding errors at compile
+time, and the ownership model prevents the memory leaks that plague
+C-based PDF libraries. Most importantly, I discovered that deterministic
+output is critical for testing: by controlling document and instance
+IDs, I could generate byte-identical PDFs for regression testing via
+postscript comparison.</p>
+<p>The PDF format is ubiquitous for document distribution because it
+preserves exact layout across platforms. Unlike HTML (which reflows
+based on viewport) or DOCX (which depends on font availability), PDFs
+specify absolute positions for every glyph. This makes them ideal for
+legal documents, academic papers, and print media where layout must be
+pixel-perfect. However, generating PDFs programmatically is notoriously
+difficult because the specification is over 1,000 pages and requires
+handling font embedding, Unicode mapping, and complex object graphs.</p>
+<p>The challenge was to build a library that handles font loading and
+embedding from TTF files, character-to-glyph-ID mapping with proper
+Unicode support, text positioning in millimeters with conversion to PDF
+points, page creation with customizable dimensions, and JSON document
+serialization for high-level control. Each component required deep
+understanding of both the PDF specification and font file formats.</p>
+<h1 id="architecture-overview">Architecture Overview</h1>
+<p>TeXtr implements two interfaces for PDF generation. The low-level
+interface is <code>PdfDocument</code>, which exposes functions like
+<code>add_page_with_layer</code>, <code>add_font</code>, and
+<code>write_text_to_layer_in_page</code>. This gives complete control
+but requires manual tracking of page and layer indices. The high-level
+interface is <code>Document</code>, which deserializes from JSON and
+automatically manages the PDF construction process. This is the intended
+use case: external layouting algorithms generate the JSON, and TeXtr
+handles PDF encoding.</p>
+<p>The JSON document format specifies two unique identifiers (document
+ID and instance ID) for deterministic output and an operations array
+that describes content:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;documentId&quot;</span><span class="fu">:</span> <span class="st">&quot;QU2KK7yivMeRDnU8DodEQxnfqJAe4wZ2&quot;</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;instanceId&quot;</span><span class="fu">:</span> <span class="st">&quot;DLjCAhuTD3cvaoQCJnMvkC0iNWEGEfyD&quot;</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;operations&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;pageWidth&quot;</span><span class="fu">:</span> <span class="fl">210.0</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;pageHeight&quot;</span><span class="fu">:</span> <span class="fl">297.0</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;color&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fl">0.0</span><span class="ot">,</span> <span class="fl">0.0</span><span class="ot">,</span> <span class="fl">0.0</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;position&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fl">50.0</span><span class="ot">,</span> <span class="fl">200.0</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;textString&quot;</span><span class="fu">:</span> <span class="st">&quot;Hello, world!&quot;</span><span class="fu">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;fontSize&quot;</span><span class="fu">:</span> <span class="fl">48.0</span><span class="fu">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;fontIndex&quot;</span><span class="fu">:</span> <span class="dv">0</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The operations are untagged serde enums, meaning the JSON structure
+determines which variant to deserialize. <code>AppendNewPage</code>
+creates a new page with specified dimensions in millimeters.
+<code>WriteUnicodeText</code> renders text at a given position with
+color, font, and size. Operations execute sequentially, building the PDF
+page by page.</p>
+<p>Converting a <code>Document</code> to a <code>PdfDocument</code>
+involves loading all Computer Modern fonts (the CMU family, including
+math fonts), iterating through operations to construct pages and write
+text, and finalizing the PDF with <code>write_all</code> using the
+instance ID:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> to_pdf_document(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">Result</span><span class="op">&lt;</span>PdfDocument<span class="op">,</span> ContextError<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> pdf_document <span class="op">=</span> <span class="pp">PdfDocument::</span>new(<span class="kw">self</span><span class="op">.</span>document_id<span class="op">.</span>clone())<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Load Computer Modern fonts</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> fonts_directory <span class="op">=</span> <span class="pp">std::fs::</span>read_dir(<span class="st">&quot;fonts/computer-modern&quot;</span>)<span class="op">?;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> font_paths<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">PathBuf</span><span class="op">&gt;</span> <span class="op">=</span> fonts_directory</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>filter_map(<span class="op">|</span>entry<span class="op">|</span> entry<span class="op">.</span>ok())</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>filter(<span class="op">|</span>entry<span class="op">|</span> entry<span class="op">.</span>path()<span class="op">.</span>extension() <span class="op">==</span> <span class="cn">Some</span>(<span class="st">&quot;ttf&quot;</span><span class="op">.</span>as_ref()))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>map(<span class="op">|</span>entry<span class="op">|</span> entry<span class="op">.</span>path())</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>collect()<span class="op">;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    font_paths<span class="op">.</span>sort()<span class="op">;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Load Latin Modern Math font</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    font_paths<span class="op">.</span>push(<span class="dt">PathBuf</span><span class="pp">::</span>from(<span class="st">&quot;fonts/lm-math/opentype/latinmodern-math.otf&quot;</span>))<span class="op">;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> font_path <span class="kw">in</span> font_paths <span class="op">{</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        pdf_document<span class="op">.</span>add_font(<span class="op">&amp;</span>font_path)<span class="op">?;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> current_page_index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> current_layer_index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> operation <span class="kw">in</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>operations <span class="op">{</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">match</span> operation <span class="op">{</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>            <span class="pp">Operation::</span>WriteUnicodeText <span class="op">{</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>                color<span class="op">,</span> position<span class="op">,</span> text_string<span class="op">,</span> font_size<span class="op">,</span> font_index</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>                pdf_document<span class="op">.</span>write_text_to_layer_in_page(</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>                    current_page_index<span class="op">,</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>                    current_layer_index<span class="op">,</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>                    <span class="op">*</span>color<span class="op">,</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>                    text_string<span class="op">.</span>clone()<span class="op">,</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>                    <span class="op">*</span>font_index<span class="op">,</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>                    <span class="op">*</span>font_size<span class="op">,</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>                    <span class="op">*</span>position<span class="op">,</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>                )<span class="op">?;</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>            <span class="pp">Operation::</span>AppendNewPage <span class="op">{</span> page_width<span class="op">,</span> page_height <span class="op">}</span> <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>                <span class="kw">let</span> (page_index<span class="op">,</span> layer_index) <span class="op">=</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>                    pdf_document<span class="op">.</span>add_page_with_layer(<span class="op">*</span>page_width<span class="op">,</span> <span class="op">*</span>page_height)<span class="op">;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>                current_page_index <span class="op">=</span> page_index<span class="op">;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>                current_layer_index <span class="op">=</span> layer_index<span class="op">;</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    pdf_document<span class="op">.</span>write_all(<span class="kw">self</span><span class="op">.</span>instance_id<span class="op">.</span>clone())<span class="op">?;</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    <span class="cn">Ok</span>(pdf_document)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The font loading order is deterministic (sorted paths) so font
+indices remain consistent across runs. This is crucial for the JSON
+format, where <code>fontIndex</code> references fonts by their loading
+order.</p>
+<h1 id="font-embedding-and-glyph-mapping">Font Embedding and Glyph
+Mapping</h1>
+<p>Embedding TrueType fonts in PDFs is complex because the PDF format
+predates Unicode. PDFs use Character ID (CID) fonts, which map 16-bit
+glyph IDs to Unicode codepoints via a CMap (character map). The process
+involves parsing the TTF file to extract metrics (ascent, descent, units
+per em), extracting glyph-to-Unicode mappings from the font’s cmap
+table, calculating glyph widths for proper text spacing, and generating
+a CID-to-Unicode CMap for text extraction.</p>
+<p>I use the <code>owned_ttf_parser</code> crate to parse TTF files. The
+<code>TtfFontFace</code> struct wraps the parsed face and provides
+metric extraction:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> TtfFontFace <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    inner<span class="op">:</span> <span class="pp">std::sync::</span>Arc<span class="op">&lt;</span><span class="pp">owned_ttf_parser::</span>OwnedFace<span class="op">&gt;,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    units_per_em<span class="op">:</span> <span class="dt">u16</span><span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> TtfFontFace <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> font_metrics(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> FontMetrics <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        FontMetrics <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            ascent<span class="op">:</span> <span class="kw">self</span><span class="op">.</span>face()<span class="op">.</span>ascender()<span class="op">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            descent<span class="op">:</span> <span class="kw">self</span><span class="op">.</span>face()<span class="op">.</span>descender()<span class="op">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            units_per_em<span class="op">:</span> <span class="kw">self</span><span class="op">.</span>units_per_em<span class="op">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> glyph_id(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> codepoint<span class="op">:</span> <span class="dt">char</span>) <span class="op">-&gt;</span> <span class="dt">Option</span><span class="op">&lt;</span><span class="dt">u16</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span><span class="op">.</span>face()</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>glyph_index(codepoint)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>map(<span class="op">|</span>glyph_id<span class="op">|</span> glyph_id<span class="op">.</span><span class="dv">0</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> glyph_ids(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> HashMap<span class="op">&lt;</span><span class="dt">u16</span><span class="op">,</span> <span class="dt">char</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> font_subtables <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>face()<span class="op">.</span>tables()<span class="op">.</span>cmap<span class="op">?</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>subtables</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>into_iter()</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>filter(<span class="op">|</span>subtable<span class="op">|</span> subtable<span class="op">.</span>is_unicode())<span class="op">;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="kw">mut</span> gid_to_codepoint_map <span class="op">=</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            <span class="pp">HashMap::</span>with_capacity(<span class="kw">self</span><span class="op">.</span>face()<span class="op">.</span>number_of_glyphs() <span class="kw">as</span> <span class="dt">usize</span>)<span class="op">;</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> subtable <span class="kw">in</span> font_subtables <span class="op">{</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>            subtable<span class="op">.</span>codepoints(<span class="op">|</span>codepoint<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Ok</span>(character) <span class="op">=</span> <span class="dt">char</span><span class="pp">::</span>try_from(codepoint) <span class="op">{</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(glyph_index) <span class="op">=</span> subtable<span class="op">.</span>glyph_index(codepoint) <span class="op">{</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> glyph_index<span class="op">.</span><span class="dv">0</span> <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>                            gid_to_codepoint_map</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                                <span class="op">.</span>entry(glyph_index<span class="op">.</span><span class="dv">0</span>)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                                <span class="op">.</span>or_insert(character)<span class="op">;</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>                        <span class="op">}</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>                    <span class="op">}</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        gid_to_codepoint_map</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>glyph_ids</code> function iterates through all Unicode
+subtables in the font’s cmap, extracting the mapping from glyph IDs to
+characters. This mapping is essential for generating the CID-to-Unicode
+CMap, which allows PDF readers to extract text for copy-paste
+operations.</p>
+<p>Glyph metrics determine character widths for proper spacing. The
+horizontal advance (how far to move the cursor after drawing the glyph)
+is scaled from font units to a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1000</mn><annotation encoding="application/x-tex">1000</annotation></semantics></math>-unit
+square:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> glyph_metrics(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> glyph_id<span class="op">:</span> <span class="dt">u16</span>) <span class="op">-&gt;</span> <span class="dt">Option</span><span class="op">&lt;</span>GlyphMetrics<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> glyph_id <span class="op">=</span> <span class="pp">owned_ttf_parser::</span>GlyphId(glyph_id)<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(width) <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>face()<span class="op">.</span>glyph_hor_advance(glyph_id) <span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> width <span class="op">=</span> width <span class="kw">as</span> <span class="dt">u32</span><span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> height <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>face()</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>glyph_bounding_box(glyph_id)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>map(<span class="op">|</span>bbox<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                (bbox<span class="op">.</span>y_max <span class="op">-</span> bbox<span class="op">.</span>y_min <span class="op">-</span> <span class="kw">self</span><span class="op">.</span>face()<span class="op">.</span>descender()) <span class="kw">as</span> <span class="dt">u32</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>unwrap_or(<span class="dv">1000</span>)<span class="op">;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="cn">Some</span>(GlyphMetrics <span class="op">{</span> width<span class="op">,</span> height <span class="op">}</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="cn">None</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The width scaling uses the formula:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">scaled_width</mtext><mo>=</mo><mfrac><mrow><mtext mathvariant="normal">glyph_width</mtext><mo>×</mo><mn>1000</mn></mrow><mtext mathvariant="normal">units_per_em</mtext></mfrac></mrow><annotation encoding="application/x-tex">\text{scaled\_width} = \frac{\text{glyph\_width} \times 1000}{\text{units\_per\_em}}</annotation></semantics></math></p>
+<p>This normalizes all fonts to the same coordinate space, simplifying
+PDF layout calculations.</p>
+<h1 id="pdf-object-structure">PDF Object Structure</h1>
+<p>The PDF format represents documents as a graph of objects referenced
+by object IDs. Each object has a type (dictionary, stream, array,
+integer, etc.) and objects reference each other via indirect references.
+The root is the catalog object, which references the pages tree, which
+references individual page objects, each containing content streams (the
+drawing operations for that page) and resource dictionaries (fonts,
+images, etc.).</p>
+<p>I use the <code>lopdf</code> crate for low-level PDF object
+manipulation. The <code>PdfDocument</code> struct maintains the object
+graph:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> PdfDocument <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    fonts<span class="op">:</span> BTreeMap<span class="op">&lt;</span><span class="dt">String</span><span class="op">,</span> (<span class="pp">lopdf::</span>ObjectId<span class="op">,</span> Font)<span class="op">&gt;,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> inner_document<span class="op">:</span> <span class="pp">lopdf::</span>Document<span class="op">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> identifier<span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    pages<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>PdfPage<span class="op">&gt;,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>fonts</code> map stores loaded fonts by their PDF names
+(<code>F0</code>, <code>F1</code>, etc.) along with their object IDs.
+The <code>inner_document</code> is the <code>lopdf::Document</code> that
+manages the object graph. The <code>pages</code> vector holds page
+structures before they are serialized into the PDF.</p>
+<p>Inserting a font into the PDF requires creating multiple linked
+objects. The font dictionary specifies the font type and encoding, the
+font descriptor contains metrics and the embedded font file, the
+descendant font dictionary specifies CID font properties, and the
+ToUnicode CMap enables text extraction:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> insert_into_document(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> inner_document<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="pp">lopdf::</span>Document) <span class="op">-&gt;</span> <span class="pp">lopdf::</span>Dictionary <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> face_metrics <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>ttf_face<span class="op">.</span>font_metrics()<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create font stream containing TTF data</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> font_stream <span class="op">=</span> <span class="pp">lopdf::Stream::</span>new(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="pp">lopdf::Dictionary::</span>from_iter(<span class="pp">vec!</span>[</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            (<span class="st">&quot;Length1&quot;</span><span class="op">,</span> Integer(<span class="kw">self</span><span class="op">.</span>bytes<span class="op">.</span>len() <span class="kw">as</span> <span class="dt">i64</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        ])<span class="op">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span><span class="op">.</span>bytes<span class="op">.</span>clone()<span class="op">,</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    )<span class="op">.</span>with_compression(<span class="cn">false</span>)<span class="op">;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Build font descriptor with metrics</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> font_descriptor <span class="op">=</span> <span class="pp">lopdf::Dictionary::</span>from_iter(<span class="pp">vec!</span>[</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Type&quot;</span><span class="op">,</span> Name(<span class="st">&quot;FontDescriptor&quot;</span><span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;FontName&quot;</span><span class="op">,</span> Name(<span class="kw">self</span><span class="op">.</span>face_identifier<span class="op">.</span>clone()<span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Ascent&quot;</span><span class="op">,</span> Integer(face_metrics<span class="op">.</span>ascent <span class="kw">as</span> <span class="dt">i64</span>))<span class="op">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Descent&quot;</span><span class="op">,</span> Integer(face_metrics<span class="op">.</span>descent <span class="kw">as</span> <span class="dt">i64</span>))<span class="op">,</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;CapHeight&quot;</span><span class="op">,</span> Integer(face_metrics<span class="op">.</span>ascent <span class="kw">as</span> <span class="dt">i64</span>))<span class="op">,</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;ItalicAngle&quot;</span><span class="op">,</span> Integer(<span class="dv">0</span>))<span class="op">,</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Flags&quot;</span><span class="op">,</span> Integer(<span class="dv">32</span>))<span class="op">,</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;StemV&quot;</span><span class="op">,</span> Integer(<span class="dv">80</span>))<span class="op">,</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    ])<span class="op">;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Generate glyph width arrays</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> width_objects <span class="op">=</span> generate_width_arrays(<span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>ttf_face<span class="op">,</span> <span class="op">&amp;</span>face_metrics)<span class="op">;</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create CIDFont dictionary</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> cid_font <span class="op">=</span> <span class="pp">lopdf::Dictionary::</span>from_iter(<span class="pp">vec!</span>[</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Type&quot;</span><span class="op">,</span> Name(<span class="st">&quot;Font&quot;</span><span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Subtype&quot;</span><span class="op">,</span> Name(<span class="st">&quot;CIDFontType2&quot;</span><span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;BaseFont&quot;</span><span class="op">,</span> Name(<span class="kw">self</span><span class="op">.</span>face_identifier<span class="op">.</span>clone()<span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;CIDSystemInfo&quot;</span><span class="op">,</span> Dictionary(<span class="pp">lopdf::Dictionary::</span>from_iter(<span class="pp">vec!</span>[</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>            (<span class="st">&quot;Registry&quot;</span><span class="op">,</span> <span class="dt">String</span>(<span class="st">&quot;Adobe&quot;</span><span class="op">.</span>into()<span class="op">,</span> Literal))<span class="op">,</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>            (<span class="st">&quot;Ordering&quot;</span><span class="op">,</span> <span class="dt">String</span>(<span class="st">&quot;Identity&quot;</span><span class="op">.</span>into()<span class="op">,</span> Literal))<span class="op">,</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>            (<span class="st">&quot;Supplement&quot;</span><span class="op">,</span> Integer(<span class="dv">0</span>))<span class="op">,</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        ])))<span class="op">,</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;W&quot;</span><span class="op">,</span> Array(width_objects))<span class="op">,</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;DW&quot;</span><span class="op">,</span> Integer(<span class="dv">1000</span>))<span class="op">,</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    ])<span class="op">;</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Generate ToUnicode CMap</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> cmap <span class="op">=</span> generate_cid_to_unicode_map(</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span><span class="op">.</span>face_identifier<span class="op">.</span>clone()<span class="op">,</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span><span class="op">.</span>ttf_face<span class="op">.</span>glyph_ids()</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> cmap_stream_id <span class="op">=</span> inner_document<span class="op">.</span>add_object(</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        <span class="pp">lopdf::Stream::</span>new(<span class="pp">lopdf::Dictionary::</span>new()<span class="op">,</span> cmap<span class="op">.</span>into_bytes())</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Build top-level font dictionary</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="pp">lopdf::Dictionary::</span>from_iter(<span class="pp">vec!</span>[</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Type&quot;</span><span class="op">,</span> Name(<span class="st">&quot;Font&quot;</span><span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Subtype&quot;</span><span class="op">,</span> Name(<span class="st">&quot;Type0&quot;</span><span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;BaseFont&quot;</span><span class="op">,</span> Name(<span class="kw">self</span><span class="op">.</span>face_identifier<span class="op">.</span>clone()<span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;Encoding&quot;</span><span class="op">,</span> Name(<span class="st">&quot;Identity-H&quot;</span><span class="op">.</span>into()))<span class="op">,</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;DescendantFonts&quot;</span><span class="op">,</span> Array(<span class="pp">vec!</span>[Dictionary(cid_font)]))<span class="op">,</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>        (<span class="st">&quot;ToUnicode&quot;</span><span class="op">,</span> Reference(cmap_stream_id))<span class="op">,</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The width array (<code>W</code> entry) specifies glyph widths in CID
+font order. The PDF specification requires grouping glyph IDs into
+ranges where the first byte matches. For example, glyphs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mtext mathvariant="normal">x</mtext><mn>1000</mn></mrow><annotation encoding="application/x-tex">0\text{x}1000</annotation></semantics></math>
+through
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mtext mathvariant="normal">x</mtext><mn>10</mn><mtext mathvariant="normal">FF</mtext></mrow><annotation encoding="application/x-tex">0\text{x}10\text{FF}</annotation></semantics></math>
+form one range. Each range contains at most
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>100</mn><annotation encoding="application/x-tex">100</annotation></semantics></math>
+glyphs:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> width_objects <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> current_range_start <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> current_widths <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> percentage_scaling <span class="op">=</span> <span class="dv">1000.0</span> <span class="op">/</span> (face_metrics<span class="op">.</span>units_per_em <span class="kw">as</span> <span class="dt">f32</span>)<span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> glyph_id <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="kw">self</span><span class="op">.</span>ttf_face<span class="op">.</span>glyph_count() <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(metrics) <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>ttf_face<span class="op">.</span>glyph_metrics(glyph_id) <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> glyph_id <span class="op">==</span> current_range_start <span class="op">+</span> current_widths<span class="op">.</span>len() <span class="kw">as</span> <span class="dt">u16</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> scaled_width <span class="op">=</span> (metrics<span class="op">.</span>width <span class="kw">as</span> <span class="dt">f32</span> <span class="op">*</span> percentage_scaling) <span class="kw">as</span> <span class="dt">i64</span><span class="op">;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            current_widths<span class="op">.</span>push(Integer(scaled_width))<span class="op">;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            width_objects<span class="op">.</span>push(Integer(current_range_start <span class="kw">as</span> <span class="dt">i64</span>))<span class="op">;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            width_objects<span class="op">.</span>push(Array(<span class="pp">std::mem::</span>take(<span class="op">&amp;</span><span class="kw">mut</span> current_widths)))<span class="op">;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            current_range_start <span class="op">=</span> glyph_id<span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>            current_widths<span class="op">.</span>push(Integer((metrics<span class="op">.</span>width <span class="kw">as</span> <span class="dt">f32</span> <span class="op">*</span> percentage_scaling) <span class="kw">as</span> <span class="dt">i64</span>))<span class="op">;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>width_objects<span class="op">.</span>push(Integer(current_range_start <span class="kw">as</span> <span class="dt">i64</span>))<span class="op">;</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>width_objects<span class="op">.</span>push(Array(current_widths))<span class="op">;</span></span></code></pre></div>
+<p>This produces a flattened array like
+<code>[20, [21, 99, 34], 50, [18, 42]]</code>, meaning glyph
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>20</mn><annotation encoding="application/x-tex">20</annotation></semantics></math>
+has width
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>21</mn><annotation encoding="application/x-tex">21</annotation></semantics></math>,
+glyph
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>21</mn><annotation encoding="application/x-tex">21</annotation></semantics></math>
+has width
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>99</mn><annotation encoding="application/x-tex">99</annotation></semantics></math>,
+glyph
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>22</mn><annotation encoding="application/x-tex">22</annotation></semantics></math>
+has width
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>34</mn><annotation encoding="application/x-tex">34</annotation></semantics></math>,
+glyph
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>50</mn><annotation encoding="application/x-tex">50</annotation></semantics></math>
+has width
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>18</mn><annotation encoding="application/x-tex">18</annotation></semantics></math>,
+and glyph
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>51</mn><annotation encoding="application/x-tex">51</annotation></semantics></math>
+has width
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>42</mn><annotation encoding="application/x-tex">42</annotation></semantics></math>.</p>
+<h1 id="text-rendering-and-coordinate-systems">Text Rendering and
+Coordinate Systems</h1>
+<p>PDF uses a bottom-left origin coordinate system where the origin
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0, 0)</annotation></semantics></math>
+is at the bottom-left corner of the page. Positive
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+extends right, positive
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+extends up. This differs from most graphics systems (which use top-left
+origin). I convert from millimeters to PDF points using the formula:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">points</mtext><mo>=</mo><mtext mathvariant="normal">millimeters</mtext><mo>×</mo><mn>2.834646</mn></mrow><annotation encoding="application/x-tex">\text{points} = \text{millimeters} \times 2.834646</annotation></semantics></math></p>
+<p>This factor derives from the definition:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+point
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mn>1</mn><mi>/</mi><mn>72</mn></mrow><annotation encoding="application/x-tex">= 1/72</annotation></semantics></math>
+inch, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+millimeter
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mn>1</mn><mi>/</mi><mn>25.4</mn></mrow><annotation encoding="application/x-tex">= 1/25.4</annotation></semantics></math>
+inch, so
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+mm
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mn>25.4</mn><mi>/</mi><mn>72</mn><mo>≈</mo><mn>2.834646</mn></mrow><annotation encoding="application/x-tex">= 25.4/72 \approx 2.834646</annotation></semantics></math>
+points.</p>
+<p>Writing text to a PDF layer involves constructing a sequence of PDF
+operators (drawing commands) that the renderer executes:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> write_text_to_layer_in_page(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    page_index<span class="op">:</span> <span class="dt">usize</span><span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    layer_index<span class="op">:</span> <span class="dt">usize</span><span class="op">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    color<span class="op">:</span> [<span class="dt">f32</span><span class="op">;</span> <span class="dv">3</span>]<span class="op">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    text<span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    font_index<span class="op">:</span> <span class="dt">usize</span><span class="op">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    font_size<span class="op">:</span> <span class="dt">f32</span><span class="op">,</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    caret_position<span class="op">:</span> [<span class="dt">f32</span><span class="op">;</span> <span class="dv">2</span>]<span class="op">,</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="dt">Result</span><span class="op">&lt;</span>()<span class="op">,</span> ContextError<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> font <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>get_font(font_index)<span class="op">?.</span><span class="dv">1</span><span class="op">.</span>clone()<span class="op">;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Begin text object</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>add_operations_to_layer(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        layer_index<span class="op">,</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        page_index<span class="op">,</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[<span class="pp">Operation::</span>new(<span class="st">&quot;BT&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[])]<span class="op">,</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    )<span class="op">?;</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set font and size</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>add_operations_to_layer(</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        layer_index<span class="op">,</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        page_index<span class="op">,</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[<span class="pp">Operation::</span>new(<span class="st">&quot;Tf&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>            font<span class="op">.</span>face_identifier<span class="op">.</span>into()<span class="op">,</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            font_size<span class="op">.</span>into()</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        ])]<span class="op">,</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    )<span class="op">?;</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set text position</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> [x<span class="op">,</span> y] <span class="op">=</span> caret_position<span class="op">;</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>add_operations_to_layer(</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        layer_index<span class="op">,</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        page_index<span class="op">,</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[<span class="pp">Operation::</span>new(<span class="st">&quot;Td&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>            millimeters_to_points(x)<span class="op">.</span>into()<span class="op">,</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            millimeters_to_points(y)<span class="op">.</span>into()</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        ])]<span class="op">,</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    )<span class="op">?;</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set text color</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> [r<span class="op">,</span> g<span class="op">,</span> b] <span class="op">=</span> color<span class="op">;</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>add_operations_to_layer(</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        layer_index<span class="op">,</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>        page_index<span class="op">,</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[<span class="pp">Operation::</span>new(<span class="st">&quot;rg&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[r<span class="op">.</span>into()<span class="op">,</span> g<span class="op">.</span>into()<span class="op">,</span> b<span class="op">.</span>into()])]<span class="op">,</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    )<span class="op">?;</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Convert text to glyph IDs</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> glyph_ids <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> character <span class="kw">in</span> text<span class="op">.</span>nfc() <span class="op">{</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(glyph_id) <span class="op">=</span> font<span class="op">.</span>ttf_face<span class="op">.</span>glyph_id(character) <span class="op">{</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>            glyph_ids<span class="op">.</span>push(glyph_id)<span class="op">;</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>            <span class="pp">log::warn!</span>(<span class="st">&quot;Character {:?} not found in font&quot;</span><span class="op">,</span> character)<span class="op">;</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Encode glyph IDs as bytes</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> glyph_bytes<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;</span> <span class="op">=</span> glyph_ids</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>iter()</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>flat_map(<span class="op">|</span>id<span class="op">|</span> <span class="pp">vec!</span>[(id <span class="op">&gt;&gt;</span> <span class="dv">8</span>) <span class="kw">as</span> <span class="dt">u8</span><span class="op">,</span> (id <span class="op">&amp;</span> <span class="dv">255</span>) <span class="kw">as</span> <span class="dt">u8</span>])</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>collect()<span class="op">;</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Show text</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>add_operations_to_layer(</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>        layer_index<span class="op">,</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>        page_index<span class="op">,</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[<span class="pp">Operation::</span>new(<span class="st">&quot;Tj&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>            <span class="pp">Object::</span><span class="dt">String</span>(glyph_bytes<span class="op">,</span> <span class="pp">StringFormat::</span>Hexadecimal)</span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>        ])]<span class="op">,</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>    )<span class="op">?;</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    <span class="co">// End text object</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>add_operations_to_layer(</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>        layer_index<span class="op">,</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>        page_index<span class="op">,</span></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>        <span class="pp">vec!</span>[<span class="pp">Operation::</span>new(<span class="st">&quot;ET&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[])]<span class="op">,</span></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>    )<span class="op">?;</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="cn">Ok</span>(())</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>BT</code> (begin text) and <code>ET</code> (end text)
+operators delimit the text object. The <code>Tf</code> operator sets the
+font and size. The <code>Td</code> operator translates the text matrix
+(moves the cursor). The <code>rg</code> operator sets the RGB fill
+color. The <code>Tj</code> operator shows text by rendering glyphs.</p>
+<p>Unicode normalization (<code>.nfc()</code>) ensures characters are in
+canonical composed form. For example, “é” can be represented as a single
+codepoint (<code>U+00E9</code>) or as “e” + combining acute accent
+(<code>U+0065</code> + <code>U+0301</code>). NFC normalization chooses
+the single-codepoint form when available, ensuring consistent glyph
+mapping.</p>
+<p>Glyph IDs are encoded as 16-bit big-endian values. The byte sequence
+<code>[0x12, 0x34, 0x56, 0x78]</code> represents glyph IDs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mtext mathvariant="normal">x</mtext><mn>1234</mn></mrow><annotation encoding="application/x-tex">0\text{x}1234</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mtext mathvariant="normal">x</mtext><mn>5678</mn></mrow><annotation encoding="application/x-tex">0\text{x}5678</annotation></semantics></math>.
+PDF readers decode these using the font’s encoding (Identity-H for
+horizontal writing).</p>
+<h1 id="page-structure-and-layers">Page Structure and Layers</h1>
+<p>PDFs organize content into pages, each containing one or more layers
+(optional content groups). Layers allow toggling visibility of content
+groups, useful for multi-language documents or engineering drawings with
+different detail levels. I create a default layer for each page:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> add_page_with_layer(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> page_width<span class="op">:</span> <span class="dt">f32</span><span class="op">,</span> page_height<span class="op">:</span> <span class="dt">f32</span>) <span class="op">-&gt;</span> (<span class="dt">usize</span><span class="op">,</span> <span class="dt">usize</span>) <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> pdf_page <span class="op">=</span> PdfPage <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        number<span class="op">:</span> <span class="kw">self</span><span class="op">.</span>pages<span class="op">.</span>len() <span class="op">+</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        width<span class="op">:</span> millimeters_to_points(page_width)<span class="op">,</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        height<span class="op">:</span> millimeters_to_points(page_height)<span class="op">,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        layers<span class="op">:</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        resources<span class="op">:</span> <span class="pp">PdfResources::</span><span class="kw">default</span>()<span class="op">,</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        extend_with<span class="op">:</span> <span class="cn">None</span><span class="op">,</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> pdf_layer <span class="op">=</span> PdfLayer <span class="op">{</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        name<span class="op">:</span> <span class="st">&quot;Layer0&quot;</span><span class="op">.</span>into()<span class="op">,</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        operations<span class="op">:</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">,</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    pdf_page<span class="op">.</span>layers<span class="op">.</span>push(pdf_layer)<span class="op">;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">self</span><span class="op">.</span>pages<span class="op">.</span>push(pdf_page)<span class="op">;</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> page_index <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>pages<span class="op">.</span>len() <span class="op">-</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> layer_index <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    (page_index<span class="op">,</span> layer_index)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The page dimensions use points internally, but the API accepts
+millimeters for user convenience. Layers are converted into PDF content
+streams when finalizing the document. The <code>operations</code> vector
+accumulates drawing commands (<code>BT</code>, <code>Tf</code>,
+<code>Td</code>, etc.) that will be encoded into a binary stream.</p>
+<p>When writing the PDF, layers are wrapped with Optional Content Group
+(OCG) markers:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (index<span class="op">,</span> layer) <span class="kw">in</span> <span class="kw">self</span><span class="op">.</span>layers<span class="op">.</span>iter_mut()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    layer<span class="op">.</span>operations<span class="op">.</span>insert(<span class="dv">0</span><span class="op">,</span> <span class="pp">Operation::</span>new(<span class="st">&quot;q&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[]))<span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    layer<span class="op">.</span>operations<span class="op">.</span>insert(<span class="dv">0</span><span class="op">,</span> <span class="pp">Operation::</span>new(<span class="st">&quot;BDC&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        Name(<span class="st">&quot;OC&quot;</span><span class="op">.</span>into())<span class="op">,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        Name(ocg_references[index]<span class="op">.</span><span class="dv">0</span><span class="op">.</span>clone()<span class="op">.</span>into())<span class="op">,</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    ]))<span class="op">;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    layer<span class="op">.</span>operations<span class="op">.</span>push(<span class="pp">Operation::</span>new(<span class="st">&quot;Q&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[]))<span class="op">;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    layer<span class="op">.</span>operations<span class="op">.</span>push(<span class="pp">Operation::</span>new(<span class="st">&quot;EMC&quot;</span><span class="op">,</span> <span class="pp">vec!</span>[]))<span class="op">;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> layer_stream<span class="op">:</span> <span class="pp">lopdf::</span>Stream <span class="op">=</span> layer<span class="op">.</span>clone()<span class="op">.</span>into()<span class="op">;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    layer_streams<span class="op">.</span>push(layer_stream)<span class="op">;</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>q</code> and <code>Q</code> operators save and restore the
+graphics state, creating an isolated context for the layer. The
+<code>BDC</code> (begin marked content) and <code>EMC</code> (end marked
+content) operators delimit the optional content. The <code>OC</code> tag
+references the OCG dictionary, which specifies layer properties (name,
+visibility, etc.).</p>
+<h1 id="deterministic-output-for-testing">Deterministic Output for
+Testing</h1>
+<p>A critical feature of TeXtr is deterministic PDF generation. Given
+the same input JSON, the library produces byte-identical PDFs every
+time. This enables regression testing by comparing PDFs after code
+changes. Traditional PDF libraries use random UUIDs for document IDs and
+timestamps for metadata, making output non-deterministic.</p>
+<p>I achieve determinism by requiring explicit document and instance IDs
+(32-character strings provided by the user), using a fixed timestamp
+(Unix epoch) for creation and modification dates, sorting font paths
+before loading to ensure consistent font indices, and avoiding any
+random number generation.</p>
+<p>The testing workflow generates fuzz targets (random JSON documents),
+converts them to PDFs (the reference outputs), converts PDFs to
+postscript format for easier text comparison, and runs the conversion
+again after code changes and diffs against references:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate random JSON fuzz targets</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> test generate_fuzz_targets <span class="at">--</span> <span class="at">--exact</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate reference PDFs</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> test generate_target_references_from_fuzz_targets <span class="at">--</span> <span class="at">--exact</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># After code changes, compare outputs</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="ex">cargo</span> test compare_fuzz_targets_with_target_references <span class="at">--</span> <span class="at">--exact</span></span></code></pre></div>
+<p>The postscript conversion uses <code>gs</code> (Ghostscript) to
+convert PDFs to PS format:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gs</span> <span class="at">-sDEVICE</span><span class="op">=</span>ps2write <span class="at">-dNOPAUSE</span> <span class="at">-dQUIET</span> <span class="at">-dBATCH</span> <span class="dt">\</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>   <span class="at">-sOutputFile</span><span class="op">=</span>output.ps input.pdf</span></code></pre></div>
+<p>Postscript is text-based, making diffs meaningful. Binary PDF diffs
+show raw byte changes without context. The test compares postscript
+files using the <code>similar-asserts</code> crate:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> reference_ps <span class="op">=</span> <span class="pp">std::fs::</span>read_to_string(<span class="op">&amp;</span>reference_path)<span class="op">?;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> current_ps <span class="op">=</span> <span class="pp">std::fs::</span>read_to_string(<span class="op">&amp;</span>current_path)<span class="op">?;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="pp">assert_eq!</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    reference_ps<span class="op">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    current_ps<span class="op">,</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;PDF output changed for {}&quot;</span><span class="op">,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    fuzz_target</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span></code></pre></div>
+<p>If the assertion fails, the crate prints a colorized diff showing
+exactly what changed, making it easy to identify regressions.</p>
+<h1 id="optimization-with-ghostscript">Optimization with
+Ghostscript</h1>
+<p>The PDFs generated by TeXtr are functional but unoptimized. They
+contain redundant objects and uncompressed streams, making files large
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>
+MB for simple documents). I provide helper functions to optimize PDFs
+using Ghostscript or <code>ps2pdf</code>:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> optimize_pdf_file_with_gs(pdf_path<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> <span class="dt">Result</span><span class="op">&lt;</span>()<span class="op">,</span> ContextError<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> output_path <span class="op">=</span> <span class="pp">format!</span>(<span class="st">&quot;{}.swp&quot;</span><span class="op">,</span> pdf_path)<span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> status <span class="op">=</span> <span class="pp">std::process::Command::</span>new(<span class="st">&quot;gs&quot;</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(<span class="st">&quot;-sDEVICE=pdfwrite&quot;</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(<span class="st">&quot;-dCompatibilityLevel=1.5&quot;</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(<span class="st">&quot;-dPDFSETTINGS=/ebook&quot;</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(<span class="st">&quot;-dNOPAUSE&quot;</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(<span class="st">&quot;-dQUIET&quot;</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(<span class="st">&quot;-dBATCH&quot;</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(<span class="pp">format!</span>(<span class="st">&quot;-sOutputFile={}&quot;</span><span class="op">,</span> output_path))</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>arg(pdf_path)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>spawn()<span class="op">?</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>wait()<span class="op">?;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">!</span>status<span class="op">.</span>success() <span class="op">{</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="cn">Err</span>(<span class="pp">ContextError::</span>with_context(<span class="st">&quot;gs optimization failed&quot;</span>))<span class="op">;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="pp">std::fs::</span>rename(output_path<span class="op">,</span> pdf_path)<span class="op">?;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="cn">Ok</span>(())</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The <code>-dPDFSETTINGS=/ebook</code> option balances file size and
+quality, suitable for on-screen viewing. Other options include
+<code>/screen</code> (lower quality, smaller size) and
+<code>/printer</code> (higher quality, larger size). Ghostscript also
+fixes subtle issues in the PDF structure, such as incorrect bounding
+boxes for glyph highlighting.</p>
+<p>The optimization reduces file sizes by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>80</mn><annotation encoding="application/x-tex">80</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>90</mn><annotation encoding="application/x-tex">90</annotation></semantics></math>%.
+A
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.5</mn><annotation encoding="application/x-tex">1.5</annotation></semantics></math>
+MB unoptimized PDF becomes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>200</mn><annotation encoding="application/x-tex">200</annotation></semantics></math>
+KB after optimization. The process takes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5</mn><annotation encoding="application/x-tex">0.5</annotation></semantics></math>-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>
+seconds depending on document complexity.</p>
+<h1 id="error-handling-and-context">Error Handling and Context</h1>
+<p>Rust’s <code>Result</code> type forces explicit error handling, but
+generic error types (<code>Box&lt;dyn Error&gt;</code>) lose context
+about where errors occurred. I implemented a custom
+<code>ContextError</code> type that chains error messages:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> ContextError <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> context<span class="op">:</span> <span class="dt">String</span><span class="op">,</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> source_error<span class="op">:</span> <span class="dt">Option</span><span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> ContextError <span class="op">{</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> with_context<span class="op">&lt;</span>S<span class="op">:</span> <span class="bu">Into</span><span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;&gt;</span>(context<span class="op">:</span> S) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        ContextError <span class="op">{</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>            context<span class="op">:</span> context<span class="op">.</span>into()<span class="op">,</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>            source_error<span class="op">:</span> <span class="cn">None</span><span class="op">,</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">pub</span> <span class="kw">fn</span> with_error<span class="op">&lt;</span>S<span class="op">:</span> <span class="bu">Into</span><span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;&gt;</span>(</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        context<span class="op">:</span> S<span class="op">,</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        error<span class="op">:</span> <span class="op">&amp;</span><span class="kw">dyn</span> <span class="pp">std::error::</span><span class="bu">Error</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        ContextError <span class="op">{</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>            context<span class="op">:</span> context<span class="op">.</span>into()<span class="op">,</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>            source_error<span class="op">:</span> <span class="cn">Some</span>(error<span class="op">.</span>to_string())<span class="op">,</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> <span class="pp">std::fmt::</span><span class="bu">Display</span> <span class="cf">for</span> ContextError <span class="op">{</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> fmt(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> f<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="pp">std::fmt::</span>Formatter) <span class="op">-&gt;</span> <span class="pp">std::fmt::</span><span class="dt">Result</span> <span class="op">{</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">match</span> <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span>source_error <span class="op">{</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>            <span class="cn">Some</span>(source) <span class="op">=&gt;</span> <span class="pp">write!</span>(f<span class="op">,</span> <span class="st">&quot;{}: {}&quot;</span><span class="op">,</span> <span class="kw">self</span><span class="op">.</span>context<span class="op">,</span> source)<span class="op">,</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>            <span class="cn">None</span> <span class="op">=&gt;</span> <span class="pp">write!</span>(f<span class="op">,</span> <span class="st">&quot;{}&quot;</span><span class="op">,</span> <span class="kw">self</span><span class="op">.</span>context)<span class="op">,</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Using this type throughout the codebase produces informative error
+chains:</p>
+<pre><code>Failed to save PDF file: failed to write bytes: permission denied</code></pre>
+<p>This is much more useful than a bare “permission denied” error, which
+doesn’t indicate what operation failed. The error propagates through the
+call stack, accumulating context at each level.</p>
+<h1 id="lessons-learned">Lessons Learned</h1>
+<p>Building a PDF library from scratch taught me several important
+lessons about low-level document processing. First, specifications are
+essential but insufficient. The PDF specification is comprehensive but
+lacks practical examples for edge cases. I spent hours debugging glyph
+width encoding because the spec doesn’t clearly explain the scaling
+factor. Examining PDFs generated by other tools (using
+<code>pdfinfo</code> and manual inspection) revealed the correct
+approach.</p>
+<p>Second, deterministic output is invaluable for testing. Binary
+formats are notoriously difficult to test because minor changes cause
+widespread byte differences. By controlling all sources of randomness, I
+could use simple byte comparison for regression tests. This caught
+numerous bugs during development where refactoring accidentally changed
+output.</p>
+<p>Third, font handling is the hardest part of PDF generation. Parsing
+TTF files, extracting glyph metrics, generating CID-to-Unicode maps, and
+encoding width arrays all require careful attention to detail. One
+off-by-one error in glyph ID encoding caused text to render as random
+glyphs, which took days to debug. Using the type system to distinguish
+glyph IDs from Unicode codepoints prevented similar errors.</p>
+<p>Finally, Rust’s ownership model shines for binary format
+manipulation. The PDF object graph has complex reference patterns (fonts
+reference font descriptors, pages reference resource dictionaries,
+etc.). In C, this would require manual reference counting or garbage
+collection. Rust’s <code>Arc</code> (atomic reference counting) and
+explicit cloning made memory management straightforward without
+sacrificing performance.</p>
+<hr />
+<p>Implementing a PDF generation library demonstrates how understanding
+binary file formats enables creating powerful document processing tools.
+The PDF specification is complex, but breaking it into manageable
+components (font embedding, text rendering, page structure) makes
+implementation tractable. Rust’s type system and ownership model provide
+safety guarantees that prevent entire classes of bugs common in C-based
+PDF libraries. The project serves as a foundation for more complex
+document generation systems, from automated report generation to
+typesetting engines. Understanding how each layer works, from Unicode
+normalization to postscript optimization, provides deep appreciation for
+the engineering that makes digital documents portable and precise.</p>
