@@ -3,7 +3,7 @@ import { MarqueeSection } from "./marquee";
 export function AboutSection() {
   return (
     <section id="skills" className="border-b border-border mb-6">
-      <div className="max-w-[1200px] mx-auto px-4 py-12">
+      <div className="max-w-[1200px] mx-auto px-4 pb-12">
         <MarqueeSection />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">

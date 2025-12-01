@@ -49,7 +49,8 @@ export function BlogHeader() {
               from coding physical simulations to building software products and
               visualizing complex data. I am seeking research or industry roles
               where I can apply my programming and development skills to solve
-              real-world problems in materials science.
+              real-world problems in materials science, technology, education and
+              adjacent fields.
             </p>
           </div>
 
@@ -61,7 +62,7 @@ export function BlogHeader() {
               rel="noopener noreferrer"
               className="px-6 py-3 bg-foreground text-background font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity border-2 border-foreground"
             >
-              View CV / Resume
+              View My CV / Resume
             </a>
             <a
               href="https://github.com/ghovax"

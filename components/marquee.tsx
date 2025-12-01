@@ -29,13 +29,28 @@ const logos = [
 export function MarqueeSection() {
   return (
     <div className="py-12">
-      <Marquee>
+      <Marquee className="overflow-hidden">
         {logos.map((logo) => (
-          <div key={logo.name} className="mx-8">
+          <div key={logo.name} className="mx-8 my-4">
             <img
               src={logo.src}
               alt={logo.name}
-              className="h-12 w-auto filter invert"
+              className="w-auto h-12"
+              style={
+                logo.name === "LAMMPS"
+                  ? { transform: "scale(2.5)", margin: "0 1.75rem 0 0.5rem" }
+                  : logo.name === "Next.js"
+                  ? { transform: "scale(0.7)", margin: "0 -1.5rem" }
+                  : logo.name == "Quantum ESPRESSO"
+                  ? { transform: "scale(2)", margin: "0 0.75rem" }
+                  : logo.name == "Google Cloud"
+                  ? { transform: "scale(1.5)" }
+                  : logo.name == "TensorFlow"
+                  ? { transform: "scale(1.75)" }
+                  : logo.name == "PyTorch"
+                  ? { transform: "scale(0.85)" }
+                  : {}
+              }
             />
           </div>
         ))}
