@@ -37,6 +37,15 @@ export function AboutSection() {
                             Git/GitHub, CI/CD, Embedded Systems
                           </p>
                         </div>
+                        {/* Adding Cloud & Experimental Techniques here as a sub-section to fit into 3 columns*/}
+                        <div>
+                          <h4 className="font-bold mb-1 text-xs uppercase tracking-wide text-muted-foreground">
+                            Cloud & DevOps
+                          </h4>
+                          <p className="text-sm leading-relaxed">
+                            Google Cloud Storage (GCS), Firebase/Firestore, Docker, MongoDB
+                          </p>
+                        </div>
                       </div>
                     </div>
         
@@ -60,6 +69,14 @@ export function AboutSection() {
                           </h4>
                           <p className="text-sm leading-relaxed">
                             VASP, Quantum ESPRESSO, LAMMPS, OVITO, ASE, TensorFlow, PyTorch, Scikit-Learn, NumPy, Pandas
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-bold mb-1 text-xs uppercase tracking-wide text-muted-foreground">
+                            Experimental & Analytical Techniques
+                          </h4>
+                          <p className="text-sm leading-relaxed">
+                            X-ray, AFM/STM, Spectroscopy (Raman, IR, UV-Vis, NQR), Photoluminescence, Nano-electronics
                           </p>
                         </div>
                       </div>
@@ -92,29 +109,13 @@ export function AboutSection() {
                             </div>
                           </div>
                         </div>
-                        {/* Adding Cloud & Experimental Techniques here as a sub-section to fit into 3 columns*/}
-                        <div>
-                          <h4 className="font-bold mb-1 text-xs uppercase tracking-wide text-muted-foreground">
-                            Cloud & DevOps
-                          </h4>
-                          <p className="text-sm leading-relaxed">
-                            Google Cloud Storage (GCS), Firebase/Firestore, Docker, MongoDB
-                          </p>
-                        </div>
-                        <div>
-                          <h4 className="font-bold mb-1 text-xs uppercase tracking-wide text-muted-foreground">
-                            Experimental & Analytical Techniques
-                          </h4>
-                          <p className="text-sm leading-relaxed">
-                            X-ray, AFM/STM, Spectroscopy (Raman, IR, UV-Vis, NQR), Photoluminescence, Nano-electronics
-                          </p>
-                        </div>
+                        
                         <div>
                           <h4 className="font-bold mb-1 text-xs uppercase tracking-wide text-muted-foreground">
                             Professional & Soft Skills
                           </h4>
                           <p className="text-sm leading-relaxed">
-                            Adaptability, Teamwork, Robust Code, Communication, Problem-Solving
+                            Adaptability, Teamwork, Robust Code Practices, Communication, Fast Learning
                           </p>
                         </div>
                       </div>
