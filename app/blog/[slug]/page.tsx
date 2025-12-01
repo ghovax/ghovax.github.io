@@ -34,7 +34,11 @@ async function getPost(
     }
 
     // Read HTML content
-    const htmlPath = path.join(process.cwd(), ".posts-build", post.htmlFile);
+    const htmlPath = path.join(
+      process.cwd(),
+      "public/.posts-build",
+      post.htmlFile,
+    );
     if (!fs.existsSync(htmlPath)) {
       return null;
     }

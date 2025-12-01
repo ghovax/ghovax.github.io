@@ -6,8 +6,7 @@ const { execSync } = require("child_process");
 const matter = require("gray-matter");
 
 const POSTS_DIR = path.join(__dirname, "../posts");
-const HTML_OUTPUT_DIR = path.join(__dirname, "../.posts-build");
-const PUBLIC_POSTS_DIR = path.join(__dirname, "../public/.posts-build");
+const OUTPUT_DIR = path.join(__dirname, "../public/.posts-build");
 const OUTPUT_JSON = path.join(__dirname, "../posts.json");
 
 function ensurePostsDir() {
@@ -15,13 +14,9 @@ function ensurePostsDir() {
     fs.mkdirSync(POSTS_DIR, { recursive: true });
     console.log("Created posts directory");
   }
-  if (!fs.existsSync(HTML_OUTPUT_DIR)) {
-    fs.mkdirSync(HTML_OUTPUT_DIR, { recursive: true });
-    console.log("Created HTML output directory");
-  }
-  if (!fs.existsSync(PUBLIC_POSTS_DIR)) {
-    fs.mkdirSync(PUBLIC_POSTS_DIR, { recursive: true });
-    console.log("Created public posts directory");
+  if (!fs.existsSync(OUTPUT_DIR)) {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+    console.log("Created posts output directory");
   }
 }
 
@@ -32,10 +27,10 @@ function convertMarkdownToHTML(filepath, folderName) {
 
     // Use folder name as the base identifier
     const basename = folderName || path.basename(filepath, ".md");
-    const htmlPath = path.join(HTML_OUTPUT_DIR, `${basename}.html`);
+    const htmlPath = path.join(OUTPUT_DIR, `${basename}.html`);
 
     // Convert markdown to HTML using pandoc with mathml
-    const tempMdPath = path.join(HTML_OUTPUT_DIR, `.temp-${basename}.md`);
+    const tempMdPath = path.join(OUTPUT_DIR, `.temp-${basename}.md`);
     fs.writeFileSync(tempMdPath, markdown);
 
     try {
@@ -100,23 +95,17 @@ function copyPostAssets(postFolder) {
     const stat = fs.statSync(srcPath);
 
     if (stat.isFile()) {
-      // Create a subdirectory in both build and public folders for this post's assets
-      const postBuildDir = path.join(HTML_OUTPUT_DIR, postFolder);
-      const postPublicDir = path.join(PUBLIC_POSTS_DIR, postFolder);
+      // Create a subdirectory for this post's assets
+      const postOutputDir = path.join(OUTPUT_DIR, postFolder);
 
-      if (!fs.existsSync(postBuildDir)) {
-        fs.mkdirSync(postBuildDir, { recursive: true });
-      }
-      if (!fs.existsSync(postPublicDir)) {
-        fs.mkdirSync(postPublicDir, { recursive: true });
+      if (!fs.existsSync(postOutputDir)) {
+        fs.mkdirSync(postOutputDir, { recursive: true });
       }
 
-      const destPathBuild = path.join(postBuildDir, file);
-      const destPathPublic = path.join(postPublicDir, file);
+      const destPath = path.join(postOutputDir, file);
 
-      fs.copyFileSync(srcPath, destPathBuild);
-      fs.copyFileSync(srcPath, destPathPublic);
-      console.log(`  ↳ Copied ${file} to build and public directories`);
+      fs.copyFileSync(srcPath, destPath);
+      console.log(`  ↳ Copied ${file} to output directory`);
     }
   }
 }
