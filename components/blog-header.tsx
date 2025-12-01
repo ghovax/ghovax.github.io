@@ -69,7 +69,7 @@ export function BlogHeader() {
           </div>
 
           {/* Contact */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
             <a
               href="https://linkedin.com/in/giovanni-gravili"
               target="_blank"

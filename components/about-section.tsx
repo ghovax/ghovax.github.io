@@ -97,7 +97,7 @@ export function AboutSection() {
                   <span className="text-muted-foreground">•</span>
                   <span>DFT</span>
                   <span className="text-muted-foreground">•</span>
-                  <span>ML-based Force Fields</span>
+                  <span>Machine Learning Potentials (MLPs)</span>
                   <span className="text-muted-foreground">•</span>
                   <span>Multiscale Simulations</span>
                   <span className="text-muted-foreground">•</span>
@@ -137,7 +137,7 @@ export function AboutSection() {
                   Experimental Techniques
                 </h4>
                 <p className="text-sm leading-relaxed flex flex-wrap items-center gap-1.5">
-                  <span>X-ray</span>
+                  <span>XRF/XRD</span>
                   <span className="text-muted-foreground">•</span>
                   <span>AFM/STM</span>
                   <span className="text-muted-foreground">•</span>
@@ -145,7 +145,7 @@ export function AboutSection() {
                   <span className="text-muted-foreground">•</span>
                   <span>Photoluminescence</span>
                   <span className="text-muted-foreground">•</span>
-                  <span>Nano-electronics</span>
+                  <span>Fabrication (Microfabrication, Lithography)</span>
                 </p>
               </div>
             </div>
@@ -183,13 +183,13 @@ export function AboutSection() {
                 <p className="text-sm leading-relaxed flex flex-wrap items-center gap-1.5">
                   <span>Adaptability</span>
                   <span className="text-muted-foreground">•</span>
-                  <span>Teamwork</span>
+                  <span>Teamwork & Inclusivity</span>
                   <span className="text-muted-foreground">•</span>
                   <span>Robust Code Practices</span>
                   <span className="text-muted-foreground">•</span>
                   <span>Communication</span>
                   <span className="text-muted-foreground">•</span>
-                  <span>Fast Learning</span>
+                  <span>Rapid Learning</span>
                 </p>
               </div>
             </div>

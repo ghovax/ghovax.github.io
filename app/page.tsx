@@ -42,7 +42,7 @@ export default function Home() {
       <BlogHeader />
       <AboutSection />
 
-      <main className="max-w-[1200px] mx-auto px-4 py-2">
+      <main className="max-w-[1200px] mx-auto px-3 py-2">
         {/* Featured Work Section */}
         <div className="border-b border-foreground mb-3 pb-0.5 pt-4">
           <h2 className="text-sm font-bold uppercase tracking-wide">
