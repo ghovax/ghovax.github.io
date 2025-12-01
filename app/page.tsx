@@ -44,7 +44,7 @@ export default function Home() {
 
       <main className="max-w-[1200px] mx-auto px-3 py-2">
         {/* Featured Work Section */}
-        <div className="border-b border-foreground mb-3 pb-0.5 pt-4">
+        <div className="border-b border-foreground/30 mb-3 pb-1 pt-4">
           <h2 className="text-sm font-bold uppercase tracking-wide">
             TECHNICAL PROJECTS & CASE STUDIES
           </h2>
