@@ -25,12 +25,6 @@ $$\frac{e^2}{|\mathbf{r}_1 - \mathbf{r}_2|}$$
 
 is what makes everything difficult. It means we can't write the wavefunction as a simple product of single-electron wavefunctions. The electrons are correlated: knowing where one electron is affects the probability distribution of the other.
 
-# Interactive Implementation
-
-Below is the interactive Pluto.jl notebook containing the full implementation where you can explore the code, modify parameters, and see how the calculation responds:
-
-<iframe src="/.posts-build/dft-helium-julia/Important_story.html" width="100%" height="800px" frameborder="0" style="border: 1px solid #e5e7eb; border-radius: 8px; margin: 20px 0;"></iframe>
-
 # The DFT Approach
 
 Density Functional Theory provides an elegant solution by reformulating the problem in terms of electron density $n(\mathbf{r})$ rather than many-body wavefunctions $\Psi(\mathbf{r}_1, \mathbf{r}_2, ..., \mathbf{r}_N)$. The key insight, formalized by Kohn and Sham in 1965, is that we can map the interacting many-electron system onto a system of non-interacting electrons moving in an effective potential.
@@ -123,6 +117,41 @@ This approximation has an error that scales as $O(h^2)$, which is acceptable for
 
 To find the eigenvalue $E$ and eigenfunction $u(r)$ of the radial Schrödinger equation, I implemented a shooting method combined with binary search. This was one of the most satisfying parts of the project to implement. The idea is simple but effective. I guess an energy $E$ within some range (I start with $[-10, 0]$ Hartree for the ground state), integrate outward from $r=0$ using the finite difference equation with boundary conditions $u(0) = 0$ and $u(h) = h$, and check the asymptotic behavior. At large $r$, the correct eigenfunction should decay exponentially to zero. If the energy guess is wrong, the wavefunction either decays too quickly and diverges negative (energy too low) or oscillates and grows (energy too high). I use bisection to narrow the energy range until I hit the eigenvalue within tolerance $10^{-6}$ Hartree. This method is robust because it's guaranteed to converge.
 
+```julia
+"""
+    solve_radial_schrodinger!(ϕ, V, r, dr; n, l, tol=1e-9)
+
+Solve radial Schrödinger equation using shooting method with binary search.
+"""
+function solve_radial_schrodinger!(ϕ, V, r, dr; n, l, tol=1e-9)
+    N = length(r)
+    E_max, E_min = 0.0, -20.0
+    ε = 0.0
+    
+    while abs(E_max - E_min) > tol
+        ε = (E_min + E_max) / 2
+        
+        # Shooting from infinity with exponential boundary condition
+        ϕ[N-1:N] .= r[N-1:N] .* exp.(-r[N-1:N])
+        
+        # Numerov integration inward
+        for i in N-1:-1:2
+            ϕ[i-1] = 2ϕ[i] - ϕ[i+1] + dr^2 * (-2ε + 2V[i]) * ϕ[i]
+        end
+        
+        # Count nodes to determine if energy is too high or low
+        num_nodes = sum(@view(ϕ[1:N-1]) .* @view(ϕ[2:N]) .< 0)
+        num_nodes > n - l - 1 ? (E_max = ε) : (E_min = ε)
+    end
+    
+    # Normalize wavefunction
+    norm² = (ϕ[1]^2 + ϕ[N]^2) / 2 + sum(@view(ϕ[2:N-1]).^2)
+    ϕ ./= √(norm² * dr)
+    
+    return ε
+end
+```
+
 The Hartree potential represents the classical electrostatic repulsion between electrons. It satisfies Poisson's equation:
 
 $$\nabla^2 V_H = -4\pi e^2 n(r)$$
@@ -145,9 +174,134 @@ which is a reasonable first approximation. The SCF typically converges in 15-25 
 
 One of the key things I learned during implementation was the importance of numerical stability. Several places in the code require careful handling of division by $r^2$ or $r$ when $r$ is small, exponential functions that can overflow, normalization of wavefunctions on discrete grids, and integration near boundaries. I handled these through careful treatment of boundary conditions and using stable numerical algorithms (like the shooting method which naturally handles the $r=0$ singularity).
 
+Here is the full implementation of the SCF loop, incorporating the potentials and the shooting method:
+
+```julia
+"""
+    dft_helium(; N::Int, r_min::Float64, r_max::Float64, 
+               tolerance::Float64, max_iterations::Int)
+
+Perform self-consistent Kohn-Sham DFT calculation for the helium atom using 
+Local Density Approximation (LDA) with Perdew-Zunger correlation functional.
+"""
+function dft_helium(; N::Int, r_min::Float64, r_max::Float64, 
+                     tolerance::Float64, max_iterations::Int)
+    
+    energies = Float64[]
+    dr = (r_max - r_min) / (N - 1)
+    r = range(r_min, r_max, length=N) |> collect
+    
+    # Initialize density and potentials
+    ρ = zeros(N)  # electron density
+    V_nuclear, V_hartree, V_exchange, V_correlation, V_total = 
+        (zeros(N) for _ in 1:5)
+    ϕ = zeros(N)  # radial wavefunction
+    
+    # Perdew-Zunger correlation parameters
+    A, B, C, D, γ, β₁, β₂ = 0.0311, -0.048, 0.002, -0.0116, -0.1423, 1.0529, 0.3334
+    
+    # Self-consistent field loop
+    E_prev, E_curr = 1.0, 0.0
+    for iter in 1:max_iterations
+        abs(E_prev - E_curr) < tolerance && break
+        E_prev = E_curr
+        
+        # Nuclear potential (Z=2 for helium)
+        V_nuclear .= -2 ./ r
+        
+        # Hartree potential via finite difference solution of Poisson equation
+        U = zeros(N)
+        U[1:2] .= 0.0
+        for i in 2:N-1
+            U[i+1] = 2U[i] - U[i-1] - dr^2 * ρ[i] / r[i]
+        end
+        boundary_correction = (2 - U[N]) / r[N]
+        V_hartree .= U ./ r .+ boundary_correction
+        
+        # Exchange potential (Slater approximation)
+        V_exchange .= -cbrt.(3 * ρ ./ (4π^2 * r.^2))
+        
+        # Correlation potential (Perdew-Zunger)
+        for i in 1:N
+            if ρ[i] < 1e-10
+                V_correlation[i] = 0.0
+                continue
+            end
+            
+            rₛ = cbrt(3r[i]^2 / ρ[i])  # Wigner-Seitz radius
+            
+            if rₛ < 1
+                # High density (metallic) regime
+                V_correlation[i] = A * log(rₛ) + B - A/3 + 
+                                   2C/3 * rₛ * log(rₛ) + (2D - C) * rₛ/3
+            elseif rₛ < 1e10
+                # Low density regime
+                εc = γ / (1 + β₁ * √rₛ + β₂ * rₛ)
+                V_correlation[i] = εc * (1 + 7β₁ * √rₛ/6 + 4β₂ * rₛ/3) / 
+                                   (1 + β₁ * √rₛ + β₂ * rₛ)
+            else
+                V_correlation[i] = 0.0
+            end
+        end
+        
+        V_total .= V_nuclear + V_hartree + V_exchange + V_correlation
+        
+        # Solve radial Schrödinger equation for 1s orbital (n=1, l=0)
+        ε = solve_radial_schrodinger!(ϕ, V_total, r, dr, n=1, l=0)
+        
+        # Update electron density (occupation = 2 for closed shell)
+        ρ .= 2 * ϕ.^2
+        
+        # Calculate energy components
+        E_hartree = sum(V_hartree .* ρ) * dr / 2
+        E_exchange = sum(V_exchange .* ρ) * dr / 2
+        E_correlation = sum(V_correlation .* ρ) * dr / 2
+        
+        # Total energy (correcting for double counting)
+        E_curr = 2ε - E_hartree - (E_exchange - E_correlation) / 2
+        push!(energies, E_curr)
+    end
+    
+    return energies
+end
+```
+
 # Results and Validation
 
 After implementing the full self-consistent DFT calculation, I obtained the ground-state energy of Helium. The calculation typically converges in 15-25 iterations depending on the initial guess and mixing parameter. Watching the energy converge iteration by iteration was deeply satisfying.
+
+```julia
+# Perform self-consistent DFT calculation for helium atom
+energies = @time dft_helium(
+    N = 1024,
+    r_min = 1e-4,
+    r_max = 10.0,
+    tolerance = 1e-3,
+    max_iterations = 10
+)
+
+# Display ground state energy
+println("Ground state energy: E₀ = $(last(energies)) Eₕ")
+```
+
+```text
+energies = Float64[
+    -3.79649,
+    -2.5962,
+    -2.99748,
+    -2.8264,
+    -2.89947,
+    -2.86793,
+    -2.8815,
+    -2.87565,
+    -2.87817,
+    -2.87709,
+]
+
+0.015317 seconds (2.24 k allocations: 2.682 MiB)
+
+Ground state energy: E₀ = -2.877085468942469 Eₕ
+```
 
 The final ground-state energy I computed is approximately $-2.86$ **Hartree** (in atomic units), which compares with the experimental value of $-2.9037$ Hartree and the exact quantum mechanical result of $-2.9037$ Hartree (from high-accuracy variational calculations). My error is $\sim 1.5\%$ or $0.04$ Hartree (about 1 eV).
 
