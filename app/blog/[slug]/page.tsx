@@ -146,7 +146,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
               @
             </span>
-            Write me via e-mail
+            Respond via e-mail
           </button>
           <button className="flex items-center gap-2 text-xs hover:opacity-70">
             <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
