@@ -5,7 +5,6 @@ export function AboutSection() {
     <section id="skills" className=" mb-6">
       <div className="max-w-[1200px] mx-auto px-4 pb-12">
         <MarqueeSection />
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Column 1: Programming & Development */}
           <div className="space-y-6">
@@ -194,7 +193,8 @@ export function AboutSection() {
               </div>
             </div>
           </div>
-        </div>      </div>
+        </div>{" "}
+      </div>
     </section>
   );
 }

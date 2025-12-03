@@ -127,27 +127,27 @@ function solve_radial_schrodinger!(ϕ, V, r, dr; n, l, tol=1e-9)
     N = length(r)
     E_max, E_min = 0.0, -20.0
     ε = 0.0
-    
+
     while abs(E_max - E_min) > tol
         ε = (E_min + E_max) / 2
-        
+
         # Shooting from infinity with exponential boundary condition
         ϕ[N-1:N] .= r[N-1:N] .* exp.(-r[N-1:N])
-        
+
         # Numerov integration inward
         for i in N-1:-1:2
             ϕ[i-1] = 2ϕ[i] - ϕ[i+1] + dr^2 * (-2ε + 2V[i]) * ϕ[i]
         end
-        
+
         # Count nodes to determine if energy is too high or low
         num_nodes = sum(@view(ϕ[1:N-1]) .* @view(ϕ[2:N]) .< 0)
         num_nodes > n - l - 1 ? (E_max = ε) : (E_min = ε)
     end
-    
+
     # Normalize wavefunction
     norm² = (ϕ[1]^2 + ϕ[N]^2) / 2 + sum(@view(ϕ[2:N-1]).^2)
     ϕ ./= √(norm² * dr)
-    
+
     return ε
 end
 ```
@@ -178,37 +178,37 @@ Here is the full implementation of the SCF loop, incorporating the potentials an
 
 ```julia
 """
-    dft_helium(; N::Int, r_min::Float64, r_max::Float64, 
+    dft_helium(; N::Int, r_min::Float64, r_max::Float64,
                tolerance::Float64, max_iterations::Int)
 
-Perform self-consistent Kohn-Sham DFT calculation for the helium atom using 
+Perform self-consistent Kohn-Sham DFT calculation for the helium atom using
 Local Density Approximation (LDA) with Perdew-Zunger correlation functional.
 """
-function dft_helium(; N::Int, r_min::Float64, r_max::Float64, 
+function dft_helium(; N::Int, r_min::Float64, r_max::Float64,
                      tolerance::Float64, max_iterations::Int)
-    
+
     energies = Float64[]
     dr = (r_max - r_min) / (N - 1)
     r = range(r_min, r_max, length=N) |> collect
-    
+
     # Initialize density and potentials
     ρ = zeros(N)  # electron density
-    V_nuclear, V_hartree, V_exchange, V_correlation, V_total = 
+    V_nuclear, V_hartree, V_exchange, V_correlation, V_total =
         (zeros(N) for _ in 1:5)
     ϕ = zeros(N)  # radial wavefunction
-    
+
     # Perdew-Zunger correlation parameters
     A, B, C, D, γ, β₁, β₂ = 0.0311, -0.048, 0.002, -0.0116, -0.1423, 1.0529, 0.3334
-    
+
     # Self-consistent field loop
     E_prev, E_curr = 1.0, 0.0
     for iter in 1:max_iterations
         abs(E_prev - E_curr) < tolerance && break
         E_prev = E_curr
-        
+
         # Nuclear potential (Z=2 for helium)
         V_nuclear .= -2 ./ r
-        
+
         # Hartree potential via finite difference solution of Poisson equation
         U = zeros(N)
         U[1:2] .= 0.0
@@ -217,51 +217,51 @@ function dft_helium(; N::Int, r_min::Float64, r_max::Float64,
         end
         boundary_correction = (2 - U[N]) / r[N]
         V_hartree .= U ./ r .+ boundary_correction
-        
+
         # Exchange potential (Slater approximation)
         V_exchange .= -cbrt.(3 * ρ ./ (4π^2 * r.^2))
-        
+
         # Correlation potential (Perdew-Zunger)
         for i in 1:N
             if ρ[i] < 1e-10
                 V_correlation[i] = 0.0
                 continue
             end
-            
+
             rₛ = cbrt(3r[i]^2 / ρ[i])  # Wigner-Seitz radius
-            
+
             if rₛ < 1
                 # High density (metallic) regime
-                V_correlation[i] = A * log(rₛ) + B - A/3 + 
+                V_correlation[i] = A * log(rₛ) + B - A/3 +
                                    2C/3 * rₛ * log(rₛ) + (2D - C) * rₛ/3
             elseif rₛ < 1e10
                 # Low density regime
                 εc = γ / (1 + β₁ * √rₛ + β₂ * rₛ)
-                V_correlation[i] = εc * (1 + 7β₁ * √rₛ/6 + 4β₂ * rₛ/3) / 
+                V_correlation[i] = εc * (1 + 7β₁ * √rₛ/6 + 4β₂ * rₛ/3) /
                                    (1 + β₁ * √rₛ + β₂ * rₛ)
             else
                 V_correlation[i] = 0.0
             end
         end
-        
+
         V_total .= V_nuclear + V_hartree + V_exchange + V_correlation
-        
+
         # Solve radial Schrödinger equation for 1s orbital (n=1, l=0)
         ε = solve_radial_schrodinger!(ϕ, V_total, r, dr, n=1, l=0)
-        
+
         # Update electron density (occupation = 2 for closed shell)
         ρ .= 2 * ϕ.^2
-        
+
         # Calculate energy components
         E_hartree = sum(V_hartree .* ρ) * dr / 2
         E_exchange = sum(V_exchange .* ρ) * dr / 2
         E_correlation = sum(V_correlation .* ρ) * dr / 2
-        
+
         # Total energy (correcting for double counting)
         E_curr = 2ε - E_hartree - (E_exchange - E_correlation) / 2
         push!(energies, E_curr)
     end
-    
+
     return energies
 end
 ```

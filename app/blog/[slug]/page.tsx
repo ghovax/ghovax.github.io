@@ -108,7 +108,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <header className="mb-8">
           {/* Title */}
           <h1 className="text-3xl md:text-4xl font-bold py-4 leading-tight border-border">
-            <Highlighter action="highlight" color={highlightColors[Math.floor(Math.random() * highlightColors.length)]}>
+            <Highlighter
+              action="highlight"
+              color={
+                highlightColors[
+                  Math.floor(Math.random() * highlightColors.length)
+                ]
+              }
+            >
               {post.metadata.title}
             </Highlighter>
           </h1>

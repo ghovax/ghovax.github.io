@@ -30,26 +30,26 @@ export function BlogHeader() {
         <div>
           <div className="max-w-4xl">
             <p className="text-base mb-4 leading-relaxed">
-              As a computational physicist with a Master's in Material Physics and
-              Nanoscience, I specialize in materials modeling, molecular
-              dynamics, and machine learning. My recent work includes a thesis on
-              nanoscale tribology using HPC, alongside leading technical
+              As a computational physicist with a Master's in Material Physics
+              and Nanoscience, I specialize in materials modeling, molecular
+              dynamics, and machine learning. My recent work includes a thesis
+              on nanoscale tribology using HPC, alongside leading technical
               development for an EdTech startup.
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              I am passionate about connecting theory with practical application,
-              from coding physical simulations to building software products and
-              visualizing complex data. I am seeking research or industry roles
-              where I can apply my programming and development skills to solve
-              real-world problems in materials science, technology, education and
-              adjacent fields.
+              I am passionate about connecting theory with practical
+              application, from coding physical simulations to building software
+              products and visualizing complex data. I am seeking research or
+              industry roles where I can apply my programming and development
+              skills to solve real-world problems in materials science,
+              technology, education and adjacent fields.
             </p>
           </div>
 
           {/* Prominent CTA Buttons */}
           <div className="flex flex-wrap gap-3 my-6">
             <a
-              href="https://drive.google.com/file/d/1G-KILQNpoLOk75gSCfRzYdH4CvNd1OFj/view?usp=sharing"
+              href="https://drive.google.com/file/d/1yUgeBOnbC9-Zk6ECqg-7DrkrLLJFQHkF/view?usp=sharing"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 bg-foreground text-background font-bold text-sm uppercase tracking-wide hover:opacity-90 transition-opacity border-2 border-foreground"
