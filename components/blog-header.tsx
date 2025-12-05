@@ -34,7 +34,7 @@ export function BlogHeader() {
               and Nanoscience, I specialize in materials modeling, molecular
               dynamics, and machine learning. My recent work includes a thesis
               on nanoscale tribology using HPC, alongside leading technical
-              development for an EdTech startup.
+              development for an EdTech startup project.
             </p>
             <p className="text-sm text-muted-foreground mb-6">
               I am passionate about connecting theory with practical
