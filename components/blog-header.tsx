@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Linkedin } from "lucide-react";
 import { Highlighter } from "./ui/highlighter";
 
@@ -16,15 +17,27 @@ export function BlogHeader() {
     <header className="w-full">
       {/* Masthead & Bio */}
       <div className="max-w-6xl mx-auto px-4 pt-8 sm:pt-12">
-        <div className="pb-6 text-left">
-          <Link href="/" className="inline-block">
-            <h1 className="text-5xl font-bold tracking-tight">
-              Giovanni Gravili
-            </h1>
-          </Link>
-          <p className="text-xl text-muted-foreground pt-1 italic">
-            R&D-Oriented Computational Physicist
-          </p>
+        <div className="pb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+          <div className="flex-shrink-0">
+            <Image
+              src="/153454774.jpeg"
+              alt="Giovanni Gravili"
+              width={180}
+              height={180}
+              className="rounded-full border-2 border-border w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 object-contain"
+              priority
+            />
+          </div>
+          <div className="flex-1 text-center sm:text-left md:ml-2 sm:mt-5 md:mt-7">
+            <Link href="/" className="inline-block">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+                Giovanni Gravili
+              </h1>
+            </Link>
+            <p className="text-lg sm:text-xl text-muted-foreground pt-1 italic">
+              R&D-Oriented Computational Physicist
+            </p>
+          </div>
         </div>
 
         <div>

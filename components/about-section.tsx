@@ -30,6 +30,10 @@ export function AboutSection() {
                   <span>MATLAB</span>
                   <span className="text-muted-foreground">•</span>
                   <span>Mathematica</span>
+                  <span className="text-muted-foreground">•</span>
+                  <span>Rust</span>
+                  <span className="text-muted-foreground">•</span>
+                  <span>Go</span>
                 </p>
               </div>
               <div>

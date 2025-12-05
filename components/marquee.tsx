@@ -14,6 +14,8 @@ const logos = [
   { name: "Node.js", src: "/logos/Node.js_logo.svg.png" },
   { name: "TypeScript", src: "/logos/Typescript_logo_2020.svg.png" },
   { name: "JavaScript", src: "/logos/Unofficial_JavaScript_logo_2.svg.png" },
+  { name: "Go", src: "/logos/Go_Logo_Blue.svg.png" },
+  { name: "Rust", src: "/logos/Rust_programming_language_black_logo.svg.png" },
   { name: "Docker", src: "/logos/Docker_Logo.png" },
   { name: "Git", src: "/logos/Git-logo.svg.png" },
   { name: "Google Cloud", src: "/logos/google-cloud.png" },
@@ -51,7 +53,9 @@ export function MarqueeSection() {
                             ? { transform: "scale(0.85)" }
                             : logo.name == "Firebase"
                               ? { margin: "0 -0rem 0 0rem" }
-                              : {}
+                              : logo.name == "Rust"
+                                ? { transform: "scale(1.2)" }
+                                : {}
               }
             />
           </div>
