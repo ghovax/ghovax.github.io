@@ -42,16 +42,16 @@ export default function Home() {
       <BlogHeader />
       <AboutSection />
 
-      <main className="mx-auto px-3 py-2">
+      <main className="mx-auto px-3 py-2 pb-2 font-serif">
         {/* Featured Work Section */}
         <div className="border-b border-foreground/30 mb-3 pb-1 pt-2">
-          <h2 className="text-sm font-bold uppercase tracking-wide">
+          <h2 className="text-sm font-bold uppercase tracking-wide font-sans">
             TECHNICAL PROJECTS & CASE STUDIES
           </h2>
         </div>
 
         {/* Offset columnar layout - 4 columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-b border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-border">
           {/* Column 1 */}
           <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
             {column1Posts.map((post, index) => (
@@ -62,7 +62,7 @@ export default function Home() {
                 <Link href={`/blog/${post.slug}`} className="block group">
                   <div className="mb-1">
                     {post.category && (
-                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
                         {post.category}
                       </span>
                     )}
@@ -90,7 +90,7 @@ export default function Home() {
                 <Link href={`/blog/${post.slug}`} className="block group">
                   <div className="mb-1">
                     {post.category && (
-                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
                         {post.category}
                       </span>
                     )}
@@ -116,7 +116,7 @@ export default function Home() {
                 <Link href={`/blog/${post.slug}`} className="block group">
                   <div className="mb-1">
                     {post.category && (
-                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
                         {post.category}
                       </span>
                     )}
@@ -142,7 +142,7 @@ export default function Home() {
                 <Link href={`/blog/${post.slug}`} className="block group">
                   <div className="mb-1">
                     {post.category && (
-                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
                         {post.category}
                       </span>
                     )}
@@ -159,78 +159,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* Simplified footer */}
-      <footer className="border-t border-border mt-12">
-        <div className="max-w-[1200px] mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-            <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
-                Portfolio
-              </h3>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <Link href="/">All Posts</Link>
-                </li>
-                <li>
-                  <Link href="#">Projects</Link>
-                </li>
-                <li>
-                  <Link href="#">Case Studies</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
-                Topics
-              </h3>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <Link href="#">Technology</Link>
-                </li>
-                <li>
-                  <Link href="#">Design</Link>
-                </li>
-                <li>
-                  <Link href="#">Research</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
-                Connect
-              </h3>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <a href="#">LinkedIn</a>
-                </li>
-                <li>
-                  <a href="#">GitHub</a>
-                </li>
-                <li>
-                  <a href="#">Twitter</a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xs font-bold uppercase mb-3 tracking-wide">
-                About
-              </h3>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <Link href="#">About Me</Link>
-                </li>
-                <li>
-                  <Link href="#">Contact</Link>
-                </li>
-                <li>
-                  <Link href="#">Resume</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

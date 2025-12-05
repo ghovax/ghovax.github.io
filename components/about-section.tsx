@@ -2,8 +2,8 @@ import { MarqueeSection } from "./marquee";
 
 export function AboutSection() {
   return (
-    <section id="skills" className=" mb-6">
-      <div className="max-w-[1200px] mx-auto px-4 pb-12">
+    <section id="skills" className="">
+      <div className="max-w-6xl mx-auto px-4 pb-12">
         <MarqueeSection />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Column 1: Programming & Development */}
