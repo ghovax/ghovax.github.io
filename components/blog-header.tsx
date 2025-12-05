@@ -83,7 +83,7 @@ export function BlogHeader() {
             </a>
             <a
               href="mailto:giovannigravili112@gmail.com"
-              className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity"
+              className="flex items-center gap-2 text-sm hover:opacity-70 transition-opacity"
             >
               <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
                 <Mail className="w-4 h-4" />
