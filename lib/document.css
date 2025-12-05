@@ -1,7 +1,7 @@
 /* Document Base Styles */
 
 .document {
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
   font-size: var(--text-sm);
   color: var(--foreground);
   text-rendering: optimizeLegibility;

@@ -103,7 +103,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <div className="min-h-screen bg-background">
       {/* Close button */}
 
-      <article className="max-w-[800px] mx-auto px-6 md:px-8 pb-6 pt-4 md:pt-6">
+      <article className="max-w-[800px] mx-auto px-6 md:px-8 pb-6 pt-8 md:pt-12">
         {/* Article header */}
         <header className="mb-8">
           {/* Title */}

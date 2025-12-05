@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-card dark:bg-card font-sans">{children}</body>
+      <body className="bg-card dark:bg-card font-serif">{children}</body>
     </html>
   );
 }
