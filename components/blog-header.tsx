@@ -18,17 +18,18 @@ export function BlogHeader() {
       {/* Masthead & Bio */}
       <div className="max-w-6xl mx-auto px-4 pt-8 sm:pt-12">
         <div className="pb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0" style={{ boxShadow: "inset -10px -10px 10px 20px white" }}
+          >
             <Image
               src="/153454774.jpeg"
               alt="Giovanni Gravili"
               width={180}
               height={180}
-              className="rounded-full border-2 border-border w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 object-contain"
+              className="rounded-xl border-1 border-foreground/30 w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 object-contain shadow-[0_0_30px_rgba(0,0,0,0.3)]"
               priority
             />
           </div>
-          <div className="flex-1 text-center sm:text-left md:ml-2 sm:mt-5 md:mt-7">
+          <div className="flex-1 text-center sm:text-left md:ml-4">
             <Link href="/" className="inline-block">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                 Giovanni Gravili
@@ -36,25 +37,21 @@ export function BlogHeader() {
             </Link>
             <p className="text-lg sm:text-xl text-muted-foreground pt-1 italic">
               R&D-Oriented Computational Physicist
+              <br />
+              Full-Stack Developer
             </p>
           </div>
         </div>
 
         <div>
           <div className="max-w-4xl">
-            <p className="text-base mb-4 leading-relaxed">
-              As a computational physicist with a Master's in Material Physics
-              and Nanoscience, I specialize in materials modeling, molecular
-              dynamics, and machine learning. My recent work includes a thesis
-              on nanoscale tribology using HPC, alongside leading technical
-              development for an EdTech startup project.
+            <p className="text-base mb-4 mt-2 leading-relaxed">
+              Master's Graduate in <i>Material Physics and Nanoscience</i> at the University of Bologna. My scientific expertise lies in materials modeling, molecular
+              dynamics, nano-scale tribology, machine learning and data analysis. My technical abilities span among full-stack development, databases, cloud infrastructure, embedded systems and low-level languages.
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              I am passionate about connecting theory with practical
-              application, from coding physical simulations to building software
-              products and visualizing complex data. I am seeking research or
-              industry roles where I can apply my programming and development
-              skills to solve real-world problems in materials science,
+              Seeking research or
+              industry roles to solve real-world problems in materials science,
               technology, education and adjacent fields.
             </p>
           </div>
