@@ -14,58 +14,62 @@ Each post is a dictionary with the following fields:
 import os
 from datetime import datetime
 
-# Base directory for HTML files
-HTML_DIR = os.path.join(os.path.dirname(__file__), 'posts/html')
+# Base directory for Markdown files
+MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
-        'title': 'Welcome to My Blog',
-        'url': '#',
-        'html_file': 'welcome.html',
-        'author': 'Giovanni Gravili',
-        'author_link': 'https://github.com/ghovax',
-        'submit_time': datetime(2025, 12, 10, 12, 0, 0),
-        'image_url': None,
-        'tags': ['announcement', 'meta'],
-        'comment_url': None,
-        'points': 0,
-        'comment_count': 0,
+        "title": "Welcome to My Blog",
+        "url": "#",
+        "md_file": "welcome.md",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2025, 12, 10, 12, 0, 0),
+        "image_url": None,
+        "tags": ["announcement", "meta"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
     },
     {
-        'title': 'Getting Started with Static Sites',
-        'url': '#',
-        'html_file': 'getting-started.html',
-        'author': 'Giovanni Gravili',
-        'author_link': 'https://github.com/ghovax',
-        'submit_time': datetime(2025, 12, 9, 10, 30, 0),
-        'image_url': None,
-        'tags': ['web-development', 'tutorial'],
-        'comment_url': None,
-        'points': 0,
-        'comment_count': 0,
+        "title": "Getting Started with Static Sites",
+        "url": "#",
+        "md_file": "getting-started.md",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2025, 12, 9, 10, 30, 0),
+        "image_url": None,
+        "tags": ["web-development", "tutorial"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
     },
 ]
 
 
-def load_html_content(html_file):
-    """Load HTML content from file"""
-    file_path = os.path.join(HTML_DIR, html_file)
+def load_markdown_content(md_file):
+    """Load and convert Markdown content to HTML"""
+    import markdown
+
+    file_path = os.path.join(MARKDOWN_DIR, md_file)
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return f.read()
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        md = markdown.Markdown()
+        return md.convert(content)
     except FileNotFoundError:
-        return f'<p>Content file not found: {html_file}</p>'
+        return f"<p>Content file not found: {md_file}</p>"
 
 
 def get_blog_posts():
     """
     Returns all blog posts sorted by date (newest first)
-    Loads HTML content from files
+    Loads and converts Markdown content to HTML
     """
     posts = []
     for post_data in BLOG_POSTS:
         post = post_data.copy()
-        post['summary'] = load_html_content(post_data['html_file'])
+        post["summary"] = load_markdown_content(post_data["md_file"])
         posts.append(post)
 
-    return sorted(posts, key=lambda x: x['submit_time'], reverse=True)
+    return sorted(posts, key=lambda x: x["submit_time"], reverse=True)

@@ -5,6 +5,7 @@ Simple blog publisher - generates static HTML from blog posts
 
 import logging
 import os
+import shutil
 import time
 from datetime import datetime
 from urllib.parse import urljoin
@@ -66,6 +67,16 @@ def gen_blog():
     for post in posts:
         gen_page([post], f"posts/{post.slug()}.html")
     gen_feed(posts)
+
+    # Copy images and other assets from markdown directory to output/posts
+    markdown_dir = os.path.join(os.path.dirname(__file__), "posts/markdown")
+    posts_output_dir = os.path.join(config.output_dir, "posts")
+    os.makedirs(posts_output_dir, exist_ok=True)
+    for file in os.listdir(markdown_dir):
+        if not file.endswith(".md"):
+            src = os.path.join(markdown_dir, file)
+            dst = os.path.join(posts_output_dir, file)
+            shutil.copy(src, dst)
 
 
 def gen_page(posts, path):

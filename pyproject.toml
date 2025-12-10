@@ -16,4 +16,5 @@ dependencies = [
     "sqlalchemy>=2.0.21",
     "humanize>=4.8.0",
     "Jinja2>=3.0.0",
+    "markdown>=3.5.1",
 ]

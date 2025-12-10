@@ -79,6 +79,13 @@
     word-wrap: break-word;
 }
 
+.post-item .post-summary img {
+    max-width: min(1024px, 100vw);
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
 .post-item .post-summary .summary-text .gist .gist-file .gist-data {
     max-height: 250px;
 }
