@@ -13,7 +13,7 @@ for md_file in "$MARKDOWN_DIR"/*.md; do
         html_file="$HTML_DIR/${filename}.html"
 
         echo "Converting $md_file -> $html_file"
-        pandoc "$md_file" -o "$html_file" --wrap=none
+        pandoc -f gfm+smart -t html --standalone=false --wrap=none --mathml  "$md_file" -o "$html_file" 
     fi
 done
 

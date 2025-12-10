@@ -3,6 +3,7 @@
 Simple blog publisher - generates static HTML from blog posts
 """
 
+import hashlib
 import logging
 import os
 import shutil
@@ -37,10 +38,11 @@ class BlogPost:
         self.comment_count = data.get("comment_count", 0)
         self.image = None
         self.summarized_by = self  # For template compatibility
+        self._slug = hashlib.md5(self.title.encode()).hexdigest()[:6]
 
     def slug(self):
-        """Generate URL-friendly slug from title"""
-        return slugify(self.title)
+        """Generate short consistent slug from title hash"""
+        return self._slug
 
     def get_score(self):
         """Return score for RSS filtering"""
