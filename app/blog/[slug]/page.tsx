@@ -4,8 +4,6 @@ import { PostMetadata } from "@/types/post";
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
-import Image from "next/image";
-import { LinkedinIcon } from "lucide-react";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -83,99 +81,88 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     });
   };
 
-  // Calculate reading time (approximate)
-  const calculateReadingTime = (htmlContent: string) => {
-    const text = htmlContent.replace(/<[^>]*>/g, "");
-    const words = text.trim().split(/\s+/).length;
-    const minutes = Math.ceil(words / 200); // Average reading speed
-    return minutes;
-  };
-
-  const readingTime = calculateReadingTime(post.content);
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Compact article layout */}
-      <article className="max-w-4xl mx-auto px-4 md:px-6">
-        {/* Header section */}
-        <header className="pt-8 md:pt-12 pb-6">
-          {/* Title */}
-          <h1 className="font-serif text-3xl font-bold leading-tight mb-3">
-            {post.metadata.title}
-          </h1>
+      <div className="container max-w-5xl mx-auto px-4">
+        {/* Navigation */}
+        <nav className="border-b border-border py-4 mb-6">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold">
+              Portfolio
+            </Link>
+          </div>
+        </nav>
 
-          {/* Subtitle/Excerpt */}
-          {post.metadata.excerpt && (
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4 font-serif">
-              {post.metadata.excerpt}
-            </p>
-          )}
+        <article className="pb-8">
+          {/* Post title */}
+          <div className="mb-4">
+            <h1 className="text-3xl font-bold mb-3">
+              {post.metadata.title}
+            </h1>
+          </div>
 
-          {/* Byline and metadata */}
-          <div className="flex items-center gap-3 pt-3 pb-3 border-t border-border/50">
-            <div className="flex-1">
-              {post.metadata.author && (
-                <div className="text-[0.8125rem] font-sans font-medium">
-                  {post.metadata.author}
-                </div>
-              )}
-              <div className="text-[0.8125rem] text-muted-foreground font-sans mt-0.5">
-                {formatDate(post.metadata.date)} · {readingTime} min read
-              </div>
-            </div>
+          {/* Post metadata */}
+          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-6 pb-6 border-b border-border">
+            {post.metadata.author && (
+              <span className="flex items-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                </svg>
+                {post.metadata.author}
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
+              {formatDate(post.metadata.date)}
+            </span>
+            {post.metadata.category && (
+              <span className="flex items-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                </svg>
+                {post.metadata.category}
+              </span>
+            )}
+          </div>
+
+          {/* Post content */}
+          <div className="prose prose-lg max-w-none">
+            <PostContent htmlContent={post.content} />
           </div>
 
           {/* Tags */}
           {post.metadata.tags && post.metadata.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-border/30">
+            <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-border">
               {post.metadata.tags.map((tag, index) => (
-                <Link
+                <span
                   key={index}
-                  href={`/blog/tags/${tag}`}
-                  className="font-sans text-xs  tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xs px-2 py-1 bg-muted rounded"
                 >
                   {tag}
-                </Link>
+                </span>
               ))}
             </div>
           )}
-        </header>
+        </article>
 
-        {/* Article content */}
-        <div className="pb-4">
-          <PostContent htmlContent={post.content} />
-        </div>
-
-        {/* Footer section */}
-        <footer className="mt-8 pt-6 border-t border-border">
-          {/* Social sharing */}
-          <div className="flex flex-col gap-2 pb-8">
-            <button className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity">
-              <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-sm">
-                @
-              </span>
-              <span className="font-sans">Respond via email</span>
-            </button>
-            <button className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity">
-              <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center">
-                <LinkedinIcon className="w-4 h-4" />
-              </span>
-              <span className="font-sans">Connect on LinkedIn</span>
-            </button>
-            <button className="flex items-center gap-2 text-xs hover:opacity-70 transition-opacity">
-              <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-sm">
-                𝕏
-              </span>
-              <span className="font-sans">Share on X</span>
-            </button>
+        {/* Footer */}
+        <footer className="border-t border-border py-6 mt-8">
+          <div className="flex justify-center gap-4 text-sm text-muted-foreground">
+            <Link href="/" className="hover:text-foreground">Home</Link>
+            <span>|</span>
+            <Link href="/about" className="hover:text-foreground">About</Link>
+            <span>|</span>
+            <a href="mailto:contact@example.com" className="hover:text-foreground">Contact</a>
           </div>
         </footer>
-      </article>
+      </div>
     </div>
   );
 }

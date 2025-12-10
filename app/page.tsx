@@ -1,11 +1,7 @@
-import { BlogHeader } from "@/components/blog-header";
-import { AboutSection } from "@/components/about-section";
 import { PostMetadata } from "@/types/post";
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
-import { PostTitle } from "@/components/post-title";
-import { Highlighter } from "@/components/ui/highlighter";
 
 export default function Home() {
   // Read posts from the generated JSON manifest
@@ -21,144 +17,97 @@ export default function Home() {
     console.error("Error loading posts:", error);
   }
 
-  // Split posts for columnar layout
-  const column1Posts = posts.slice(0, 3);
-  const column2Posts = posts.slice(3, 6);
-  const column3Posts = posts.slice(6, 9);
-  const column4Posts = posts.slice(9, 12);
-
-  // Color palette for highlighting different posts
-  const highlightColors = [
-    "#3b82f655", // blue
-    "#8b5cf655", // purple
-    "#ec489955", // pink
-    "#f59e0b55", // amber
-    "#10b98155", // emerald
-    "#06b6d455", // cyan
-  ];
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-background px-2 md:px-4 max-w-6xl mx-auto">
-      <BlogHeader />
-      <AboutSection />
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-5xl mx-auto px-4">
+        {/* Navigation */}
+        <nav className="border-b border-border py-4 mb-6">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="text-xl font-bold">
+              Portfolio
+            </Link>
+          </div>
+        </nav>
 
-      <main className="mx-auto px-3 py-2 pb-2 font-serif">
-        {/* Featured Work Section */}
-        <div className="border-b border-foreground/30 mb-3 pb-1 pt-2">
-          <h2 className="text-sm font-bold uppercase tracking-wide font-sans">
-            TECHNICAL PROJECTS & CASE STUDIES
-          </h2>
-        </div>
+        {/* Posts List */}
+        {posts.map((post) => (
+          <article key={post.slug} className="mb-8 pb-8 border-b border-border last:border-b-0">
+            <div className="mb-3">
+              <h3 className="text-2xl font-bold mb-2">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="hover:opacity-70 transition-opacity"
+                >
+                  {post.title}
+                </Link>
+              </h3>
+            </div>
 
-        {/* Offset columnar layout - 4 columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 pb-6 border-border">
-          {/* Column 1 */}
-          <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
-            {column1Posts.map((post, index) => (
-              <article
-                key={post.slug}
-                className={index > 0 ? "border-t border-border pt-4" : ""}
-              >
-                <Link href={`/blog/${post.slug}`} className="block group">
-                  <div className="mb-1">
-                    {post.category && (
-                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        {post.category}
-                      </span>
-                    )}
-                  </div>
-                  <h3
-                    className={`font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity ${index === 0 ? "text-2xl" : "text-lg"}`}
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-3">
+              {post.author && (
+                <span className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                  </svg>
+                  {post.author}
+                </span>
+              )}
+              <span className="flex items-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                {formatDate(post.date)}
+              </span>
+              {post.category && (
+                <span className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                  </svg>
+                  {post.category}
+                </span>
+              )}
+            </div>
+
+            {post.excerpt && (
+              <div className="text-base leading-relaxed">
+                {post.excerpt}
+              </div>
+            )}
+
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {post.tags.map((tag, tagIndex) => (
+                  <span
+                    key={tagIndex}
+                    className="text-xs px-2 py-1 bg-muted rounded"
                   >
-                    {post.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-                </Link>
-              </article>
-            ))}
-          </div>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </article>
+        ))}
 
-          {/* Column 2 */}
-          <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
-            {column2Posts.map((post, index) => (
-              <article
-                key={post.slug}
-                className={index > 0 ? "border-t border-border pt-4" : ""}
-              >
-                <Link href={`/blog/${post.slug}`} className="block group">
-                  <div className="mb-1">
-                    {post.category && (
-                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        {post.category}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-                </Link>
-              </article>
-            ))}
+        {/* Footer */}
+        <footer className="border-t border-border py-6 mt-8">
+          <div className="flex justify-center gap-4 text-sm text-muted-foreground">
+            <Link href="/" className="hover:text-foreground">Home</Link>
+            <span>|</span>
+            <Link href="/about" className="hover:text-foreground">About</Link>
+            <span>|</span>
+            <a href="mailto:contact@example.com" className="hover:text-foreground">Contact</a>
           </div>
-
-          {/* Column 3 */}
-          <div className="lg:col-span-1 border-r-0 lg:border-r border-border lg:pr-4 space-y-4">
-            {column3Posts.map((post, index) => (
-              <article
-                key={post.slug}
-                className={index > 0 ? "border-t border-border pt-4" : ""}
-              >
-                <Link href={`/blog/${post.slug}`} className="block group">
-                  <div className="mb-1">
-                    {post.category && (
-                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        {post.category}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-                </Link>
-              </article>
-            ))}
-          </div>
-
-          {/* Column 4 */}
-          <div className="lg:col-span-1 space-y-4">
-            {column4Posts.map((post, index) => (
-              <article
-                key={post.slug}
-                className={index > 0 ? "border-t border-border pt-4" : ""}
-              >
-                <Link href={`/blog/${post.slug}`} className="block group">
-                  <div className="mb-1">
-                    {post.category && (
-                      <span className="font-sans text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                        {post.category}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-bold leading-tight mb-2 group-hover:opacity-70 transition-opacity">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-                </Link>
-              </article>
-            ))}
-          </div>
-        </div>
-      </main>
+        </footer>
+      </div>
     </div>
   );
 }
