@@ -68,12 +68,12 @@ def gen_blog():
         gen_page([post], f"posts/{post.slug()}.html")
     gen_feed(posts)
 
-    # Copy images and other assets from each post's markdown folder to output/posts/slug
+    # Copy images and other assets from each post's markdown folder to output/posts
+    dst_dir = os.path.join(config.output_dir, "posts")
+    os.makedirs(dst_dir, exist_ok=True)
     for post_data in posts_data:
         folder = post_data["folder"]
         src_dir = os.path.join(os.path.dirname(__file__), "posts/markdown", folder)
-        dst_dir = os.path.join(config.output_dir, "posts", BlogPost(post_data).slug())
-        os.makedirs(dst_dir, exist_ok=True)
         if os.path.exists(src_dir):
             for file in os.listdir(src_dir):
                 if file != folder + ".md":

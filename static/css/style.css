@@ -62,15 +62,16 @@
 
 .post-item .post-summary .feature-image {
     margin-top: 5px;
-    margin-right: 8px;
-    float: left;
+    display: block;
+    text-align: center;
     cursor: pointer;
     cursor: -webkit-zoom-in;
     cursor: -moz-zoom-in;
 }
 
 .post-item .post-summary .feature-image img {
-    max-width: 220px;
+    max-width: 100%;
+    height: auto;
     border: 1px solid #F7F7F7;
 }
 

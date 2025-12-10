@@ -8,15 +8,25 @@ import subprocess
 import time
 from pathlib import Path
 
-WATCH_DIR = Path("posts/markdown")
 CHECK_INTERVAL = 2  # seconds
 
 
 def get_modification_times():
-    """Get modification times of all markdown files"""
+    """Get modification times of all relevant files"""
     times = {}
-    for md_file in WATCH_DIR.glob("**/*.md"):
+    # Markdown files
+    for md_file in Path("posts/markdown").glob("**/*.md"):
         times[md_file] = md_file.stat().st_mtime
+    # Templates
+    for tpl_file in Path("templates").glob("**/*.html"):
+        times[tpl_file] = tpl_file.stat().st_mtime
+    # Static files
+    for static_file in Path("static").glob("**/*"):
+        if static_file.is_file():
+            times[static_file] = static_file.stat().st_mtime
+    # Python files
+    for py_file in Path(".").glob("*.py"):
+        times[py_file] = py_file.stat().st_mtime
     return times
 
 
@@ -31,7 +41,9 @@ def rebuild():
 
 
 def main():
-    print(f"Watching {WATCH_DIR}/**/*.md for changes...")
+    print(
+        "Watching posts/markdown/**/*.md, templates/**/*.html, static/**/*, *.py for changes..."
+    )
     print("Press Ctrl+C to stop\n")
 
     last_times = get_modification_times()
