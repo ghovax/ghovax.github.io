@@ -16,7 +16,7 @@ export function BlogHeader() {
   return (
     <header className="w-full">
       {/* Masthead & Bio */}
-      <div className="max-w-6xl mx-auto px-4 pt-8 sm:pt-12">
+      <div className="max-w-6xl mx-auto px-4 pt-8 sm:pt-12 md:pt-16 lg:pt-20">
         <div className="pb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
           <div className="flex-shrink-0" style={{ boxShadow: "inset -10px -10px 10px 20px white" }}
           >
@@ -31,7 +31,7 @@ export function BlogHeader() {
           </div>
           <div className="flex-1 text-center sm:text-left md:ml-4">
             <Link href="/" className="inline-block">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+              <h1 className="text-[2rem] leading-[1.2] md:text-4xl font-bold tracking-tight">
                 Giovanni Gravili
               </h1>
             </Link>

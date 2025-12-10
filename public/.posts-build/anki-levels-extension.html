@@ -1,27 +1,15 @@
-<p>In this post, I’ll walk you through my implementation of Anki Levels,
-a browser extension that bridges spaced repetition learning with
-real-world reading. This project taught me that effective browser
-extensions require careful attention to performance. The naive approach
-of searching thousands of words through every text node on a page
-creates noticeable lag. I learned to use IndexedDB for persistent
-caching, batch processing with idle callbacks to avoid blocking the UI,
-and the TreeWalker API for efficient DOM traversal. The most interesting
-challenge was handling overlapping words in languages like Japanese
-where longer phrases contain shorter words. The solution uses a
-level-based layout system that stacks color-coded underlines, showing
-multiple matches simultaneously without visual clutter. Working with the
-WXT framework made cross-browser development straightforward, handling
-manifest generation and build configuration automatically.</p>
-<p>The core idea emerged from a frustration with traditional language
-learning. When studying Japanese through Anki, I could review flashcards
-effectively, but I had no sense of my progress in real-world contexts.
-Which words on a news article would I recognize? Which kanji compounds
-had I mastered? The disconnect between controlled flashcard review and
-wild reading was jarring. I wanted a tool that would show me, in real
-time, which words I knew well and which needed more practice. The result
-is an extension that transforms any web page into a personalized
-difficulty map, color-coding words from red (difficult) to green
-(mastered) based on my actual Anki statistics.</p>
+<p>They say an image speaks a thousand words, so here is the product of
+my work. Over the past year I have been intermittently memorizing over a
+thousand kanji and a few thousands of Japanese vocabulary words.
+Although I often struggled to gauge my reading comprehension—some words
+I knew well, others I had never seen—out of frustration I spent an
+evening coding a Chrome extension that loads your Anki deck and
+immediately lets you visualize your progress in reading comprehension.
+In simple terms, words you know well are underlined in green, while
+those you know less well in red. Available now on my GitHub at this <a
+href="https://github.com/ghovax/AnkiLevels">link</a>. Free for anyone to
+use as they please under any permissive license that may apply. For the
+technical read see below.</p>
 <div style="text-align: center; margin: 30px 0;">
 <img src="/.posts-build/anki-levels-extension/Screenshot%202025-11-28%20at%2001.15.52.png" alt="Example of highlighted text" style="border: 1px solid #e5e7eb; border-radius: 8px;" />
 <p style="margin-top: 10px; font-size: 0.9em; color: #666;">

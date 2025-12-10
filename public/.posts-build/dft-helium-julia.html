@@ -225,27 +225,27 @@ class="sourceCode julia"><code class="sourceCode julia"><span id="cb1-1"><a href
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    N <span class="op">=</span> <span class="fu">length</span>(r)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    E_max, E_min <span class="op">=</span> <span class="fl">0.0</span>, <span class="op">-</span><span class="fl">20.0</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    ε <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="fu">abs</span>(E_max <span class="op">-</span> E_min) <span class="op">&gt;</span> tol</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        ε <span class="op">=</span> (E_min <span class="op">+</span> E_max) <span class="op">/</span> <span class="fl">2</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Shooting from infinity with exponential boundary condition</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        ϕ[N<span class="op">-</span><span class="fl">1</span><span class="op">:</span>N] <span class="op">.=</span> r[N<span class="op">-</span><span class="fl">1</span><span class="op">:</span>N] <span class="op">.*</span> <span class="fu">exp</span>.(<span class="op">-</span>r[N<span class="op">-</span><span class="fl">1</span><span class="op">:</span>N])</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Numerov integration inward</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> N<span class="op">-</span><span class="fl">1</span><span class="op">:-</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            ϕ[i<span class="op">-</span><span class="fl">1</span>] <span class="op">=</span> <span class="fl">2</span>ϕ[i] <span class="op">-</span> ϕ[i<span class="op">+</span><span class="fl">1</span>] <span class="op">+</span> dr<span class="op">^</span><span class="fl">2</span> <span class="op">*</span> (<span class="op">-</span><span class="fl">2</span>ε <span class="op">+</span> <span class="fl">2</span>V[i]) <span class="op">*</span> ϕ[i]</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">end</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Count nodes to determine if energy is too high or low</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        num_nodes <span class="op">=</span> <span class="fu">sum</span>(<span class="pp">@view</span>(ϕ[<span class="fl">1</span><span class="op">:</span>N<span class="op">-</span><span class="fl">1</span>]) <span class="op">.*</span> <span class="pp">@view</span>(ϕ[<span class="fl">2</span><span class="op">:</span>N]) <span class="op">.&lt;</span> <span class="fl">0</span>)</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        num_nodes <span class="op">&gt;</span> n <span class="op">-</span> l <span class="op">-</span> <span class="fl">1</span> ? (E_max <span class="op">=</span> ε) <span class="op">:</span> (E_min <span class="op">=</span> ε)</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Normalize wavefunction</span></span>
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    norm² <span class="op">=</span> (ϕ[<span class="fl">1</span>]<span class="op">^</span><span class="fl">2</span> <span class="op">+</span> ϕ[N]<span class="op">^</span><span class="fl">2</span>) <span class="op">/</span> <span class="fl">2</span> <span class="op">+</span> <span class="fu">sum</span>(<span class="pp">@view</span>(ϕ[<span class="fl">2</span><span class="op">:</span>N<span class="op">-</span><span class="fl">1</span>])<span class="op">.^</span><span class="fl">2</span>)</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    ϕ <span class="op">./=</span> <span class="fu">√</span>(norm² <span class="op">*</span> dr)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ε</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
 <p>The Hartree potential represents the classical electrostatic
@@ -329,37 +329,37 @@ singularity).</p>
 potentials and the shooting method:</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode julia"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">    dft_helium(; N::Int, r_min::Float64, r_max::Float64, </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">    dft_helium(; N::Int, r_min::Float64, r_max::Float64,</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">               tolerance::Float64, max_iterations::Int)</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">Perform self-consistent Kohn-Sham DFT calculation for the helium atom using </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">Perform self-consistent Kohn-Sham DFT calculation for the helium atom using</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">Local Density Approximation (LDA) with Perdew-Zunger correlation functional.</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">dft_helium</span>(; N<span class="op">::</span><span class="dt">Int</span>, r_min<span class="op">::</span><span class="dt">Float64</span>, r_max<span class="op">::</span><span class="dt">Float64</span>, </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">dft_helium</span>(; N<span class="op">::</span><span class="dt">Int</span>, r_min<span class="op">::</span><span class="dt">Float64</span>, r_max<span class="op">::</span><span class="dt">Float64</span>,</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                     tolerance<span class="op">::</span><span class="dt">Float64</span>, max_iterations<span class="op">::</span><span class="dt">Int</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    energies <span class="op">=</span> <span class="dt">Float64</span>[]</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    dr <span class="op">=</span> (r_max <span class="op">-</span> r_min) <span class="op">/</span> (N <span class="op">-</span> <span class="fl">1</span>)</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> <span class="fu">range</span>(r_min, r_max, length<span class="op">=</span>N) <span class="op">|&gt;</span> collect</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize density and potentials</span></span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    ρ <span class="op">=</span> <span class="fu">zeros</span>(N)  <span class="co"># electron density</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    V_nuclear, V_hartree, V_exchange, V_correlation, V_total <span class="op">=</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    V_nuclear, V_hartree, V_exchange, V_correlation, V_total <span class="op">=</span></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        (<span class="fu">zeros</span>(N) <span class="cf">for</span> _ <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>)</span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    ϕ <span class="op">=</span> <span class="fu">zeros</span>(N)  <span class="co"># radial wavefunction</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Perdew-Zunger correlation parameters</span></span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    A, B, C, D, γ, β₁, β₂ <span class="op">=</span> <span class="fl">0.0311</span>, <span class="op">-</span><span class="fl">0.048</span>, <span class="fl">0.002</span>, <span class="op">-</span><span class="fl">0.0116</span>, <span class="op">-</span><span class="fl">0.1423</span>, <span class="fl">1.0529</span>, <span class="fl">0.3334</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Self-consistent field loop</span></span>
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    E_prev, E_curr <span class="op">=</span> <span class="fl">1.0</span>, <span class="fl">0.0</span></span>
 <span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> iter <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>max_iterations</span>
 <span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="fu">abs</span>(E_prev <span class="op">-</span> E_curr) <span class="op">&lt;</span> tolerance <span class="op">&amp;&amp;</span> <span class="cf">break</span></span>
 <span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        E_prev <span class="op">=</span> E_curr</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Nuclear potential (Z=2 for helium)</span></span>
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        V_nuclear <span class="op">.=</span> <span class="op">-</span><span class="fl">2</span> <span class="op">./</span> r</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Hartree potential via finite difference solution of Poisson equation</span></span>
 <span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        U <span class="op">=</span> <span class="fu">zeros</span>(N)</span>
 <span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        U[<span class="fl">1</span><span class="op">:</span><span class="fl">2</span>] <span class="op">.=</span> <span class="fl">0.0</span></span>
@@ -368,51 +368,51 @@ class="sourceCode julia"><code class="sourceCode julia"><span id="cb2-1"><a href
 <span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">end</span></span>
 <span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        boundary_correction <span class="op">=</span> (<span class="fl">2</span> <span class="op">-</span> U[N]) <span class="op">/</span> r[N]</span>
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        V_hartree <span class="op">.=</span> U <span class="op">./</span> r <span class="op">.+</span> boundary_correction</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Exchange potential (Slater approximation)</span></span>
 <span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        V_exchange <span class="op">.=</span> <span class="fu">-cbrt</span>.(<span class="fl">3</span> <span class="op">*</span> ρ <span class="op">./</span> (<span class="fl">4</span>π<span class="op">^</span><span class="fl">2</span> <span class="op">*</span> r<span class="op">.^</span><span class="fl">2</span>))</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Correlation potential (Perdew-Zunger)</span></span>
 <span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
 <span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> ρ[i] <span class="op">&lt;</span> <span class="fl">1e-10</span></span>
 <span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>                V_correlation[i] <span class="op">=</span> <span class="fl">0.0</span></span>
 <span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
 <span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>            <span class="cf">end</span></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>            rₛ <span class="op">=</span> <span class="fu">cbrt</span>(<span class="fl">3</span>r[i]<span class="op">^</span><span class="fl">2</span> <span class="op">/</span> ρ[i])  <span class="co"># Wigner-Seitz radius</span></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> rₛ <span class="op">&lt;</span> <span class="fl">1</span></span>
 <span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>                <span class="co"># High density (metallic) regime</span></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>                V_correlation[i] <span class="op">=</span> A <span class="op">*</span> <span class="fu">log</span>(rₛ) <span class="op">+</span> B <span class="op">-</span> A<span class="op">/</span><span class="fl">3</span> <span class="op">+</span> </span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>                V_correlation[i] <span class="op">=</span> A <span class="op">*</span> <span class="fu">log</span>(rₛ) <span class="op">+</span> B <span class="op">-</span> A<span class="op">/</span><span class="fl">3</span> <span class="op">+</span></span>
 <span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>                                   <span class="fl">2</span>C<span class="op">/</span><span class="fl">3</span> <span class="op">*</span> rₛ <span class="op">*</span> <span class="fu">log</span>(rₛ) <span class="op">+</span> (<span class="fl">2</span>D <span class="op">-</span> C) <span class="op">*</span> rₛ<span class="op">/</span><span class="fl">3</span></span>
 <span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elseif</span> rₛ <span class="op">&lt;</span> <span class="fl">1e10</span></span>
 <span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Low density regime</span></span>
 <span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>                εc <span class="op">=</span> γ <span class="op">/</span> (<span class="fl">1</span> <span class="op">+</span> β₁ <span class="op">*</span> √rₛ <span class="op">+</span> β₂ <span class="op">*</span> rₛ)</span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>                V_correlation[i] <span class="op">=</span> εc <span class="op">*</span> (<span class="fl">1</span> <span class="op">+</span> <span class="fl">7</span>β₁ <span class="op">*</span> √rₛ<span class="op">/</span><span class="fl">6</span> <span class="op">+</span> <span class="fl">4</span>β₂ <span class="op">*</span> rₛ<span class="op">/</span><span class="fl">3</span>) <span class="op">/</span> </span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>                V_correlation[i] <span class="op">=</span> εc <span class="op">*</span> (<span class="fl">1</span> <span class="op">+</span> <span class="fl">7</span>β₁ <span class="op">*</span> √rₛ<span class="op">/</span><span class="fl">6</span> <span class="op">+</span> <span class="fl">4</span>β₂ <span class="op">*</span> rₛ<span class="op">/</span><span class="fl">3</span>) <span class="op">/</span></span>
 <span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>                                   (<span class="fl">1</span> <span class="op">+</span> β₁ <span class="op">*</span> √rₛ <span class="op">+</span> β₂ <span class="op">*</span> rₛ)</span>
 <span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span></span>
 <span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>                V_correlation[i] <span class="op">=</span> <span class="fl">0.0</span></span>
 <span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>            <span class="cf">end</span></span>
 <span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">end</span></span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>        V_total <span class="op">.=</span> V_nuclear <span class="op">+</span> V_hartree <span class="op">+</span> V_exchange <span class="op">+</span> V_correlation</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Solve radial Schrödinger equation for 1s orbital (n=1, l=0)</span></span>
 <span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>        ε <span class="op">=</span> <span class="fu">solve_radial_schrodinger!</span>(ϕ, V_total, r, dr, n<span class="op">=</span><span class="fl">1</span>, l<span class="op">=</span><span class="fl">0</span>)</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Update electron density (occupation = 2 for closed shell)</span></span>
 <span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>        ρ <span class="op">.=</span> <span class="fl">2</span> <span class="op">*</span> ϕ<span class="op">.^</span><span class="fl">2</span></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate energy components</span></span>
 <span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>        E_hartree <span class="op">=</span> <span class="fu">sum</span>(V_hartree <span class="op">.*</span> ρ) <span class="op">*</span> dr <span class="op">/</span> <span class="fl">2</span></span>
 <span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>        E_exchange <span class="op">=</span> <span class="fu">sum</span>(V_exchange <span class="op">.*</span> ρ) <span class="op">*</span> dr <span class="op">/</span> <span class="fl">2</span></span>
 <span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>        E_correlation <span class="op">=</span> <span class="fu">sum</span>(V_correlation <span class="op">.*</span> ρ) <span class="op">*</span> dr <span class="op">/</span> <span class="fl">2</span></span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Total energy (correcting for double counting)</span></span>
 <span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>        E_curr <span class="op">=</span> <span class="fl">2</span>ε <span class="op">-</span> E_hartree <span class="op">-</span> (E_exchange <span class="op">-</span> E_correlation) <span class="op">/</span> <span class="fl">2</span></span>
 <span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>        <span class="fu">push!</span>(energies, E_curr)</span>
 <span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> energies</span>
 <span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
 <h1 id="results-and-validation">Results and Validation</h1>

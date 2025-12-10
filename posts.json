@@ -15,7 +15,7 @@
     "slug": "bequire-full-stack",
     "htmlFile": "bequire-full-stack.html",
     "postFolder": "bequire-full-stack",
-    "image": "/.posts-build/bequire-full-stack/image.png"
+    "image": null
   },
   {
     "title": "Ground-State Energy via DFT for Helium",
@@ -32,7 +32,7 @@
     "slug": "dft-helium-julia",
     "htmlFile": "dft-helium-julia.html",
     "postFolder": "dft-helium-julia",
-    "image": "/.posts-build/dft-helium-julia/image.png"
+    "image": null
   },
   {
     "title": "Reverse Engineering the Tobii Eye Tracker 5 Protocol",
@@ -50,7 +50,7 @@
     "slug": "tobii-reverse-engineering",
     "htmlFile": "tobii-reverse-engineering.html",
     "postFolder": "tobii-reverse-engineering",
-    "image": "/.posts-build/tobii-reverse-engineering/image.png"
+    "image": null
   },
   {
     "title": "Real-Time Digit Recognition on Arduino with TensorFlow",
@@ -68,7 +68,7 @@
     "slug": "mnist-arduino",
     "htmlFile": "mnist-arduino.html",
     "postFolder": "mnist-arduino",
-    "image": "/.posts-build/mnist-arduino/image.png"
+    "image": null
   },
   {
     "title": "Building a Networked Game Engine with Entity-Component Architecture",
@@ -87,7 +87,7 @@
     "slug": "game-engine-server",
     "htmlFile": "game-engine-server.html",
     "postFolder": "game-engine-server",
-    "image": "/.posts-build/game-engine-server/image.png"
+    "image": null
   },
   {
     "title": "Visualizing Quantum Confinement Through Brillouin Zone Analysis",
@@ -105,7 +105,7 @@
     "slug": "lattice-plot-mathematica",
     "htmlFile": "lattice-plot-mathematica.html",
     "postFolder": "lattice-plot-mathematica",
-    "image": "/.posts-build/lattice-plot-mathematica/image.png"
+    "image": null
   },
   {
     "title": "Symbolic Mathematics Engine in Haskell",
@@ -122,12 +122,12 @@
     "slug": "math-library-haskell",
     "htmlFile": "math-library-haskell.html",
     "postFolder": "math-library-haskell",
-    "image": "/.posts-build/math-library-haskell/image.png"
+    "image": null
   },
   {
-    "title": "Building a Browser Extension to Visualize Anki Learning Progress",
+    "title": "Visualize Anki Learning Progress",
     "date": "2024-10-01",
-    "excerpt": "A Chrome extension that highlights words on web pages based on Anki card difficulty levels, combining spaced repetition data with real-world reading to visualize vocabulary mastery.",
+    "excerpt": "TL;DR – A Chrome extension that highlights words on web pages based on Anki card difficulty levels based on mastery.",
     "category": "Computer Science",
     "tags": [
       "Browser Extension",
@@ -140,7 +140,7 @@
     "slug": "anki-levels-extension",
     "htmlFile": "anki-levels-extension.html",
     "postFolder": "anki-levels-extension",
-    "image": "/.posts-build/anki-levels-extension/image.png"
+    "image": null
   },
   {
     "title": "Building a PDF Generation Library from Scratch in Rust",
@@ -158,7 +158,7 @@
     "slug": "pdf-generation-library",
     "htmlFile": "pdf-generation-library.html",
     "postFolder": "pdf-generation-library",
-    "image": "/.posts-build/pdf-generation-library/image.png"
+    "image": null
   },
   {
     "title": "Bringing Desktop Mascots to macOS with Swift",
@@ -177,6 +177,6 @@
     "slug": "desktop-mascots-macos",
     "htmlFile": "desktop-mascots-macos.html",
     "postFolder": "desktop-mascots-macos",
-    "image": "/.posts-build/desktop-mascots-macos/image.png"
+    "image": null
   }
 ]
