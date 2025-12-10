@@ -76,12 +76,13 @@
 }
 
 .post-item .post-summary .summary-text {
-    padding-top: 5px;
+    padding-top: 15px;
     word-wrap: break-word;
+    text-align: justify;
 }
 
 .post-item .post-summary img {
-    max-width: min(1024px, 100vw);
+    max-width: 100%;
     height: auto;
     display: block;
     margin: 0 auto;

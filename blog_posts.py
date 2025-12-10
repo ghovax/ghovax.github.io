@@ -19,9 +19,9 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
-        "title": "Welcome to My Blog",
+        "title": "Chrome Extension to Visualize Anki Learning Progress",
         "url": "#",
-        "folder": "welcome",
+        "folder": "anki-extension",
         "author": "Giovanni Gravili",
         "author_link": "https://github.com/ghovax",
         "submit_time": datetime(2025, 12, 10, 12, 0, 0),
