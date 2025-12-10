@@ -26,7 +26,7 @@
 </head>
 <body>
 <div class="container">
-    <nav class="navbar">
+    <nav class="navbar" style="padding-top: 15px;">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                     data-target="#blog-menu" style="padding: 6px 10px; font-size: 14px;">
@@ -38,18 +38,8 @@
             {% block nav_brand %} {% endblock %}
         </div>
         <div class="collapse navbar-collapse" id="blog-menu">
-            <ul class="nav navbar-nav nav-pills">
+            <ul class="nav navbar-nav navbar-right nav-pills">
                 {% block nav_links %} {% endblock %}
-                <li class="sort-dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">
-                        Sort
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="sort-by-submit-time">Date (newest)</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="sort-by-submit-time-asc">Date (oldest)</a></li>
-                    </ul>
-                </li>
             </ul>
         </div>
     </nav>
@@ -114,10 +104,10 @@
             </div>
             {% endif %}
         </article>
-        {% if not loop.last and news_list|length > 1 %}<hr>{% endif %}
+        {% if not loop.last and news_list|length > 1 %}<hr style="color: gray;">{% endif %}
     {% endfor %}
 
-    <footer>
+    <footer style="padding-top: 8px;">
         <ul class="list-inline text-center">
             <li><a href="/feed.xml">RSS</a></li>
             &centerdot;
