@@ -69,17 +69,18 @@ Commit your changes and push to GitHub - the blog will automatically rebuild and
 To test your blog locally before pushing:
 
 ```bash
-make blog
+make serve
 ```
 
-This will generate the static site in the `output/` directory. To view it:
+This will generate the static site and start a local server at `http://localhost:8000`.
+
+Or if you prefer to do it manually:
 
 ```bash
+make blog                    # Generate the site
 cd output
-python -m http.server 8000
+python3 -m http.server 8000  # Serve it locally
 ```
-
-Then visit `http://localhost:8000` in your browser.
 
 ### Making Changes
 
