@@ -75,6 +75,11 @@
     border: 1px solid #F7F7F7;
 }
 
+math {
+    padding: 1rem 0;
+    font-size: 103.46%;
+}
+
 .post-item .post-summary .summary-text {
     padding-top: 15px;
     word-wrap: break-word;

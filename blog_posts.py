@@ -19,7 +19,7 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
-        "title": "Welcome to My Blog",
+        "title": "Chrome Extension to Visualize Anki Learning Progress",
         "url": "#",
         "folder": "anki-extension",
         "author": "Giovanni Gravili",
@@ -50,28 +50,38 @@ BLOG_POSTS = [
 def load_markdown_content(folder):
     """Load and convert Markdown content to HTML using pandoc"""
     import subprocess
+    import tempfile
+    import os
+    import re
 
     md_file = folder + ".md"
     file_path = os.path.join(MARKDOWN_DIR, folder, md_file)
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
+
+        original_cwd = os.getcwd()
+        os.chdir(os.path.dirname(file_path))
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write(content)
+            temp_file = f.name
         result = subprocess.run(
             [
                 "pandoc",
                 "-f",
-                "gfm+smart",
+                "markdown",
                 "-t",
                 "html",
                 "--standalone=false",
-                "--wrap=none",
                 "--mathml",
+                temp_file,
             ],
-            input=content,
             capture_output=True,
             text=True,
             check=True,
         )
+        os.unlink(temp_file)
+        os.chdir(original_cwd)
         return result.stdout
     except FileNotFoundError:
         return f"<p>Content file not found: {md_file}</p>"
