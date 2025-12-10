@@ -19,7 +19,7 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
-        "title": "How to Visualize Your Anki Learning Progress in Chrome",
+        "title": "How to Visualize Your Anki Learning Progress",
         "url": "#",
         "folder": "anki-extension",
         "author": "Giovanni Gravili",
