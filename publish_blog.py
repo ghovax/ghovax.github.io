@@ -68,15 +68,21 @@ def gen_blog():
         gen_page([post], f"posts/{post.slug()}.html")
     gen_feed(posts)
 
-    # Copy images and other assets from markdown directory to output/posts
-    markdown_dir = os.path.join(os.path.dirname(__file__), "posts/markdown")
-    posts_output_dir = os.path.join(config.output_dir, "posts")
-    os.makedirs(posts_output_dir, exist_ok=True)
-    for file in os.listdir(markdown_dir):
-        if not file.endswith(".md"):
-            src = os.path.join(markdown_dir, file)
-            dst = os.path.join(posts_output_dir, file)
-            shutil.copy(src, dst)
+    # Copy images and other assets from each post's markdown folder to output/posts/slug
+    for post_data in posts_data:
+        folder = post_data["folder"]
+        src_dir = os.path.join(os.path.dirname(__file__), "posts/markdown", folder)
+        dst_dir = os.path.join(config.output_dir, "posts", BlogPost(post_data).slug())
+        os.makedirs(dst_dir, exist_ok=True)
+        if os.path.exists(src_dir):
+            for file in os.listdir(src_dir):
+                if file != folder + ".md":
+                    src = os.path.join(src_dir, file)
+                    dst = os.path.join(dst_dir, file)
+                    if os.path.isdir(src):
+                        shutil.copytree(src, dst, dirs_exist_ok=True)
+                    else:
+                        shutil.copy(src, dst)
 
 
 def gen_page(posts, path):

@@ -21,7 +21,7 @@ BLOG_POSTS = [
     {
         "title": "Welcome to My Blog",
         "url": "#",
-        "md_file": "welcome.md",
+        "folder": "welcome",
         "author": "Giovanni Gravili",
         "author_link": "https://github.com/ghovax",
         "submit_time": datetime(2025, 12, 10, 12, 0, 0),
@@ -34,7 +34,7 @@ BLOG_POSTS = [
     {
         "title": "Getting Started with Static Sites",
         "url": "#",
-        "md_file": "getting-started.md",
+        "folder": "getting-started",
         "author": "Giovanni Gravili",
         "author_link": "https://github.com/ghovax",
         "submit_time": datetime(2025, 12, 9, 10, 30, 0),
@@ -47,11 +47,12 @@ BLOG_POSTS = [
 ]
 
 
-def load_markdown_content(md_file):
+def load_markdown_content(folder):
     """Load and convert Markdown content to HTML"""
     import markdown
 
-    file_path = os.path.join(MARKDOWN_DIR, md_file)
+    md_file = folder + ".md"
+    file_path = os.path.join(MARKDOWN_DIR, folder, md_file)
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -69,7 +70,7 @@ def get_blog_posts():
     posts = []
     for post_data in BLOG_POSTS:
         post = post_data.copy()
-        post["summary"] = load_markdown_content(post_data["md_file"])
+        post["summary"] = load_markdown_content(post_data["folder"])
         posts.append(post)
 
     return sorted(posts, key=lambda x: x["submit_time"], reverse=True)

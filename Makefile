@@ -1,11 +1,7 @@
-.PHONY: blog clean serve convert watch
-
-# Convert markdown to HTML
-convert:
-	./convert_posts.sh
+.PHONY: blog clean serve watch
 
 # Generate the blog
-blog: convert
+blog:
 	rm -rf output/static output/*.html output/*.xml
 	uv run publish_blog.py
 	cp -r static output/static
@@ -14,7 +10,7 @@ blog: convert
 
 # Clean generated files
 clean:
-	rm -rf output/ posts/html/
+	rm -rf output/
 
 # Serve the blog locally
 serve: blog
