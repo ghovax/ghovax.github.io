@@ -2,6 +2,7 @@
 """
 Simple blog publisher - generates static HTML from blog posts
 """
+
 import logging
 import os
 import time
@@ -20,18 +21,19 @@ logger = logging.getLogger(__name__)
 
 class BlogPost:
     """Wrapper class to make blog posts compatible with the template"""
+
     def __init__(self, data):
-        self.title = data['title']
-        self.url = data['url']
-        self.summary = data['summary']
-        self.author = data['author']
-        self.author_link = data.get('author_link', '')
-        self.submit_time = data['submit_time']
-        self.image_url = data.get('image_url')
-        self.tags = data.get('tags', [])
-        self.comment_url = data.get('comment_url')
-        self.points = data.get('points', 0)
-        self.comment_count = data.get('comment_count', 0)
+        self.title = data["title"]
+        self.url = data["url"]
+        self.summary = data["summary"]
+        self.author = data["author"]
+        self.author_link = data.get("author_link", "")
+        self.submit_time = data["submit_time"]
+        self.image_url = data.get("image_url")
+        self.tags = data.get("tags", [])
+        self.comment_url = data.get("comment_url")
+        self.points = data.get("points", 0)
+        self.comment_count = data.get("comment_count", 0)
         self.image = None
         self.summarized_by = self  # For template compatibility
 
@@ -50,7 +52,7 @@ class BlogPost:
 
 environment = Environment(
     loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), "templates/")),
-    autoescape=True
+    autoescape=True,
 )
 environment.globals["config"] = config
 
@@ -60,7 +62,9 @@ def gen_blog():
     posts_data = get_blog_posts()
     posts = [BlogPost(p) for p in posts_data]
 
-    gen_page(posts, 'index.html')
+    gen_page(posts, "index.html")
+    for post in posts:
+        gen_page([post], f"posts/{post.slug()}.html")
     gen_feed(posts)
 
 
@@ -70,7 +74,7 @@ def gen_page(posts, path):
         logger.warning("No posts to generate")
         return
 
-    template = environment.get_template('blog.html')
+    template = environment.get_template("blog.html")
     static_page = os.path.join(config.output_dir, path)
     directory = os.path.dirname(static_page)
     os.makedirs(directory, exist_ok=True)
@@ -79,14 +83,14 @@ def gen_page(posts, path):
     rendered = template.render(
         news_list=posts,  # Keep name for template compatibility
         last_updated=datetime.utcnow(),
-        path=urljoin(config.site + '/', path.rstrip('index.html'))
+        path=urljoin(config.site + "/", path.rstrip("index.html")),
     )
 
     with open(static_page, "w") as fp:
         fp.write(rendered)
 
     cost = (time.time() - start) * 1000
-    logger.info(f'Written {len(rendered)} bytes to {static_page}, cost(ms): {cost:.2f}')
+    logger.info(f"Written {len(rendered)} bytes to {static_page}, cost(ms): {cost:.2f}")
 
 
 def gen_feed(posts):
@@ -95,21 +99,23 @@ def gen_feed(posts):
     feed = AtomFeed(
         "Giovanni's Portfolio",
         updated=datetime.utcnow(),
-        feed_url=f'{config.site}/feed.xml',
+        feed_url=f"{config.site}/feed.xml",
         url=config.site,
-        author={'name': 'Giovanni Gravili', 'uri': config.site}
+        author={"name": "Giovanni Gravili", "uri": config.site},
     )
 
     for post in posts:
-        img_tag = ''
+        img_tag = ""
         if post.image_url:
             img_tag = f'<img src="{post.image_url}" style="max-width: 100%; height: auto;" /><br />'
 
         feed.add(
             post.title,
-            content=f'{img_tag}{post.summary}',
-            author={'name': post.author, 'uri': post.author_link} if post.author_link else {},
-            url=post.url if post.url != '#' else f'{config.site}/#{post.slug()}',
+            content=f"{img_tag}{post.summary}",
+            author={"name": post.author, "uri": post.author_link}
+            if post.author_link
+            else {},
+            url=post.url if post.url != "#" else f"{config.site}/#{post.slug()}",
             updated=post.submit_time,
         )
 
@@ -119,8 +125,8 @@ def gen_feed(posts):
         fp.write(rendered)
 
     cost = (time.time() - start) * 1000
-    logger.info(f'Written {len(rendered)} bytes to {output_path}, cost(ms): {cost:.2f}')
+    logger.info(f"Written {len(rendered)} bytes to {output_path}, cost(ms): {cost:.2f}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gen_blog()

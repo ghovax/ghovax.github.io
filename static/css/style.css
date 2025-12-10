@@ -18,7 +18,6 @@
 }
 
 .post-item {
-    border-bottom: 1px solid #dddddd;
     height: 100% !important;
     margin: 5px;
 }
@@ -45,9 +44,9 @@
 }
 
 .post-meta > span:not(:last-of-type)::after {
-    content: '|';
+    content: '·';
     margin: 0 4px;
-    color: #ddd;
+    color: #adadad;
 }
 
 .post-item .post-meta img {

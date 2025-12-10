@@ -29,7 +29,7 @@
     <nav class="navbar">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#blog-menu">
+                    data-target="#blog-menu" style="padding: 6px 10px; font-size: 14px;">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -53,16 +53,11 @@
             </ul>
         </div>
     </nav>
-
     {% for news in news_list %}
         <article class="post-item" data-rank="{{ loop.index0 }}">
             <div class="post-title">
                 <h3 id="{{ news.slug() }}">
-                    {% if news.url and news.url != '#' %}
-                        <a target="_blank" class="post-url" href="{{ news.url }}">{{ news.title }}</a>
-                    {% else %}
-                        {{ news.title }}
-                    {% endif %}
+                    <a class="post-url" href="/posts/{{ news.slug() }}.html">{{ news.title }}</a>
                 </h3>
             </div>
 
@@ -98,8 +93,9 @@
                         <span>{{ news.tags|join(', ') }}</span>
                     </span>
                 {% endif %}
-            </div>
+             </div>
 
+            {% if news_list|length == 1 %}
             <div class="post-summary">
                 {% if news.image_url %}
                     <a class="feature-image" href="{{ news.image_url }}" target="_blank">
@@ -116,16 +112,18 @@
                 {% endif %}
                 <div style="clear: both;"></div>
             </div>
+            {% endif %}
         </article>
+        {% if not loop.last and news_list|length > 1 %}<hr>{% endif %}
     {% endfor %}
 
     <footer>
         <ul class="list-inline text-center">
             <li><a href="/feed.xml">RSS</a></li>
-            |
+            &centerdot;
             <li><a href="https://github.com/ghovax" title="My GitHub" target="_blank">GitHub</a></li>
             {% if last_updated %}
-                |
+                &centerdot;
                 <li class="last-updated"
                     data-submitted="{{ last_updated.strftime("%Y-%m-%dT%H:%M:%SZ") }}"
                     title="{{ last_updated.replace(microsecond=0) }} UTC">
