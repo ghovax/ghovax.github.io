@@ -19,7 +19,7 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
-        "title": "Chrome Extension to Visualize Anki Learning Progress",
+        "title": "Welcome to My Blog",
         "url": "#",
         "folder": "anki-extension",
         "author": "Giovanni Gravili",
@@ -48,18 +48,35 @@ BLOG_POSTS = [
 
 
 def load_markdown_content(folder):
-    """Load and convert Markdown content to HTML"""
-    import markdown
+    """Load and convert Markdown content to HTML using pandoc"""
+    import subprocess
 
     md_file = folder + ".md"
     file_path = os.path.join(MARKDOWN_DIR, folder, md_file)
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
-        md = markdown.Markdown()
-        return md.convert(content)
+        result = subprocess.run(
+            [
+                "pandoc",
+                "-f",
+                "gfm+smart",
+                "-t",
+                "html",
+                "--standalone=false",
+                "--wrap=none",
+                "--mathml",
+            ],
+            input=content,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout
     except FileNotFoundError:
         return f"<p>Content file not found: {md_file}</p>"
+    except subprocess.CalledProcessError as e:
+        return f"<p>Error converting markdown: {e}</p>"
 
 
 def get_blog_posts():
