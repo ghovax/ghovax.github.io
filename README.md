@@ -16,28 +16,41 @@ A simple, clean personal blog built with Python and static site generation.
 
 ## Quick Start - Adding Blog Posts
 
-To add a new blog post, simply edit `blog_posts.py` and add a new entry to the `BLOG_POSTS` list:
+### 1. Write in Markdown
+
+Create a new markdown file in `posts/markdown/`:
+
+```bash
+# posts/markdown/my-new-post.md
+```
+
+Write your content using standard Markdown syntax.
+
+### 2. Add Post Metadata
+
+Edit `blog_posts.py` and add a new entry:
 
 ```python
 {
-    'title': 'Your Post Title',
-    'url': '#',  # Use '#' for blog-only posts, or add external URL
-    'summary': '''
-        <p>Your post content here. You can use HTML formatting.</p>
-        <p>Multiple paragraphs, lists, and other HTML elements are supported.</p>
-    ''',
+    'title': 'My New Post',
+    'url': '#',
+    'html_file': 'my-new-post.html',  # Matches your .md filename
     'author': 'Giovanni Gravili',
     'author_link': 'https://github.com/ghovax',
-    'submit_time': datetime(2025, 12, 10, 12, 0, 0),  # Publication date
-    'image_url': None,  # Optional: URL to a featured image
-    'tags': ['tag1', 'tag2'],  # Optional: List of tags
-    'comment_url': None,  # Optional: Link to comments
+    'submit_time': datetime(2025, 12, 10, 15, 30, 0),
+    'image_url': None,
+    'tags': ['tutorial'],
+    'comment_url': None,
     'points': 0,
     'comment_count': 0,
 }
 ```
 
-Commit your changes and push to GitHub - the blog will automatically rebuild and deploy!
+### 3. Build & Deploy
+
+The build process automatically converts Markdown → HTML → Blog.
+
+Commit and push to GitHub - the blog will automatically rebuild and deploy!
 
 ## Local Development & Testing
 
@@ -45,6 +58,7 @@ Commit your changes and push to GitHub - the blog will automatically rebuild and
 
 - Python 3.9-3.12
 - [uv](https://docs.astral.sh/uv/) (fast Python package manager)
+- [pandoc](https://pandoc.org/) (for Markdown to HTML conversion)
 
 ### Setup
 
@@ -54,9 +68,16 @@ Commit your changes and push to GitHub - the blog will automatically rebuild and
    cd ghovax.github.io
    ```
 
-2. Install uv if you haven't already:
+2. Install dependencies:
    ```bash
+   # Install uv
    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Install pandoc (macOS)
+   brew install pandoc
+
+   # Or on Linux
+   sudo apt-get install pandoc
    ```
 
 3. (Optional) Create a `.env` file from the example:
