@@ -1,7 +1,7 @@
 [project]
 name = "ghovax-blog"
 version = "1.0.0"
-description = "Giovanni's personal blog"
+description = "Giovanni's Portfolio"
 requires-python = ">=3.9,<3.13"
 dependencies = [
     "beautifulsoup4>=4.12.2",

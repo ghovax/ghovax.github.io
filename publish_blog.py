@@ -93,7 +93,7 @@ def gen_feed(posts):
     """Generate RSS/Atom feed"""
     start = time.time()
     feed = AtomFeed(
-        "Giovanni's Blog",
+        "Giovanni's Portfolio",
         updated=datetime.utcnow(),
         feed_url=f'{config.site}/feed.xml',
         url=config.site,

@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Simple blog post management - add your blog posts here!
 
