@@ -1,0 +1,104 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+  repository_dispatch:
+    types: [ generate-gh-pages ]
+
+  # Commented out automatic scheduling - uncomment if you want automatic updates
+  # schedule:
+  #   - cron: "0 0 * * *"  # Run once daily at midnight
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  deployments: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: event-${{ github.event_name }}  # So UT won't be interrupted by cronjobs
+  cancel-in-progress: true # Avoid batch pending when one job hangs
+
+jobs:
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      TOKENIZERS_PARALLELISM: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: My Host
+        run: |
+          date
+          sudo apt install -y -qq moreutils  # https://unix.stackexchange.com/questions/26728/prepending-a-timestamp-to-each-line-of-output-from-a-command
+          echo -e "free -h:\n`free -h`" | ts
+          echo
+          sudo rm -rf /usr/local/lib/android & # release about 12 GB, cost 1min
+          sudo rm -rf /usr/share/dotnet & # release about 1 GB, cost 2s
+          echo -e "df -h:\n`df -h`" | ts
+          echo
+          echo "pwd: `pwd`" | ts
+          echo
+          echo "nproc: `nproc`" | ts
+          echo
+          echo -e "curl -s ifconfig.me/all:\n`curl -s --max-time 30 ifconfig.me/all`" | ts
+
+      - name: Export vars to env
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
+        run: |
+          echo "$VARS_JSON" | jq -r 'keys[] as $k | "\($k)=\(.[$k])"' >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # Artifact download removed for simplified blog setup
+      - name: Create output directory
+        run: mkdir -p output
+
+      # Unit tests removed for simplified blog setup
+
+      - name: Generate Blog
+        run: make blog
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Page Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'output'
+          retention-days: 7
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        if: ${{ success() }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        continue-on-error: true  # tolerate cloudflare api failure
+        if: ${{ success() }}
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: hndigest
+          directory: 'output'
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

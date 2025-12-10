@@ -1,0 +1,23 @@
+{% extends "base_blog.html" %}
+
+{% set title = "Giovanni's Blog" -%}
+{% set description = 'Personal blog by Giovanni Gravili. Thoughts on software development, projects, and more.' -%}
+
+{% block head %}
+    <meta name="description" content="{{ description }}">
+    <link rel="canonical" href="https://ghovax.github.io/"/>
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="{{ title }}"/>
+    <meta name="twitter:description" content="{{ description }}"/>
+    {{ super() }}
+{% endblock %}
+
+{% block nav_brand %}
+    <a class="navbar-brand" href="{{ config.site }}/">Giovanni's Blog</a>
+{% endblock %}
+
+{% block nav_links %}
+    <li>
+        <a href="https://github.com/ghovax" target="_blank" title="My GitHub">GitHub</a>
+    </li>
+{% endblock %}

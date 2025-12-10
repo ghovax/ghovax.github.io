@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    {% block head %}
+        <title>{{ title }}</title>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="alternate" type="application/atom+xml" title="{{ title }}" href="/feed.xml"/>
+        <link rel="shortcut icon" href="/static/favicon.ico">
+        <link rel="bookmark" href="/static/favicon.ico">
+        <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+        <meta name="apple-mobile-web-app-title" content="Blog">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.css" integrity="sha512-YTuMx+CIxXa1l+j5aDPm98KFbVcYFNhlr2Auha3pwjHCF1lLbY9/ITQQlsUzdM1scW45kHC5KNib4mNa1IFvJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/css/style.css">
+        <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script>
+            function illustration_fall_back(img) {
+                img.onerror = '';
+                img.src = $(img).attr('alt');
+            }
+        </script>
+    {% endblock head %}
+</head>
+<body>
+<div class="container">
+    <nav class="navbar">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#blog-menu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            {% block nav_brand %} {% endblock %}
+        </div>
+        <div class="collapse navbar-collapse" id="blog-menu">
+            <ul class="nav navbar-nav nav-pills">
+                {% block nav_links %} {% endblock %}
+                <li class="sort-dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">
+                        Sort
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="sort-by-submit-time">Date (newest)</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="sort-by-submit-time-asc">Date (oldest)</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    {% for news in news_list %}
+        <article class="post-item" data-rank="{{ loop.index0 }}">
+            <div class="post-title">
+                <h3 id="{{ news.slug() }}">
+                    {% if news.url and news.url != '#' %}
+                        <a target="_blank" class="post-url" href="{{ news.url }}">{{ news.title }}</a>
+                    {% else %}
+                        {{ news.title }}
+                    {% endif %}
+                </h3>
+            </div>
+
+            <div class="post-meta">
+                {% if news.author %}
+                    <span class="author-link" title="Author">
+                        {% if news.author_link %}
+                            <a href="{{ news.author_link }}" rel="author" target="_blank">
+                                <i class="fa fa-user"></i>
+                                <span>{{ news.author }}</span>
+                            </a>
+                        {% else %}
+                            <i class="fa fa-user"></i>
+                            <span>{{ news.author }}</span>
+                        {% endif %}
+                    </span>
+                {% endif %}
+                <span class="summit-time" title="Published at {{ news.submit_time.replace(microsecond=0) }} UTC">
+                    <i class="fa fa-clock-o"></i>
+                    <span class="last-updated" data-submitted="{{ news.submit_time.strftime("%Y-%m-%dT%H:%M:%SZ") }}">
+                        <span>{{ news.submit_time.strftime("%B %d, %Y") }}</span>
+                    </span>
+                </span>
+                <span class="share-icon" title="Share">
+                    <a href="{{ path }}#{{ news.slug() }}">
+                        <i class="fa fa-share-square-o"></i>
+                        <span>Share</span>
+                    </a>
+                </span>
+                {% if news.tags %}
+                    <span class="tags" title="Tags">
+                        <i class="fa fa-tags"></i>
+                        <span>{{ news.tags|join(', ') }}</span>
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="post-summary">
+                {% if news.image_url %}
+                    <a class="feature-image" href="{{ news.image_url }}" target="_blank">
+                        <img class="img-rounded" src="{{ news.image_url }}"
+                             alt="{{ news.image_url }}" onerror="illustration_fall_back(this);"
+                             style="max-width: 220px; max-height: 220px;"
+                             loading="lazy"/>
+                    </a>
+                {% endif %}
+                {% if news.summary %}
+                    <div class="{% if news.summary.startswith('<iframe') %}embed-responsive embed-responsive-16by9 {% else %}summary-text{% endif %}">
+                        {{ news.summary|safe }}
+                    </div>
+                {% endif %}
+                <div style="clear: both;"></div>
+            </div>
+        </article>
+    {% endfor %}
+
+    <footer>
+        <ul class="list-inline text-center">
+            <li><a href="/feed.xml">RSS</a></li>
+            |
+            <li><a href="https://github.com/ghovax" title="My GitHub" target="_blank">GitHub</a></li>
+            {% if last_updated %}
+                |
+                <li class="last-updated"
+                    data-submitted="{{ last_updated.strftime("%Y-%m-%dT%H:%M:%SZ") }}"
+                    title="{{ last_updated.replace(microsecond=0) }} UTC">
+                    Last updated: <span>{{ last_updated.replace(microsecond=0) }} UTC</span>
+                </li>
+            {% endif %}
+        </ul>
+    </footer>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/humanize-duration/3.27.3/humanize-duration.min.js" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/jquery.scrollup/2.4.0/jquery.scrollUp.min.js"></script>
+<script src="/static/js/blog.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</body>
+</html>
