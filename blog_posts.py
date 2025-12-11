@@ -50,21 +50,16 @@ BLOG_POSTS = [
 def load_markdown_content(folder):
     """Load and convert Markdown content to HTML using pandoc"""
     import subprocess
-    import tempfile
     import os
-    import re
 
     md_file = folder + ".md"
     file_path = os.path.join(MARKDOWN_DIR, folder, md_file)
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
-
+        # Run pandoc directly on the markdown file
+        # Change to the markdown directory so relative image paths work
         original_cwd = os.getcwd()
         os.chdir(os.path.dirname(file_path))
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            f.write(content)
-            temp_file = f.name
+
         result = subprocess.run(
             [
                 "pandoc",
@@ -74,19 +69,18 @@ def load_markdown_content(folder):
                 "html",
                 "--standalone=false",
                 "--mathml",
-                temp_file,
+                md_file,
             ],
             capture_output=True,
             text=True,
             check=True,
         )
-        os.unlink(temp_file)
         os.chdir(original_cwd)
         return result.stdout
-    except FileNotFoundError:
-        return f"<p>Content file not found: {md_file}</p>"
+    except FileNotFoundError as e:
+        return f"<p>Content file not found: {md_file} - {e}</p>"
     except subprocess.CalledProcessError as e:
-        return f"<p>Error converting markdown: {e}</p>"
+        return f"<p>Error converting markdown: {e.stderr if e.stderr else str(e)}</p>"
 
 
 def get_blog_posts():
