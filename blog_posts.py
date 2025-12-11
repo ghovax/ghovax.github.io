@@ -67,7 +67,6 @@ def load_markdown_content(folder):
                 "markdown",
                 "-t",
                 "html",
-                "--standalone=false",
                 "--mathml",
                 md_file,
             ],
