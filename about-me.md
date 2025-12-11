@@ -36,4 +36,4 @@ I enjoy connecting theory and practical application—whether through writing co
 
 ---
 
-### 👨🏻‍🏫 You Can Find My Writings Below
+## 👨🏻‍🏫 My Writings
