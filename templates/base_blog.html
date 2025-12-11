@@ -45,10 +45,14 @@
     </nav>
 
     {% if about_me %}
-    <section class="about-me-section" style="margin-bottom: 40px;">
-        {{ about_me|safe }}
-    </section>
-    <hr style="color: gray; margin-bottom: 40px;">
+    <article class="post-item about-me-section">
+        <div class="post-summary">
+            <div class="summary-text">
+                {{ about_me|safe }}
+            </div>
+        </div>
+    </article>
+    <hr style="color: gray;">
     {% endif %}
 
     {% for news in news_list %}

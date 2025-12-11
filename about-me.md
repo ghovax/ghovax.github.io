@@ -1,23 +1,23 @@
-# Hi, I'm Giovanni Gravili 👋
+## Hi, I'm Giovanni Gravili 👋
 
 **R&D-Oriented Computational Physicist** • **Full-Stack Development** • Materials Science • Machine Learning
 
-## 🔬 About Me
+### 🔬 About Me
 
 I'm **Giovanni Gravili**, an R&D-Oriented Computational Physicist with a graduate degree in Material Physics and Nanoscience from the University of Bologna. I specialize in computational physics, with expertise spanning materials modeling, molecular dynamics simulations, and machine learning applications.
 
 I recently completed my Master's thesis on nanoscale tribology using High-Performance Computing (HPC) systems, while simultaneously serving as the Technical Lead of "Bequire", an EdTech startup project that won first place in a competitive entrepreneurship program at Dokuz Eylül University (DEU) in Izmir, Türkiye, gaining access to the DEPARK startup incubator.
 
-I enjoy connecting theory and practical application—whether through writing code for physical simulations, building software products, or developing ways to visualize complex data. I'm looking for research or industry roles where I can use both computational methods and hands-on development to solve real-world problems in materials science and related areas.
+I enjoy connecting theory and practical application—whether through writing code for physical simulations, building software products, or developing ways to visualize complex data, helping people realize their maximum potential.
 
-## 👨🏻‍🔬 Connect With Me
+### 👨🏻‍🔬 Connect With Me
 
 - 🎯 **Seeking Roles**: Research or industry roles where I can apply my programming and development skills to solve real-world problems in materials science, technology, education, and adjacent fields.
 - 📧 **Contact**: [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)  
 - 🔗 **LinkedIn**: [linkedin.com/in/giovanni-gravili](https://linkedin.com/in/giovanni-gravili)  
 - 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1yUgeBOnbC9-Zk6ECqg-7DrkrLLJFQHkF/view?usp=sharing)
 
-## 💻 Technical Skills & Stack
+### 💻 Technical Skills & Stack
 
 * **Computational Modeling:** LAMMPS • VASP • Quantum ESPRESSO • OVITO • ASE
 * **Programming Languages:** Python • C++ • FORTRAN • MATLAB • Mathematica • Julia • JavaScript/TypeScript
@@ -25,11 +25,15 @@ I enjoy connecting theory and practical application—whether through writing co
 * **Cloud & DevOps:** React • Next.js • Node.js • MongoDB • Google Cloud Storage (GCS) • Firebase/Firestore • REST APIs • Docker • Git/GitHub • CI/CD Pipelines • Embedded Systems
 * **Experimental Techniques:** Raman • IR • UV-Vis Spectroscopy • X-ray Diffraction (XRD) and Fluorescence (XRF) • Atomic Force Microscopy (AFM) • Mott-Schottky Analysis • Photocurrent Characterization • LASERs
 
-## 🎓 Education
+### 🎓 Education
 
 - **M.Sc. Material Physics & Nanoscience** (University of Bologna, 2023–2025)
 - **B.Sc. Physics** (University of Bologna, 2019–2023)
 
-## 🌟 Core Strengths
+### 🌟 Core Strengths
 
-✨ **Adaptability** • **Teamwork & Inclusivity** • **Robust Code Practices** • **Communication** • **Rapid Learning**
+✨ *Adaptability* • *Teamwork & Inclusivity* • *Robust Code Practices* • *Communication* • *Rapid Learning*
+
+---
+
+### 👨🏻‍🏫 You Can Find My Writings Below

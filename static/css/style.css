@@ -78,6 +78,9 @@
 math {
     padding: 1rem 0;
     font-size: 103.46%;
+    max-width: 100%;
+    overflow-x: auto;
+    
 }
 
 .post-item .post-summary .summary-text {
