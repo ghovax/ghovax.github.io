@@ -45,7 +45,7 @@ BLOG_POSTS = [
         "comment_count": 0,
     },
     {
-        "title": "A New Framework for Integrating LLMs Into Academia",
+        "title": "Arduino-CNN Hand-Drawn Digit Classifier",
         "url": "#",
         "folder": "arduino-mnist-vision",
         "author": "Giovanni Gravili",
