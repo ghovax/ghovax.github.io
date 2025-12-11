@@ -44,6 +44,19 @@ BLOG_POSTS = [
         "points": 0,
         "comment_count": 0,
     },
+    {
+        "title": "A New Framework for Integrating LLMs Into Academia",
+        "url": "#",
+        "folder": "arduino-mnist-vision",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2025, 12, 9, 10, 30, 0),
+        "image_url": None,
+        "tags": ["Embedded Systems", "AI"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
+    },
 ]
 
 
