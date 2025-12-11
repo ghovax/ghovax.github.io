@@ -1,6 +1,6 @@
 ## Hi, I'm Giovanni Gravili 👋
 
-**R&D-Oriented Computational Physicist** • **Full-Stack Development** • Materials Science • Machine Learning
+_**R&D-Oriented Computational Physicist**_ • _**Full-Stack Development**_ • Materials Science • Machine Learning
 
 ### 🔬 About Me
 
