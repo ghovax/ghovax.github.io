@@ -7,6 +7,7 @@ import hashlib
 import logging
 import os
 import shutil
+import subprocess
 import time
 from datetime import datetime
 from urllib.parse import urljoin
@@ -60,6 +61,33 @@ environment = Environment(
 environment.globals["config"] = config
 
 
+def load_about_me():
+    """Load and convert About Me markdown to HTML using pandoc"""
+    about_me_path = os.path.join(os.path.dirname(__file__), "about-me.md")
+    try:
+        result = subprocess.run(
+            [
+                "pandoc",
+                "-f",
+                "markdown",
+                "-t",
+                "html",
+                "--mathml",
+                about_me_path,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout
+    except FileNotFoundError:
+        logger.warning("About Me file not found")
+        return ""
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error converting About Me markdown: {e.stderr if e.stderr else str(e)}")
+        return ""
+
+
 def gen_blog():
     """Generate the blog homepage"""
     posts_data = get_blog_posts()
@@ -98,9 +126,13 @@ def gen_page(posts, path):
     directory = os.path.dirname(static_page)
     os.makedirs(directory, exist_ok=True)
 
+    # Load About Me section only for the main index page
+    about_me_html = load_about_me() if path == "index.html" else ""
+
     start = time.time()
     rendered = template.render(
         news_list=posts,  # Keep name for template compatibility
+        about_me=about_me_html,
         last_updated=datetime.utcnow(),
         path=urljoin(config.site + "/", path.rstrip("index.html")),
     )

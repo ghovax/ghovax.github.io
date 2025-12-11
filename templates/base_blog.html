@@ -43,6 +43,14 @@
             </ul>
         </div>
     </nav>
+
+    {% if about_me %}
+    <section class="about-me-section" style="margin-bottom: 40px;">
+        {{ about_me|safe }}
+    </section>
+    <hr style="color: gray; margin-bottom: 40px;">
+    {% endif %}
+
     {% for news in news_list %}
         <article class="post-item" data-rank="{{ loop.index0 }}">
             <div class="post-title">
