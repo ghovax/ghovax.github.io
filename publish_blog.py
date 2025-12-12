@@ -27,6 +27,7 @@ class BlogPost:
 
     def __init__(self, data):
         self.title = data["title"]
+        self.emoji = data.get("emoji")
         self.url = data["url"]
         self.summary = data["summary"]
         self.author = data["author"]

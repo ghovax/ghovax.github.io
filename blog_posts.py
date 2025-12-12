@@ -20,6 +20,7 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 BLOG_POSTS = [
     {
         "title": "How to Visualize Your Anki Learning Progress",
+        "emoji": "📊",
         "url": "#",
         "folder": "anki-extension",
         "author": "Giovanni Gravili",
@@ -33,6 +34,7 @@ BLOG_POSTS = [
     },
     {
         "title": "A New Framework for Integrating LLMs Into Academia",
+        "emoji": "🎓",
         "url": "#",
         "folder": "bequire-full-stack",
         "author": "Giovanni Gravili",
@@ -46,6 +48,7 @@ BLOG_POSTS = [
     },
     {
         "title": "Arduino-CNN Hand-Drawn Digit Classifier",
+        "emoji": "🔢",
         "url": "#",
         "folder": "arduino-mnist-vision",
         "author": "Giovanni Gravili",
