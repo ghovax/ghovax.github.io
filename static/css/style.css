@@ -4,6 +4,30 @@
     }
 }
 
+.tech-stack {
+    margin-bottom: 12px;
+}
+
+.tech-badge {
+    display: inline-block;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 4px 10px;
+    margin: 3px 4px 3px 0;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease;
+}
+
+.tech-badge:hover {
+    background-color: #e0e0e0;
+    border-color: #ccc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .nav > li > a:hover, .nav > li > a:focus {
     text-decoration: none;
     background-color: transparent;

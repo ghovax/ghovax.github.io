@@ -40,7 +40,7 @@ Documents can be created via the "New Document" button on the top bar. Users can
 
 ![](Screenshot 2025-12-11 at 12.06.18.png)
 
-Each document includes metadata so the user can differentiate among the various created documents. For each document a title and description are generated automatically. Documents themselves these are immutable and, in the current version, can only be downloaded as a PDF in addition to being accessible on the platform itself.
+Each document includes metadata so the user can differentiate among the various created documents. For each document a title and description are generated automatically. Documents themselves are immutable and, in the current version, can only be downloaded as a PDF in addition to being accessible on the platform itself.
 
 On the right, the chat panel can be collapsed or revealed via a toggle. The chat input at the bottom contains multiple utilities, including a view of which documents are currently in the context, creation of a new chat, and an autocorrect feature for messages that facilitates input of formulas via plain text. This feature not only corrects formulas but also grammar and syntax. The user can choose a response style that is balanced, concise, or oriented toward guided learning, allowing you to focus on the desired experience.
 

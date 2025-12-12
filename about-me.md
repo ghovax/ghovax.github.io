@@ -20,7 +20,7 @@ I enjoy connecting theory and practical application—whether through writing co
 ### 💻 Technical Skills & Stack
 
 * **Computational Modeling:** LAMMPS • VASP • Quantum ESPRESSO • OVITO • ASE
-* **Programming Languages:** Python • C++ • FORTRAN • MATLAB • Mathematica • Julia • JavaScript/TypeScript
+* **Programming Languages:** Python • Rust • Go • C++ • FORTRAN • MATLAB • Mathematica • Julia • JavaScript/TypeScript • Bash • GPU Programming
 * **ML & Data Science:** TensorFlow • PyTorch • Scikit-Learn • NumPy • Pandas • Large-Scale Data Pipelines
 * **Cloud & DevOps:** React • Next.js • Node.js • MongoDB • Google Cloud Storage (GCS) • Firebase/Firestore • REST APIs • Docker • Git/GitHub • CI/CD Pipelines • Embedded Systems
 * **Experimental Techniques:** Raman • IR • UV-Vis Spectroscopy • X-ray Diffraction (XRD) and Fluorescence (XRF) • Atomic Force Microscopy (AFM) • Mott-Schottky Analysis • Photocurrent Characterization • LASERs
