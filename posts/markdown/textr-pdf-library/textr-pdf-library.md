@@ -40,6 +40,40 @@ $$\text{points} = \text{millimeters} \times 2.834646$$
 
 This factor derives from the definition of points in relation to inches.
 
+To generate a document from scratch using this library, use the following high-level API (as per the example):
+
+```rust
+// Create a new document with a predefined document ID
+let document_id = "QU2KK7yivMeRDnU8DodEQxnfqJAe4wZ2".to_string();
+let mut pdf_document = PdfDocument::new(document_id);
+// Add a page of 300 by 500 millimeters with an empty layer
+let (page_index, layer_index_in_page) = pdf_document.add_page_with_layer(300.0, 500.0);
+
+// Add a font to the document, in this case it is the bold italic font of the CMU family
+let font_path = Path::new("fonts/computer-modern/cmunbi.ttf");
+let font_index = pdf_document.add_font(font_path).unwrap();
+
+// Write some text to the current page at the current layer
+pdf_document
+    .write_text_to_layer_in_page(
+        page_index,
+        layer_index_in_page,
+        [0.0, 0.0, 0.0],
+        "Hello, world!".into(),
+        font_index,
+        48.0,
+        [50.0, 200.0],
+    )
+    .unwrap();
+
+// Because we are not working with a `Document`, but instead with a `PdfDocument` we need
+// to first save the PDF document to bytes and then to a file
+let instance_id = "DLjCAhuTD3cvaoQCJnMvkC0iNWEGEfyD".to_string();
+pdf_document.optimize();
+pdf_document.write_all(instance_id.clone()).unwrap();
+let pdf_document_bytes = pdf_document.save_to_bytes().unwrap();
+```
+
 ### Deterministic Output for Testing
 
 The library focuses on producing byte-identical PDFs every time to enable regression testing by comparing PDFs after code changes. Traditional PDF libraries use random UUIDs for document IDs and timestamps in metadata, which makes output non-deterministic. Testing generates fuzz targets—random JSON documents—converts them to PDFs as reference outputs, converts those PDFs to PostScript for easier text-based diffing using a Goss script, and then reconverts after code changes to verify diffs against the references. Binary PDF diffs show raw byte changes without context, whereas PostScript diffs are meaningful. The PDFs my library generates are functional but unoptimized: they contain redundant objects and uncompressed streams, making files large—usually a few megabytes even for simple documents because all font files are embedded. I provide a helper function that typically reduces file sizes by 80–90%. I spent hours developing these solutions; it was a difficult learning process to understand PDFs and how to generate them, since minor changes can cause widespread byte differences. Another major challenge was identifying sources of randomness, which allowed me to catch numerous bugs that otherwise caused unintended output changes.
