@@ -67,7 +67,7 @@ BLOG_POSTS = [
         "folder": "desktop-mascots-macos",
         "author": "Giovanni Gravili",
         "author_link": "https://github.com/ghovax",
-        "submit_time": datetime(2025, 4, 10, 10, 0, 0),
+        "submit_time": datetime(2023, 7, 10, 9, 44, 0),
         "image_url": None,
         "tags": [
             "Swift",
@@ -88,7 +88,7 @@ BLOG_POSTS = [
         "folder": "math-library-haskell",
         "author": "Giovanni Gravili",
         "author_link": "https://github.com/ghovax",
-        "submit_time": datetime(2025, 2, 15, 10, 0, 0),
+        "submit_time": datetime(2024, 4, 13, 12, 11, 0),
         "image_url": None,
         "tags": [
             "Haskell",
