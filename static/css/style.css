@@ -124,6 +124,7 @@ math {
     max-height: 250px;
 }
 
+.post-item .post-summary pre,
 .post-item .post-summary .sourceCode {
     font-size: 0.953125em !important;
 }
