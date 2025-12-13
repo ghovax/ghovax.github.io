@@ -60,6 +60,20 @@ BLOG_POSTS = [
         "points": 0,
         "comment_count": 0,
     },
+    {
+        "title": "Building a PDF Generation Library from Scratch in Rust",
+        "emoji": "📑",
+        "url": "#",
+        "folder": "textr-pdf-library",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2025, 12, 9, 10, 30, 0),
+        "image_url": None,
+        "tags": ["Rust", "LaTeX"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
+    },
 ]
 
 
