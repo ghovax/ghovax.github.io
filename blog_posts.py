@@ -118,7 +118,7 @@ BLOG_POSTS = [
     },
     {
         "title": "Visualizing Quantum Confinement with Brillouin Zone Analysis",
-        "emoji": "🔬",
+        "emoji": "📐",
         "url": "#",
         "folder": "lattice-plot-mathematica",
         "author": "Giovanni Gravili",
@@ -131,7 +131,7 @@ BLOG_POSTS = [
         "comment_count": 0,
     },
     {
-        "title": "Computing Helium Ground State Energy with Density Functional Theory",
+        "title": "Helium Ground-State Energy with DFT",
         "emoji": "⚛️",
         "url": "#",
         "folder": "dft-helium-julia",

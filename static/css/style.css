@@ -102,8 +102,11 @@
 }
 
 math {
-  padding: 1rem 0;
   font-size: 103.46%;
+}
+
+math[display="block"] {
+  padding: 1rem 0;
   max-width: 100%;
   overflow-x: auto;
 }
@@ -125,13 +128,7 @@ math {
   max-height: 250px;
 }
 
-.post-item .post-summary pre,
-.post-item .post-summary .sourceCode {
-  font-size: 0.953125em !important;
-}
-
 .post-item .post-summary pre {
-  font-size: 1em;
   background-color: #f5f5d5;
   line-height: 1.42857143;
   color: #333;
