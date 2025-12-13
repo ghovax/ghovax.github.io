@@ -89,7 +89,7 @@ BLOG_POSTS = [
         "comment_count": 0,
     },
     {
-        "title": "TeX-Inspired Document Editor with GTK4 and Skia",
+        "title": "Document Editor with GTK4 and Skia From Scratch",
         "emoji": "✍️",
         "url": "#",
         "folder": "editex-skia-rust",
