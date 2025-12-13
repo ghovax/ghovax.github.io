@@ -1,0 +1,13 @@
+Computer algebra systems like Mathematica or SymPy feel like magic. You type in a derivative request and get back a perfect symbolic answer. But how does a computer understand variables rather than strings? How does it know the rules of calculus? I decided to build a symbolic mathematics engine from scratch in Haskell to find out. I chose Haskell because its functional nature mirrors mathematics perfectly. In imperative languages, you might implement an expression as an object with methods; in functional programming, an expression is just data, and differentiation is just a transformation of that data. The full source code is available on [GitHub](https://github.com/ghovax/math-library-haskell).
+
+### Expression Trees
+
+The fundamental insight is that any mathematical expression can be represented as a tree. The expression $2x + 1$ isn't a flat string; it's a Sum operation where the left child is a Product (of 2 and x) and the right child is 1. In Haskell, we define this using an Algebraic Data Type that covers everything from simple constants to trig functions. Once you have this tree structure, calculus becomes a game of pattern matching. Differentiation isn't a calculation; it's a recursive function that transforms one tree structure into another based on the standard rules. For example, the product rule $d(uv) = u'v + uv'$ becomes a direct translation where a Product node is transformed into a Sum of two Product nodes representing the sub-derivatives.
+
+### Simplification
+
+However, raw symbolic differentiation is messy. If you differentiate $x^2$ using the power rule, you strictly get $2 \cdot x^{2-1}$. A computer doesn't automatically know that $2-1=1$ or that $x^1=x$. Without simplification, the derivative of $2x$ might come out as $0 \cdot x + 2 \cdot 1$. To fix this, I implemented a simplifier that repeatedly applies algebraic identities until the expression stops changing (a "fixed-point" algorithm). It applies rules like identity addition, identity multiplication, and constant folding to turn that messy tree back into the clean result we expect. This engine is robust enough to handle advanced applications like Taylor Series expansion. By symbolically computing the first $n$ derivatives and evaluating them at a point $a$, the library can construct the polynomial approximation for any supported function:
+
+$$ f(x) \approx \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!} (x-a)^n $$
+
+Building this library highlighted why functional programming is so effective for compiler-like tasks; the lack of mutable state means you never worry about "breaking" an expression while transforming it.
