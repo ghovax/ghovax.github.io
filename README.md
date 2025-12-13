@@ -7,12 +7,12 @@ A simple, clean personal blog built with Python and static site generation.
 
 ## Features
 
-* Write blog posts in simple Python data structures
-* Clean, responsive design
-* RSS/Atom feed support
-* Automatic deployment to GitHub Pages
-* Sort posts by date
-* Tag support
+- Write blog posts in simple Python data structures
+- Clean, responsive design
+- RSS/Atom feed support
+- Automatic deployment to GitHub Pages
+- Sort posts by date
+- Tag support
 
 ## Quick Start - Adding Blog Posts
 
@@ -63,12 +63,14 @@ Commit and push to GitHub - the blog will automatically rebuild and deploy!
 ### Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/ghovax/ghovax.github.io.git
    cd ghovax.github.io
    ```
 
 2. Install dependencies:
+
    ```bash
    # Install uv
    curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -116,6 +118,7 @@ python3 -m http.server 8000  # Serve it locally
 The site automatically deploys to GitHub Pages when you push to the `main` branch.
 
 The GitHub Actions workflow:
+
 1. Installs Python dependencies
 2. Generates the blog from `blog_posts.py`
 3. Deploys to GitHub Pages
@@ -125,6 +128,7 @@ You can also manually trigger deployment from the Actions tab in your GitHub rep
 ### GitHub Pages Setup
 
 Make sure GitHub Pages is enabled in your repository settings:
+
 1. Go to Settings > Pages
 2. Source: "GitHub Actions"
 3. Your blog will be available at `https://ghovax.github.io/`
@@ -134,6 +138,7 @@ Make sure GitHub Pages is enabled in your repository settings:
 ### Change Blog Title and Branding
 
 Edit `templates/blog.html`:
+
 - Update `title` and `description` variables
 - Modify the navigation links in the `nav_brand` and `nav_links` blocks
 
@@ -149,4 +154,3 @@ Update the default author info in `blog_posts.py` or in each individual post.
 ### Customize Footer
 
 Edit `templates/base_blog.html` to change footer links and information.
-

@@ -42,27 +42,27 @@ Unfortunately I have no pictures of the device, as it needed to be returned to t
 
 ### Training the CNN Model
 
-The digital recognition model is a standard CNN trained on the MNIST dataset. 
+The digital recognition model is a standard CNN trained on the MNIST dataset.
 
-* **Input:** $(28, 28, 1)$
+- **Input:** $(28, 28, 1)$
 
 For feature extraction it comprises two convolutional blocks...
 
-* **Conv2D:** $32$ filters, $3 \times 3$ kernel, ReLU$\rightarrow (26, 26, 32)$
-* **MaxPooling2D:** $2 \times 2$ pool$\rightarrow (13, 13, 32)$
-* **Conv2D:** $64$ filters, $3 \times 3$ kernel, ReLU$\rightarrow (11, 11, 64)$
-* **MaxPooling2D:** $2 \times 2$ pool$\rightarrow (5, 5, 64)$
-* **Flatten:** Converts to $1D$$\rightarrow (1600)$
-    
+- **Conv2D:** $32$ filters, $3 \times 3$ kernel, ReLU$\rightarrow (26, 26, 32)$
+- **MaxPooling2D:** $2 \times 2$ pool$\rightarrow (13, 13, 32)$
+- **Conv2D:** $64$ filters, $3 \times 3$ kernel, ReLU$\rightarrow (11, 11, 64)$
+- **MaxPooling2D:** $2 \times 2$ pool$\rightarrow (5, 5, 64)$
+- **Flatten:** Converts to $1D$$\rightarrow (1600)$
+
 ...followed by a classifier of fully connected layers with dropout for regularization to prevent overfitting. The data are augmented with an image generator that randomly rotates images up to 30 degrees and shifts them horizontally and vertically by up to $\pm 20\%$, which improves robustness when the digit is misaligned during camera acquisition. The model is saved as a Keras file that the Flask server loads for inference at runtime.
 
-* **Dense:** $128$ units, ReLU, $\ell_2(0.01)$ regularization
-* **BatchNormalization**
-* **Dropout:** Rate $0.2$
-* **Dense:** $32$ units, ReLU, $\ell_2(0.01)$ regularization
-* **BatchNormalization**
-* **Dropout:** Rate $0.2$
-* **Dense (Output):** $10$ units, softmax activation
+- **Dense:** $128$ units, ReLU, $\ell_2(0.01)$ regularization
+- **BatchNormalization**
+- **Dropout:** Rate $0.2$
+- **Dense:** $32$ units, ReLU, $\ell_2(0.01)$ regularization
+- **BatchNormalization**
+- **Dropout:** Rate $0.2$
+- **Dense (Output):** $10$ units, softmax activation
 
 The training process uses the Adam optimizer with an initial learning rate of 0.001, which decays by 10% every epoch after the tenth epoch. This learning rate schedule prevents the model from overshooting the optimal weights in the later stages of training. I also implemented early stopping based on validation loss to prevent overfitting; if the validation loss does not improve for five consecutive epochs, training terminates and the best weights are restored. After 15 epochs, the model achieves a test accuracy of approximately 98.5% on the standard MNIST test set, which is sufficient for real-time digit recognition.
 

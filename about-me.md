@@ -13,18 +13,18 @@ I enjoy connecting theory and practical application—whether through writing co
 ### 👨🏻‍🔬 Connect With Me
 
 - 🎯 **Seeking Roles**: Research or industry roles where I can apply my programming and development skills to solve real-world problems in materials science, technology, education, and adjacent fields.
-- 📧 **Contact**: [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)  
+- 📧 **Contact**: [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn**: [linkedin.com/in/giovanni-gravili](https://linkedin.com/in/giovanni-gravili)
 - 👨🏽‍💻 **GitHub:** [View My Profile](https://github.com/ghovax)
 - 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/18zvCTV1tNHtrGgyqNtqThmkyAOKCyPxF/view?usp=sharing)
 
 ### 💻 Technical Skills & Stack
 
-* **Computational Modeling:** LAMMPS • VASP • Quantum ESPRESSO • OVITO • ASE
-* **Programming Languages:** Python • Rust • Go • C++ • FORTRAN • MATLAB • Mathematica • Julia • JavaScript/TypeScript • Bash • GPU Programming
-* **ML & Data Science:** TensorFlow • PyTorch • Scikit-Learn • NumPy • Pandas • Large-Scale Data Pipelines
-* **Cloud & DevOps:** React • Next.js • Node.js • MongoDB • Google Cloud Storage (GCS) • Firebase/Firestore • REST APIs • Docker • Git/GitHub • CI/CD Pipelines • Embedded Systems
-* **Experimental Techniques:** Raman • IR • UV-Vis Spectroscopy • X-ray Diffraction (XRD) and Fluorescence (XRF) • Atomic Force Microscopy (AFM) • Mott-Schottky Analysis • Photocurrent Characterization • LASERs
+- **Computational Modeling:** LAMMPS • VASP • Quantum ESPRESSO • OVITO • ASE
+- **Programming Languages:** Python • Rust • Go • C++ • FORTRAN • MATLAB • Mathematica • Julia • JavaScript/TypeScript • Bash • GPU Programming
+- **ML & Data Science:** TensorFlow • PyTorch • Scikit-Learn • NumPy • Pandas • Large-Scale Data Pipelines
+- **Cloud & DevOps:** React • Next.js • Node.js • MongoDB • Google Cloud Storage (GCS) • Firebase/Firestore • REST APIs • Docker • Git/GitHub • CI/CD Pipelines • Embedded Systems
+- **Experimental Techniques:** Raman • IR • UV-Vis Spectroscopy • X-ray Diffraction (XRD) and Fluorescence (XRF) • Atomic Force Microscopy (AFM) • Mott-Schottky Analysis • Photocurrent Characterization • LASERs
 
 ### 🎓 Education
 
@@ -33,7 +33,7 @@ I enjoy connecting theory and practical application—whether through writing co
 
 ### 🌟 Core Strengths
 
-✨ *Adaptability* • *Teamwork & Inclusivity* • *Robust Code Practices* • *Communication* • *Rapid Learning*
+✨ _Adaptability_ • _Teamwork & Inclusivity_ • _Robust Code Practices_ • _Communication_ • _Rapid Learning_
 
 ---
 

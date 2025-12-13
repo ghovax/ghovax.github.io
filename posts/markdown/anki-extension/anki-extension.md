@@ -35,7 +35,7 @@ $$
 \end{cases}
 $$
 
-This is a piecewise linear function: progress in memorization is not linear. A one-week interval indicates the information is established in short-term memory; three weeks marks a transition to medium-term memory; three months represents a solid medium-term memory. Six months means it has entered long-term memory and can be freely recalled. 
+This is a piecewise linear function: progress in memorization is not linear. A one-week interval indicates the information is established in short-term memory; three weeks marks a transition to medium-term memory; three months represents a solid medium-term memory. Six months means it has entered long-term memory and can be freely recalled.
 
 The interval score is clearly not the only metric that should be considered. I also assign a score to lapses and apply a penalty, because mistakes indicate difficulty:
 
@@ -60,7 +60,7 @@ $$
 \text{difficultyLevel} = \max(0, \min(100, \text{intervalScore} + \text{lapsesScore} + \text{repsBonus}))
 $$
 
-This score is then used as input to the text-highlighting algorithm. 
+This score is then used as input to the text-highlighting algorithm.
 
 ### Text-Highlight Algorithm
 
