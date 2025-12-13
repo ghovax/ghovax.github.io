@@ -125,7 +125,7 @@ math {
 }
 
 .post-item .post-summary .sourceCode {
-    font-size: 0.953125em;
+    font-size: 0.953125em !important;
 }
 
 .post-item .post-summary pre {
