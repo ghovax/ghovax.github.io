@@ -73,7 +73,7 @@ The structure of the optimization is straightforward:
 
 1. **Initialize** parameters $\theta = (c_1, c_2, t_{lens})$ and mark them as requiring gradients
 2. **Repeat** until convergence:
-   - **Run the ray tracer:** $\{(x_k, y_k)\} = \text{TraceRays}(\theta)$
+   - **Run the ray tracer:** Obtain $\{(x_k, y_k)\}$ for each ray from running the ray tracer as a function of the parameters $\theta$
    - **Compute loss:** $L = \frac{1}{K}\sum_k (x_k^2 + y_k^2)$
    - **Backpropagate:** compute $\nabla_\theta L$ automatically
    - **Update the parameters:** $\theta \leftarrow \theta - \alpha \cdot \text{Adam}(\nabla_\theta L)$
