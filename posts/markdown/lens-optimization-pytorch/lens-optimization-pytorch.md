@@ -10,7 +10,7 @@ $$\vec{P}(t) = \vec{P}_0 + t \vec{D}$$
 
 This parametric form is computationally convenient because finding where a ray intersects a surface reduces to solving for the scalar $t$.
 
-A lens is defined by two spherical surfaces, each specified by its curvature $c = 1/R$ where $R$ is the radius of curvature. A positive curvature means the center of curvature lies in the $+z$ direction from the surface vertex. For a sphere centered at $(0, 0, R)$, the implicit equation $x^2+y^2+(z-R)^2=R^2$ can be solved for the sag (the z-displacement from the vertex):
+A lens is defined by two spherical surfaces separated by a thickness $t_{lens}$, each surface specified by its curvature $c = 1/R$ where $R$ is the radius of curvature. The front surface has curvature $c_1$ with vertex at $z = 0$, and the back surface has curvature $c_2$ with vertex at $z = t_{lens}$. A positive curvature means the center of curvature lies in the $+z$ direction from the surface vertex. For a sphere centered at $(0, 0, R)$, the implicit equation $x^2+y^2+(z-R)^2=R^2$ can be solved for the sag (the z-displacement from the vertex):
 
 $$z = R - \sqrt{R^2 - r^2}$$
 
@@ -69,7 +69,18 @@ $$ L(c_1, c_2, t_{lens}) = \frac{1}{K} \sum_{k=1}^{K} (x_k^2 + y_k^2) $$
 
 This equals the squared RMS spot radius. We also add a penalty $\lambda(1 - f_{valid})$ to discourage configurations where rays undergo TIR.
 
-Computing this gradient analytically would be nightmarish—our ray tracer involves Newton iterations, square roots, dot products in Snell's law, and averaging over thousands of rays. Writing $\frac{\partial L}{\partial c_1}$ by hand would require pages of chain rule. This is where PyTorch comes in. The key insight is that PyTorch tensors remember their computational history. With NumPy, `c = a * b` produces just a number. With PyTorch tensors that have `requires_grad=True`, `c` knows "I am the product of `a` and `b`." Every operation creates a tensor storing its value, references to input tensors, and which operation was used. This forms a computation graph. When we run our ray tracer with PyTorch tensors, we simultaneously compute the loss (the "forward pass") and build a graph recording how it was computed. Consider $L = (c_1 \cdot r^2)^2$. Letting $u = c_1 \cdot r^2$:
+The structure of the optimization is straightforward:
+
+1. **Initialize** parameters $\theta = (c_1, c_2, t_{lens})$ and mark them as requiring gradients
+2. **Repeat** until convergence:
+   - **Run the ray tracer:** $\{(x_k, y_k)\} = \text{TraceRays}(\theta)$
+   - **Compute loss:** $L = \frac{1}{K}\sum_k (x_k^2 + y_k^2)$
+   - **Backpropagate:** compute $\nabla_\theta L$ automatically
+   - **Update the parameters:** $\theta \leftarrow \theta - \alpha \cdot \text{Adam}(\nabla_\theta L)$
+
+The `TraceRays` function contains all the physics—Newton's method, Snell's law, propagation—but to PyTorch it's just a sequence of primitive operations (multiply, add, sqrt, divide) whose derivatives are known. By marking parameters as "requiring gradients," every operation gets recorded into a computation graph. Calling backpropagate then walks through this graph in reverse, applying the chain rule to compute how much each parameter contributed to the final loss.
+
+Computing $\nabla_\theta L$ by hand would require pages of chain rule through Newton iterations, Snell's law, and thousands of rays. PyTorch automates this entirely. To illustrate, consider a toy example $L = (c_1 \cdot r^2)^2$. Letting $u = c_1 \cdot r^2$:
 
 $$c_1 \xrightarrow{\times \, r^2} u \xrightarrow{(\cdot)^2} L$$
 
@@ -87,16 +98,14 @@ The optimization loop is: zero gradients, run forward pass (building the graph),
 
 ### Results
 
-The optimization started with a symmetric biconvex lens: $R_1 = 100$ mm, $R_2 = -100$ mm, thickness $5$ mm. Initial loss was $0.1258$ (RMS spot radius $\sigma \approx 0.35$ mm). After 300 iterations, the loss dropped to $0.001126$ ($\sigma \approx 0.034$ mm)—a 100× improvement. The final parameters were $R_1 = 95.95$ mm, $R_2 = -94.51$ mm, thickness $4.99$ mm. The optimizer slightly increased both curvatures and reduced thickness. Valid rays remained at 100% throughout.
+The optimization started with a symmetric biconvex lens with initial curvatures $c_1 = 0.01 \text{ mm}^{-1}$ and $c_2 = -0.01 \text{ mm}^{-1}$ (corresponding to radii $R_1 = 100$ mm and $R_2 = -100$ mm), and thickness $t_{lens} = 5$ mm. Initial loss was $0.1258$ (RMS spot radius $\sigma \approx 0.35$ mm). After 300 iterations, the loss dropped to $0.001126$ ($\sigma \approx 0.034$ mm)—a 100× improvement. The final curvatures correspond to radii $R_1 = 95.95$ mm, $R_2 = -94.51$ mm, with thickness $4.99$ mm. The optimizer slightly increased both curvatures (shorter radii) and reduced thickness. Valid rays remained at 100% throughout.
 
-The solution reveals interesting physics. Starting symmetric ($|R_1| = |R_2|$), the optimizer converged to a slightly asymmetric configuration—its attempt to minimize spherical aberration. The Coddington shape factor $q = (R_2 + R_1)/(R_2 - R_1)$ shifted from $0$ to $-0.0076$. For a single lens focusing collimated light, theory predicts an asymmetric shape is optimal, and the optimizer discovered this independently.
-
-The loss history shows characteristic dynamics: rapid exponential descent in early iterations as large gradients drive big steps, then slowing convergence as the minimum is approached, finally plateauing around iteration 150. Convergence in ~100 iterations (rather than thousands) demonstrates the efficiency of gradient-based optimization on smooth, differentiable problems.
-
-![](Screenshot 2025-12-14 at 14.58.41.png)
-
-The first figure shows a side view of the optimized lens with ray paths converging to a tight spot, alongside the spot diagram showing final $(x, y)$ positions on the target.
+The solution reveals interesting physics. Starting symmetric ($|c_1| = |c_2|$), the optimizer converged to a slightly asymmetric configuration—its attempt to minimize spherical aberration. The Coddington shape factor $q = (R_2 + R_1)/(R_2 - R_1)$ shifted from $0$ to $-0.0076$. For a single lens focusing collimated light, theory predicts an asymmetric shape is optimal, and the optimizer discovered this independently.
 
 ![](Screenshot 2025-12-14 at 14.59.37.png)
 
-The loss history on a logarithmic scale reveals the exponential decrease followed by convergence—typical of gradient descent on smooth loss landscapes.
+The loss history shows characteristic dynamics: rapid exponential but oscillatory descent in early iterations as large gradients drive big steps, then slowing convergence as the minimum is approached, finally plateauing around iteration 150. Convergence in ~100 iterations (rather than thousands) demonstrates the efficiency of gradient-based optimization on smooth, differentiable problems.
+
+![](Screenshot 2025-12-14 at 14.58.41.png)
+
+The first figure shows a side view of the optimized lens with ray paths converging to a tight spot, alongside the spot diagram showing final $(x, y)$ positions on the target, zoomed in where they're appearing.
