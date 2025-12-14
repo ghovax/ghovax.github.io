@@ -19,6 +19,20 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
+        "title": "Differentiable Lens Shape Design Optimization via PyTorch",
+        "emoji": "🔎",
+        "url": "#",
+        "folder": "lens-optimization-pytorch",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2025, 12, 14, 15, 35, 0),
+        "image_url": None,
+        "tags": ["PyTorch", "Machine Learning", "Physics", "Python"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
+    },
+    {
         "title": "How to Visualize Your Anki Learning Progress",
         "emoji": "📊",
         "url": "#",
@@ -139,7 +153,7 @@ BLOG_POSTS = [
     },
     {
         "title": "Reverse Engineering the Tobii Eye Tracker 5 Protocol",
-        "emoji": "🔍",
+        "emoji": "👁️",
         "url": "#",
         "folder": "tobii-reverse-engineering",
         "author": "Giovanni Gravili",
