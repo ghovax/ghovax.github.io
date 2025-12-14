@@ -4,6 +4,11 @@
   }
 }
 
+@font-face {
+  font-family: "STIX Two Math";
+  src: url("STIXTwoMath-Regular.ttf") format("truetype");
+}
+
 .tech-stack {
   margin-bottom: 12px;
 }
@@ -103,6 +108,7 @@
 
 math {
   font-size: 105.46%;
+  font-family: "STIX Two Math" !important;
 }
 
 math[display="block"] {
