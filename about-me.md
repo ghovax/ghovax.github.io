@@ -1,14 +1,14 @@
 ## Hi, I'm Giovanni Gravili 👋
 
-_**R&D-Oriented Computational Physicist**_ • _**Full-Stack Development**_ • Materials Science • Machine Learning
+_R&D-Oriented Computational Physicist_ • _Machine Learning & Full-Stack Developer_
 
 ### 🔬 About Me
 
-I'm **Giovanni Gravili**, an R&D-Oriented Computational Physicist with a graduate degree in Material Physics and Nanoscience from the University of Bologna. I specialize in computational physics, with expertise spanning materials modeling, molecular dynamics simulations, and machine learning applications.
+I hold a Master's degree in Material Physics and Nanoscience, specializing in computational physics. My expertise includes materials modeling, molecular dynamics simulations, and applying machine learning techniques.
 
-I recently completed my Master's thesis on nanoscale tribology using High-Performance Computing (HPC) systems, while simultaneously serving as the Technical Lead of "Bequire", an EdTech startup project that won first place in a competitive entrepreneurship program at Dokuz Eylül University (DEU) in Izmir, Türkiye, gaining access to the DEPARK startup incubator.
+I recently finished my Master’s thesis on ML-driven nanoscale tribology simulations using High-Performance Computing (HPC) systems, while also having driven the development as the Technical Lead of an EdTech startup project that won first place in a competitive entrepreneurship program at Dokuz Eylül University (DEU) in Izmir, Türkiye. I enjoy connecting theory and practical application, whether through writing code for physical simulations, building software products, or developing ways to visualize complex data. 
 
-I enjoy connecting theory and practical application—whether through writing code for physical simulations, building software products, or developing ways to visualize complex data, helping people realize their maximum potential.
+With strong programming skills in multiple languages and frameworks, I’m looking for research or industry roles where I can use both computational methods and hands-on development to solve real-world problems in materials science and related areas. I am particularly interested in roles that allow me to apply my expertise in machine learning and computational physics to drive innovation and impact, but I'm always open to new challenges and opportunities independently of the sector and industry.
 
 ### 👨🏻‍🔬 Connect With Me
 
@@ -16,7 +16,7 @@ I enjoy connecting theory and practical application—whether through writing co
 - 📧 **Contact**: [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn**: [linkedin.com/in/giovanni-gravili](https://linkedin.com/in/giovanni-gravili)
 - 👨🏽‍💻 **GitHub:** [View My Profile](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/18zvCTV1tNHtrGgyqNtqThmkyAOKCyPxF/view?usp=sharing)
+- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1VxDHMrhlf3kTtS44LVAh35YdwJC9WSti/view?usp=sharing)
 
 ### 💻 Technical Skills & Stack
 

@@ -78,7 +78,7 @@ The structure of the optimization is straightforward:
    - **Backpropagate:** compute $\nabla_\theta L$ automatically
    - **Update the parameters:** $\theta \leftarrow \theta - \alpha \cdot \text{Adam}(\nabla_\theta L)$
 
-The `TraceRays` function contains all the physics—Newton's method, Snell's law, propagation—but to PyTorch it's just a sequence of primitive operations (multiply, add, sqrt, divide) whose derivatives are known. By marking parameters as "requiring gradients," every operation gets recorded into a computation graph. Calling backpropagate then walks through this graph in reverse, applying the chain rule to compute how much each parameter contributed to the final loss.
+The code module contains all the physics—Newton's method, Snell's law, propagation—but to PyTorch it's just a sequence of primitive operations (`multiply`, `add`, `sqrt`, `divide`) whose derivatives are known. By marking parameters as "requiring gradients," every operation gets recorded into a computation graph. Calling backpropagate then walks through this graph in reverse, applying the chain rule to compute how much each parameter contributed to the final loss.
 
 Computing $\nabla_\theta L$ by hand would require pages of chain rule through Newton iterations, Snell's law, and thousands of rays. PyTorch automates this entirely. To illustrate, consider a toy example $L = (c_1 \cdot r^2)^2$. Letting $u = c_1 \cdot r^2$:
 

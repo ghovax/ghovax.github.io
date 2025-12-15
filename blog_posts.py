@@ -19,7 +19,21 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
-        "title": "Differentiable Lens Shape Design Optimization via PyTorch",
+        "title": "Computational Design of Advanced Caustic Optics using PyTorch",
+        "emoji": "💠",
+        "url": "#",
+        "folder": "caustic-lens-pytorch",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2025, 12, 16, 10, 22, 0),
+        "image_url": None,
+        "tags": ["PyTorch", "Machine Learning", "Physics", "Python"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
+    },
+    {
+        "title": "Minimizing Aberration in Spherical Lenses with PyTorch",
         "emoji": "🔎",
         "url": "#",
         "folder": "lens-optimization-pytorch",
