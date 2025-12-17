@@ -19,7 +19,7 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
-        "title": "Computational Design of Advanced Caustic Optics using PyTorch",
+        "title": "Computational Design of Caustic Optics using PyTorch",
         "emoji": "💠",
         "url": "#",
         "folder": "caustic-lens-pytorch",
