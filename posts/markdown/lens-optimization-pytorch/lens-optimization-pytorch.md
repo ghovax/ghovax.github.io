@@ -34,7 +34,7 @@ $$ \vec{D}_{refr} = \mu \vec{D}_{inc} + \left(\mu \cos(\theta_1) - \cos(\theta_2
 
 where $\cos(\theta_1) = -\vec{D}_{inc} \cdot \vec{N}$ and $\cos(\theta_2) = \sqrt{1 - \mu^2 (1 - \cos^2(\theta_1))}$.
 
-A crucial edge case appears when the term inside this square root becomes negative. This occurs when light travels from a denser to a less dense medium at a sufficiently shallow angle—beyond the critical angle $\theta_c = \arcsin(n_2/n_1)$. For glass ($n \approx 1.5$) to air, $\theta_c \approx 41.8°$. Beyond this, Total Internal Reflection (TIR) occurs and the ray never exits the lens.
+A crucial edge case appears when the term inside this square root becomes negative. This occurs when light travels from a denser to a less dense medium at a sufficiently shallow angle, beyond the critical angle $\theta_c = \arcsin(n_2/n_1)$. For glass ($n \approx 1.5$) to air, $\theta_c \approx 41.8°$. Beyond this, Total Internal Reflection (TIR) occurs and the ray never exits the lens.
 
 ### The Computational Model
 
@@ -59,13 +59,13 @@ A ray is valid if it passes all aperture checks, experiences no TIR, and $t_{tar
 
 ### Optimization with PyTorch
 
-We have three parameters—$c_1$, $c_2$, and $t_{lens}$—and a complex simulation mapping them to a spot size. How do we find optimal values? Brute-force search over continuous parameters is hopeless. Gradient descent is smarter: if we know how the spot size changes when we tweak each parameter, we can iteratively adjust them to reduce it. The quantity we need is the gradient:
+We have three parameters, $c_1$, $c_2$, and $t_{lens}$, and a complex simulation mapping them to a spot size. How do we find optimal values? Brute-force search over continuous parameters is hopeless. Gradient descent is smarter: if we know how the spot size changes when we tweak each parameter, we can iteratively adjust them to reduce it. The quantity we need is the gradient:
 
 $$\nabla L = \left( \frac{\partial L}{\partial c_1}, \frac{\partial L}{\partial c_2}, \frac{\partial L}{\partial t_{lens}} \right)$$
 
 where $L$ is a loss function measuring lens quality. We define $L$ as the mean squared distance of ray endpoints from the origin:
 
-$$ L(c_1, c_2, t_{lens}) = \frac{1}{K} \sum_{k=1}^{K} (x_k^2 + y_k^2) $$
+$$ L(c*1, c_2, t*{lens}) = \frac{1}{K} \sum\_{k=1}^{K} (x_k^2 + y_k^2) $$
 
 This equals the squared RMS spot radius. We also add a penalty $\lambda(1 - f_{valid})$ to discourage configurations where rays undergo TIR.
 
@@ -78,7 +78,7 @@ The structure of the optimization is straightforward:
    - **Backpropagate:** compute $\nabla_\theta L$ automatically
    - **Update the parameters:** $\theta \leftarrow \theta - \alpha \cdot \text{Adam}(\nabla_\theta L)$
 
-The code module contains all the physics—Newton's method, Snell's law, propagation—but to PyTorch it's just a sequence of primitive operations (`multiply`, `add`, `sqrt`, `divide`) whose derivatives are known. By marking parameters as "requiring gradients," every operation gets recorded into a computation graph. Calling backpropagate then walks through this graph in reverse, applying the chain rule to compute how much each parameter contributed to the final loss.
+The code module contains all the physics, Newton's method, Snell's law, propagation, but to PyTorch it's just a sequence of primitive operations (`multiply`, `add`, `sqrt`, `divide`) whose derivatives are known. By marking parameters as "requiring gradients," every operation gets recorded into a computation graph. Calling backpropagate then walks through this graph in reverse, applying the chain rule to compute how much each parameter contributed to the final loss.
 
 Computing $\nabla_\theta L$ by hand would require pages of chain rule through Newton iterations, Snell's law, and thousands of rays. PyTorch automates this entirely. To illustrate, consider a toy example $L = (c_1 \cdot r^2)^2$. Letting $u = c_1 \cdot r^2$:
 
@@ -98,9 +98,9 @@ The optimization loop is: zero gradients, run forward pass (building the graph),
 
 ### Results
 
-The optimization started with a symmetric biconvex lens with initial curvatures $c_1 = 0.01 \text{ mm}^{-1}$ and $c_2 = -0.01 \text{ mm}^{-1}$ (corresponding to radii $R_1 = 100$ mm and $R_2 = -100$ mm), and thickness $t_{lens} = 5$ mm. Initial loss was $0.1258$ (RMS spot radius $\sigma \approx 0.35$ mm). After 300 iterations, the loss dropped to $0.001126$ ($\sigma \approx 0.034$ mm)—a 100× improvement. The final curvatures correspond to radii $R_1 = 95.95$ mm, $R_2 = -94.51$ mm, with thickness $4.99$ mm. The optimizer slightly increased both curvatures (shorter radii) and reduced thickness. Valid rays remained at 100% throughout.
+The optimization started with a symmetric biconvex lens with initial curvatures $c_1 = 0.01 \text{ mm}^{-1}$ and $c_2 = -0.01 \text{ mm}^{-1}$ (corresponding to radii $R_1 = 100$ mm and $R_2 = -100$ mm), and thickness $t_{lens} = 5$ mm. Initial loss was $0.1258$ (RMS spot radius $\sigma \approx 0.35$ mm). After 300 iterations, the loss dropped to $0.001126$ ($\sigma \approx 0.034$ mm), a 100× improvement. The final curvatures correspond to radii $R_1 = 95.95$ mm, $R_2 = -94.51$ mm, with thickness $4.99$ mm. The optimizer slightly increased both curvatures (shorter radii) and reduced thickness. Valid rays remained at 100% throughout.
 
-The solution reveals interesting physics. Starting symmetric ($|c_1| = |c_2|$), the optimizer converged to a slightly asymmetric configuration—its attempt to minimize spherical aberration. The Coddington shape factor $q = (R_2 + R_1)/(R_2 - R_1)$ shifted from $0$ to $-0.0076$. For a single lens focusing collimated light, theory predicts an asymmetric shape is optimal, and the optimizer discovered this independently.
+The solution reveals interesting physics. Starting symmetric ($|c_1| = |c_2|$), the optimizer converged to a slightly asymmetric configuration, its attempt to minimize spherical aberration. The Coddington shape factor $q = (R_2 + R_1)/(R_2 - R_1)$ shifted from $0$ to $-0.0076$. For a single lens focusing collimated light, theory predicts an asymmetric shape is optimal, and the optimizer discovered this independently.
 
 ![](Screenshot 2025-12-14 at 14.59.37.png)
 

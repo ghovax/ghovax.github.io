@@ -1,4 +1,4 @@
-The Helium atom—just two electrons orbiting a nucleus—turns out to be impossible to solve exactly. This surprised me when I first learned it, since hydrogen with one electron has textbook analytical solutions. Adding a single additional electron introduces electron-electron interactions that destroy the separability of the Schrödinger equation, making the problem intractable without approximations. Density Functional Theory offers an elegant way out: instead of tracking the positions of individual electrons in a high-dimensional wavefunction, we work with the much simpler electron density in three dimensions. For my computational physics project, I implemented a complete DFT solver for Helium from scratch in Julia, achieving ground-state energies within 1.5% of experimental values. The implementation taught me that numerical stability matters as much as theoretical correctness—getting the boundary conditions right, choosing appropriate mixing parameters for convergence, and balancing grid resolution against computational cost were all critical to success.
+The Helium atom, just two electrons orbiting a nucleus, turns out to be impossible to solve exactly. This surprised me when I first learned it, since hydrogen with one electron has textbook analytical solutions. Adding a single additional electron introduces electron-electron interactions that destroy the separability of the Schrödinger equation, making the problem intractable without approximations. Density Functional Theory offers an elegant way out: instead of tracking the positions of individual electrons in a high-dimensional wavefunction, we work with the much simpler electron density in three dimensions. For my computational physics project, I implemented a complete DFT solver for Helium from scratch in Julia, achieving ground-state energies within 1.5% of experimental values. The implementation taught me that numerical stability matters as much as theoretical correctness, getting the boundary conditions right, choosing appropriate mixing parameters for convergence, and balancing grid resolution against computational cost were all critical to success.
 
 The time-independent many-body Schrödinger equation for Helium is:
 
@@ -56,7 +56,7 @@ $$n(r) = \frac{2}{4\pi r^2}\left|\frac{u(r)}{r}\right|^2 = \frac{2u^2(r)}{4\pi r
 
 where the factor of 2 accounts for two electrons with opposite spins occupying the same spatial orbital. This reduces our 3D problem to a 1D radial problem, which is much more tractable numerically.
 
-The Kohn-Sham equations must be solved self-consistently because the effective potential depends on the density, which in turn depends on the orbitals we're trying to find. This creates a circular dependency that we resolve through iteration. I start with an initial guess for the density $n(r)$—typically an exponential decay $n(r) = n_0 e^{-\alpha r}$ or the density from a hydrogen-like atom. Then I calculate the effective Kohn-Sham potential:
+The Kohn-Sham equations must be solved self-consistently because the effective potential depends on the density, which in turn depends on the orbitals we're trying to find. This creates a circular dependency that we resolve through iteration. I start with an initial guess for the density $n(r)$, typically an exponential decay $n(r) = n_0 e^{-\alpha r}$ or the density from a hydrogen-like atom. Then I calculate the effective Kohn-Sham potential:
 
 $$V_{eff}(r) = V_{ext}(r) + V_H(r) + V_{xc}(r)$$
 
@@ -135,7 +135,7 @@ $$n(r) = \frac{Z^3}{\pi}e^{-2Zr}$$
 
 which is a reasonable first approximation. The SCF typically converges in 15-25 iterations from this starting point.
 
-One of the key things I learned during implementation was the importance of numerical stability. Several places in the code require careful handling: division by $r^2$ or $r$ when $r$ is small, exponential functions that can overflow, normalization of wavefunctions on discrete grids, and integration near boundaries. I handled these through careful treatment of boundary conditions and using stable numerical algorithms—the shooting method naturally handles the $r=0$ singularity, for instance.
+One of the key things I learned during implementation was the importance of numerical stability. Several places in the code require careful handling: division by $r^2$ or $r$ when $r$ is small, exponential functions that can overflow, normalization of wavefunctions on discrete grids, and integration near boundaries. I handled these through careful treatment of boundary conditions and using stable numerical algorithms, the shooting method naturally handles the $r=0$ singularity, for instance.
 
 The full implementation of the self-consistent field loop incorporates the potentials and the shooting method:
 
