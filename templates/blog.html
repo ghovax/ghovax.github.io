@@ -1,7 +1,7 @@
 {% extends "base_blog.html" %}
 
 {% set title = (news_list[0].emoji + ' ' if news_list[0].emoji else '') + news_list[0].title if news_list|length == 1 else "Giovanni's Portfolio" -%}
-{% set description = 'Personal blog by Giovanni Gravili. Thoughts on software development, projects, and more.' -%}
+{% set description = 'Giovanni Gravili\'s work-related portfolio. Thoughts on software development, projects, and more.' -%}
 
 {% block head %}
     <meta name="description" content="{{ description }}">
@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block nav_brand %}
-    <a class="navbar-brand" href="{{ config.site }}/">Giovanni Gravili's Portfolio</a>
+    <a class="navbar-brand" href="{{ config.site }}/">Home</a>
 {% endblock %}
 
 {% block nav_links %}
