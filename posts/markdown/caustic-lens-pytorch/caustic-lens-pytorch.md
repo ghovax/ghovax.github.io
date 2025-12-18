@@ -1,4 +1,4 @@
-I've been learning PyTorch extensively and believe the best approach is to combine physics with machine learning. My goal in this article is to show how to model a lens while enforcing physical constraints, so it reproduces a custom pattern via caustics, that is, the rays of light passing through the lens and focusing in specific directions. This problem appears simple but conceals considerable mathematical complexity, which I will explain step by step. The code is publicly available at the following [link](https://github.com/ghovax/caustics_lens_pytorch).
+I've been learning PyTorch extensively and believe the best approach is to combine physics with machine learning. My goal in this article is to show how to model a lens while enforcing physical constraints, so it reproduces a custom pattern via caustics, that is, the rays of light passing through the lens and focusing in specific directions. This problem appears simple but conceals considerable mathematical complexity, which I will explain step by step. The code is publicly available at the following [link](https://github.com/ghovax/Caustic-Lenses-PyTorch).
 
 ![](final_results.gif)
 
