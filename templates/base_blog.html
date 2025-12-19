@@ -128,13 +128,15 @@
         </article>
         {% if not loop.last %}<hr style="color: gray;">{% endif %}
     {% endfor %}
-
-    <div style="margin-top: 30px; margin-bottom: 15px;">
-        <h2 style="font-size: 24px; font-weight: 500; margin-bottom: 15px; color: #333;">All Projects</h2>
-    </div>
     {% endif %}
 
     {% set all_posts = news_list | rejectattr('pinned', 'equalto', True) | list if pinned_posts else news_list %}
+    {% if all_posts %}
+    <div style="margin-top: 30px; margin-bottom: 15px;">
+        <h2 style="font-size: 24px; font-weight: 500; margin-bottom: 15px; color: #333;">{% if pinned_posts %}Other Projects{% else %}All Projects{% endif %}</h2>
+    </div>
+    {% endif %}
+
     {% for news in all_posts %}
         <article class="post-item" data-rank="{{ loop.index0 }}">
             <div class="post-title">
