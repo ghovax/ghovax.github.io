@@ -16,15 +16,14 @@ With a toolkit ranging from **Low-Level Systems Programming** in C, C++ and Rust
 - 📧 **Contact**: [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn**: [linkedin.com/in/giovanni-gravili](https://linkedin.com/in/giovanni-gravili)
 - 👨🏽‍💻 **GitHub:** [View My Profile](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1m8IlZUvfdS-OaZzVeRDK0gUkyqp00wr8/view?usp=sharing)
+- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1K1p-TkjidF8HGfZUBvRhyfgwInjnLAsH/view?usp=sharing)
 
 ### 💻 Technical Skills & Stack
 
-- **Programming Languages**: **Python** • **Rust** • Go • **C/C++** • FORTRAN • MATLAB • Mathematica • Julia • **JavaScript/TypeScript** • DSLs • Bash Scripting • **GPU Programming**
-- **MLOps & Data Science**: **PyTorch** • TensorFlow • Scikit-Learn • **NumPy** • **Pandas** • **Large-Scale Data Pipelines**
-- **Cloud & DevOps**: **React** • Next.js • **Agentic AI** • SQL/NoSQL • Google Cloud Storage (GCS) • Firebase/Firestore • **REST APIs** • **Docker** • Git/GitHub • CI/CD Pipelines
-
-- **Computational Modeling**: **LAMMPS** • VASP • Quantum ESPRESSO • OVITO • **ASE**
+- 💻 **Programming Languages**: **Python**, **Rust**, Go, **C/C++**, FORTRAN, MATLAB, Mathematica, Julia, **JavaScript/TypeScript**, DSLs, Bash Scripting, **GPU Programming**
+- 🤖 **MLOps & Data Science**: **PyTorch**, TensorFlow, Scikit-Learn, **NumPy**, **Pandas**, **Large-Scale Data Pipelines**
+- ☁️ **Cloud & DevOps**: **React**, Next.js, **Agentic AI**, SQL/NoSQL Databases, Google Cloud Storage (GCS), Firebase/Firestore, **REST APIs**, **Docker**, Git/GitHub, CI/CD Pipelines
+- 🔬 **Computational Modeling**: **LAMMPS**, VASP, Quantum ESPRESSO, OVITO, **ASE**
 
 ### 🎓 Education
 
