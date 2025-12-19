@@ -134,7 +134,8 @@
     </div>
     {% endif %}
 
-    {% for news in news_list %}
+    {% set all_posts = news_list | rejectattr('pinned', 'equalto', True) | list if pinned_posts else news_list %}
+    {% for news in all_posts %}
         <article class="post-item" data-rank="{{ loop.index0 }}">
             <div class="post-title">
                 <h3 id="{{ news.slug() }}">
