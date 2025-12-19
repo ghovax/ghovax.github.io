@@ -2,6 +2,8 @@ Quantum confinement fundamentally changes how electrons behave. Take a bulk semi
 
 The challenge of understanding electronic band structure begins with reciprocal space. While real space describes where atoms sit in a crystal, reciprocal space (or k-space) describes the allowed momentum states for electrons. The first Brillouin zone (1BZ) is the fundamental domain in k-space, analogous to a unit cell in real space. For a body-centered cubic (bcc) lattice, the 1BZ has a characteristic truncated octahedral shape. By calculating energy eigenvalues along high-symmetry paths through this zone and sampling the full volume, we can understand how quantum confinement affects electronic structure.
 
+My whole collection of Mathematica Notebook files is available at this [link](https://github.com/ghovax/Notebooks).
+
 ### Constructing the Brillouin Zone
 
 The foundation is the reciprocal lattice. For a bcc crystal with real-space basis vectors, the reciprocal lattice is face-centered cubic (fcc). I define the basis for the reciprocal lattice:
