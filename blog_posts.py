@@ -31,6 +31,7 @@ BLOG_POSTS = [
         "comment_url": None,
         "points": 0,
         "comment_count": 0,
+        "pinned": True,
     },
     {
         "title": "Minimizing Aberration in Spherical Lenses with PyTorch",
@@ -73,6 +74,7 @@ BLOG_POSTS = [
         "comment_url": None,
         "points": 0,
         "comment_count": 0,
+        "pinned": True,
     },
     {
         "title": "Arduino-CNN Hand-Drawn Digit Classifier",
@@ -87,6 +89,7 @@ BLOG_POSTS = [
         "comment_url": None,
         "points": 0,
         "comment_count": 0,
+        "pinned": True,
     },
     {
         "title": "Bringing Desktop Mascots to macOS with Swift",
@@ -136,6 +139,7 @@ BLOG_POSTS = [
         "comment_url": None,
         "points": 0,
         "comment_count": 0,
+        "pinned": True,
     },
     {
         "title": "Networked Game Engine with Entity-Component Architecture",
@@ -178,6 +182,7 @@ BLOG_POSTS = [
         "comment_url": None,
         "points": 0,
         "comment_count": 0,
+        "pinned": True,
     },
     {
         "title": "Visualizing Quantum Confinement with Brillouin Zone Analysis",

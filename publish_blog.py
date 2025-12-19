@@ -38,6 +38,7 @@ class BlogPost:
         self.comment_url = data.get("comment_url")
         self.points = data.get("points", 0)
         self.comment_count = data.get("comment_count", 0)
+        self.pinned = data.get("pinned", False)
         self.image = None
         self.summarized_by = self  # For template compatibility
         self._slug = hashlib.md5(self.title.encode()).hexdigest()[:6]

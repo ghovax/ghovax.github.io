@@ -60,6 +60,80 @@
     </article>
     {% endif %}
 
+    {% set pinned_posts = news_list | selectattr('pinned', 'equalto', True) | list %}
+    {% if pinned_posts %}
+    <div style="margin-top: 20px; margin-bottom: 15px;">
+        <h2 style="font-size: 24px; font-weight: 500; margin-bottom: 15px; color: #333;">Featured Projects</h2>
+    </div>
+    {% for news in pinned_posts %}
+        <article class="post-item" data-rank="{{ loop.index0 }}">
+            <div class="post-title">
+                <h3 id="{{ news.slug() }}">
+                    <a class="post-url" href="/posts/{{ news.slug() }}.html">{% if news.emoji %}{{ news.emoji }} {% endif %}{{ news.title }}</a>
+                </h3>
+            </div>
+
+            <div class="post-meta">
+                {% if news.author %}
+                    <span class="author-link" title="Author">
+                        {% if news.author_link %}
+                            <a href="{{ news.author_link }}" rel="author" target="_blank">
+                                <i class="fa fa-user"></i>
+                                <span>{{ news.author }}</span>
+                            </a>
+                        {% else %}
+                            <i class="fa fa-user"></i>
+                            <span>{{ news.author }}</span>
+                        {% endif %}
+                    </span>
+                {% endif %}
+                <span class="summit-time" title="Published at {{ news.submit_time.replace(microsecond=0) }} UTC">
+                    <i class="fa fa-clock-o"></i>
+                    <span class="last-updated" data-submitted="{{ news.submit_time.strftime("%Y-%m-%dT%H:%M:%SZ") }}">
+                        <span>{{ news.submit_time.strftime("%B %d, %Y") }}</span>
+                    </span>
+                </span>
+                <span class="share-icon" title="Share">
+                    <a href="{{ path }}#{{ news.slug() }}">
+                        <i class="fa fa-share-square-o"></i>
+                        <span>Share</span>
+                    </a>
+                </span>
+                {% if news.tags %}
+                    <span class="tags" title="Tags">
+                        <i class="fa fa-tags"></i>
+                        <span>{{ news.tags|join(', ') }}</span>
+                    </span>
+                {% endif %}
+             </div>
+
+            {% if news_list|length == 1 %}
+            <div class="post-summary">
+                {% if news.image_url %}
+                    <a class="feature-image" href="{{ news.image_url }}" target="_blank">
+                        <img class="img-rounded" src="{{ news.image_url }}"
+                             alt="{{ news.image_url }}" onerror="illustration_fall_back(this);"
+                             style="max-width: 100%; height: auto;"
+                             loading="lazy"/>
+                    </a>
+                {% endif %}
+                {% if news.summary %}
+                    <div class="{% if news.summary.startswith('<iframe') %}embed-responsive embed-responsive-16by9 {% else %}summary-text{% endif %}">
+                        {{ news.summary|safe }}
+                    </div>
+                {% endif %}
+                <div style="clear: both;"></div>
+            </div>
+            {% endif %}
+        </article>
+        {% if not loop.last %}<hr style="color: gray;">{% endif %}
+    {% endfor %}
+
+    <div style="margin-top: 30px; margin-bottom: 15px;">
+        <h2 style="font-size: 24px; font-weight: 500; margin-bottom: 15px; color: #333;">All Projects</h2>
+    </div>
+    {% endif %}
+
     {% for news in news_list %}
         <article class="post-item" data-rank="{{ loop.index0 }}">
             <div class="post-title">
