@@ -6,7 +6,6 @@ blog:
 	uv run publish_blog.py
 	cp -r static output/static
 	ln -sf feed.xml output/feed
-	ln -sf static/favicon.ico output/favicon.ico
 	touch output/.nojekyll
 
 # Clean generated files
