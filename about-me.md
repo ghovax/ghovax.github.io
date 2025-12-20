@@ -1,14 +1,22 @@
 ## Hi, I'm Giovanni Gravili 👋
 
-_R&D-Oriented Computational Physicist_ • _Machine Learning & Full-Stack Developer_
+**🚀 Primary Role:** MLOps Engineer, Computational Physicist & Full-Stack Developer
+
+**🛠️ Specializations:**
+
+* 🖥️ **HPC Systems:** Performance optimization and low-level engineering.
+* 🧠 **Distributed ML:** Scaling models across GPU-accelerated clusters.
+* ⚙️ **Systems Engineering:** Designing high-performance, distributed architectures.
+* 🏗️ **Full-Stack Infrastructure:** Building robust deployment pipelines.
+* 🤖 **Agentic AI:** Developing intelligent systems that can learn and adapt to changing environments.
 
 ### 🔬 About Me
 
-I am a **Full-Stack Developer** and computational physicist who builds end-to-end **ML Pipelines** and high-performance software for complex scientific and industrial applications. My expertise spans the entire development stack, from architecting low-level Rust engines and GPU-accelerated simulations to deploying agentic AI frameworks and responsive web platforms.
+I am a **Machine Learning** and **Full-Stack Systems Developer** with a background as a **Computational Physicist** specializing in end-to-end ML pipelines for complex scientific and industrial applications. My expertise is bifurcated between the computational side: engineering low-level **C/C++** and **Rust** engines for **machine learning** and GPU-accelerated simulations, and the architectural side, building the robust full-stack software required to deploy these intelligent systems at scale.
 
-I recently served as the **Technical Lead** for an award-winning EdTech startup project, where I architected multi-stage AI pipelines and led a team through a competitive incubation program. This experience, combined with my Master’s research in ML-driven nanoscale simulations on **HPC Systems**, has shaped my ability to bridge high-level theoretical research with production-grade software development.
+I recently served as the **Technical Lead** for an award-winning EdTech startup project, where I architected multi-stage AI pipelines and led a team through a competitive incubation program. While that role focused on leadership and rapid deployment, my Master’s research in ML-driven nanoscale simulations on **HPC Systems** provided the computational depth necessary for high-stakes modeling; drawing from these two distinct domains allows me to effectively bridge high-level theoretical research with the requirements of production-grade software development.
 
-With a toolkit ranging from **Low-Level Systems Programming** in C, C++ and Rust to full-stack deployment and **Agentic AI**, I am looking for roles where I can build scalable, data-intensive applications. I am particularly interested in engineering challenges that require a deep understanding of physical systems, machine learning, and robust software architecture to solve real-world problems.
+Utilizing this multi-disciplinary toolkit, leveraging **low-level system languages** to architect the high-performance backends that power advanced **machine learning** models and **agentic AI** frameworks, I am seeking roles where I can build scalable, data-intensive applications. I am particularly interested in engineering, financial, and related challenges that require a deep understanding of **complex systems** to solve real-world problems, and I am always open to new challenges that push the boundaries of current technology.
 
 ### 👨🏻‍🔬 Connect With Me
 
@@ -16,7 +24,7 @@ With a toolkit ranging from **Low-Level Systems Programming** in C, C++ and Rust
 - 📧 **Contact**: [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn**: [linkedin.com/in/giovanni-gravili](https://linkedin.com/in/giovanni-gravili)
 - 👨🏽‍💻 **GitHub:** [View My Profile](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1K1p-TkjidF8HGfZUBvRhyfgwInjnLAsH/view?usp=sharing)
+- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1JlFJnDKW1Yl2vXfrbgk5csLfQoB4iVtG/view?usp=sharing)
 
 ### 💻 Technical Skills & Stack
 
