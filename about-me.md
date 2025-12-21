@@ -1,30 +1,35 @@
-## Hi, I'm Giovanni Gravili 👋
+# Hi, I'm Giovanni Gravili 👋
 
-**🚀 Primary Role:** MLOps Engineer, Computational Physicist & Full-Stack Developer
+### 💡 Machine Learning, Full-Stack & Systems Developer
+#### 🔍 *Computational Physics, HPC Systems, End-to-End MLOps*
 
-**🛠️ Specializations:**
+I am a **Systems Developer and Computational Physicist** specializing in the intersection of High-Performance Computing (HPC), Machine Learning, and full-stack engineering. I architect the entire lifecycle of data-intensive applications: from low-level **C/C++, Rust, and Python** engines optimized for execution speed to the **MLOps pipelines** and **full-stack local and cloud infrastructure** required to deploy intelligent systems at scale.
 
-* 🖥️ **HPC Systems:** Performance optimization and low-level engineering.
-* 🧠 **Distributed ML:** Scaling models across GPU-accelerated clusters.
-* ⚙️ **Systems Engineering:** Designing high-performance, distributed architectures.
-* 🏗️ **Full-Stack Infrastructure:** Building robust deployment pipelines.
-* 🤖 **Agentic AI:** Developing intelligent systems that can learn and adapt to changing environments.
+My background in **Computational Physics** provides the mathematical rigor to solve complex modeling and quantitative challenges with a "performance-first" mindset. I bridge the gap between high-level theoretical research and the pragmatic requirements of production-grade software, ensuring both scientific accuracy and engineering efficiency.
 
-### 🔬 About Me
+Most recently, I served as **Technical Lead** for an award-winning EdTech startup project, architecting multi-stage AI pipelines and leading a team through a competitive incubation program. This leadership experience is backed by deep computational research in **ML-driven molecular dynamics simulations on HPC systems**. I am now seeking to apply this unique blend of systems engineering and predictive analytics to high-stakes environments in engineering or finance.
 
-I am a **Machine Learning** and **Full-Stack Systems Developer** with a background as a **Computational Physicist** specializing in end-to-end ML pipelines for complex scientific and industrial applications. My expertise is bifurcated between the computational side: engineering low-level **C/C++** and **Rust** engines for **machine learning** and GPU-accelerated simulations, and the architectural side, building the robust full-stack software required to deploy these intelligent systems at scale.
+### 🛠️ Core Competencies
 
-I recently served as the **Technical Lead** for an award-winning EdTech startup project, where I architected multi-stage AI pipelines and led a team through a competitive incubation program. While that role focused on leadership and rapid deployment, my Master’s research in ML-driven nanoscale simulations on **HPC Systems** provided the computational depth necessary for high-stakes modeling; drawing from these two distinct domains allows me to effectively bridge high-level theoretical research with the requirements of production-grade software development.
+* 🚀 **HPC & Performance:** Low-level optimization and memory management using **C, C++, and Rust** to achieve maximum computational throughput.
+* 🌐 **Full-Stack Engineering:** Architecting scalable, end-to-end web applications and **high-performance APIs** designed to interface with complex, data-heavy backends.
+* 🤖 **Applied Machine Learning:** Developing and deploying production-ready models and **agentic AI frameworks** for scientific discovery and industrial automation.
+* ⚙️ **MLOps & Infrastructure:** Building robust, automated pipelines for model orchestration, deployment monitoring, and large-scale data lifecycle management.
+* 📈 **Quantitative Modeling:** Translating physics-based simulations into modern software solutions for **quantitative risk modeling**, finance, and predictive analytics.
 
-Utilizing this multi-disciplinary toolkit, leveraging **low-level system languages** to architect the high-performance backends that power advanced **machine learning** models and **agentic AI** frameworks, I am seeking roles where I can build scalable, data-intensive applications. I am particularly interested in engineering, financial, and related challenges that require a deep understanding of **complex systems** to solve real-world problems, and I am always open to new challenges that push the boundaries of current technology.
+### 🔬 Experience & Research
 
-### 👨🏻‍🔬 Connect With Me
+Recently, I served as the **Technical Lead** for an award-winning EdTech startup project, where I architected multi-stage AI pipelines and led a team through a competitive incubation program. While that role focused on leadership and rapid deployment, my Master’s research in **ML-driven molecular dynamics simulations on HPC systems** provided the computational depth needed for high-stakes engineering. I am currently seeking roles in engineering, finance, or related fields that require a deep understanding of complex systems.
 
-- 🎯 **Seeking Roles**: Research or industry roles where I can apply my programming and development skills to solve real-world problems in materials science, technology, education, and adjacent fields.
+- 💼 **Digital Portfolio:** [View My Portfolio](https://ghovax.github.io)
+
+## 👨🏻‍🔬 Connect With Me
+
+- 🎯 **Seeking Roles**: Research or industry roles where I can leverage this multi-disciplinary toolkit, combining low-level systems logic, machine learning workflows, and modern web architecture, to solve real-world problems in engineering, finance, and adjacent fields.
 - 📧 **Contact**: [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn**: [linkedin.com/in/giovanni-gravili](https://linkedin.com/in/giovanni-gravili)
 - 👨🏽‍💻 **GitHub:** [View My Profile](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1JlFJnDKW1Yl2vXfrbgk5csLfQoB4iVtG/view?usp=sharing)
+- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/17aV2k_LeAYNRSjUAR9LTxaDn_hQ-Nn19/view?usp=sharing)
 
 ### 💻 Technical Skills & Stack
 
