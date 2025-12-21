@@ -1,7 +1,6 @@
-# Hi, I'm Giovanni Gravili 👋
-
 ### 💡 Machine Learning, Full-Stack & Systems Developer
-#### 🔍 *Computational Physics, HPC Systems, End-to-End MLOps*
+
+*Computational Physics, HPC Systems, End-to-End MLOps*
 
 I am a **Systems Developer and Computational Physicist** specializing in the intersection of High-Performance Computing (HPC), Machine Learning, and full-stack engineering. I architect the entire lifecycle of data-intensive applications: from low-level **C/C++, Rust, and Python** engines optimized for execution speed to the **MLOps pipelines** and **full-stack local and cloud infrastructure** required to deploy intelligent systems at scale.
 
@@ -10,6 +9,8 @@ My background in **Computational Physics** provides the mathematical rigor to so
 Most recently, I served as **Technical Lead** for an award-winning EdTech startup project, architecting multi-stage AI pipelines and leading a team through a competitive incubation program. This leadership experience is backed by deep computational research in **ML-driven molecular dynamics simulations on HPC systems**. I am now seeking to apply this unique blend of systems engineering and predictive analytics to high-stakes environments in engineering or finance.
 
 ### 🛠️ Core Competencies
+
+I engineer at the intersection of mathematical rigor and high-performance software, delivering scalable solutions across the following domains:
 
 * 🚀 **HPC & Performance:** Low-level optimization and memory management using **C, C++, and Rust** to achieve maximum computational throughput.
 * 🌐 **Full-Stack Engineering:** Architecting scalable, end-to-end web applications and **high-performance APIs** designed to interface with complex, data-heavy backends.
