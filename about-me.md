@@ -4,7 +4,7 @@
 
 *Computational Physics, HPC Systems, End-to-End MLOps*
 
-I am a **Systems Developer and Computational Physicist** specializing in the intersection of High-Performance Computing (HPC), Machine Learning, and full-stack engineering. I architect the entire lifecycle of data-intensive applications: from low-level **C/C++, Rust, and Python** engines optimized for execution speed to the **MLOps pipelines** and **full-stack local and cloud infrastructure** required to deploy intelligent systems at scale.
+I am a **Systems Developer** and **Computational Physicist** specializing in the intersection of High-Performance Computing (HPC), Machine Learning, and full-stack engineering. I architect the entire lifecycle of data-intensive applications: from low-level **C/C++, Rust, and Python** engines optimized for execution speed to the **MLOps pipelines** and **full-stack local and cloud infrastructure** required to deploy intelligent systems at scale.
 
 My background in **Computational Physics** provides the mathematical rigor to solve complex modeling and quantitative challenges with a "performance-first" mindset. I bridge the gap between high-level theoretical research and the pragmatic requirements of production-grade software, ensuring both scientific accuracy and engineering efficiency.
 
