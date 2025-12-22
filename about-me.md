@@ -18,7 +18,7 @@ I am a Software Engineer with a background in Computational Physics, specializin
 
 ### 💼 Professional Experience
 
-* **Technical Lead, Bequire (EdTech Startup Project)**, March – September 2025, Izmir, Turkey
+* **Technical Lead, Bequire (EdTech Startup Project)**, March–September 2025, Izmir, Turkey
     * Architected and implemented a multi-stage AI pipeline to transform multimodal data from lecture recordings and slides into professional study materials
     * Built a parallelized Node.js/TypeScript backend using BullMQ for asynchronous job processing
     * Developed a custom algorithm for multimodal data alignment using the Gemini API, reducing hallucination and token costs
@@ -27,12 +27,12 @@ I am a Software Engineer with a background in Computational Physics, specializin
 
 ### 🔬 Research Experience
 
-* **Master's Thesis Research, University of Bologna**, March – September 2025
+* **Master's Thesis Research, University of Bologna**, March–September 2025
     * Ran large-scale molecular dynamics simulations on Cineca LEONARDO supercomputer
     * Built Python analysis pipelines for processing simulation output data
     * Developed visualization workflows contributing to a peer-reviewed publication
 
-* **Bachelor's Thesis Research, University of Bologna**, September – December 2023
+* **Bachelor's Thesis Research, University of Bologna**, September–December 2023
     * Implemented time-resolved numerical simulations of earthquake fault dynamics
     * Created visualization tools in Python, Mathematica, and MATLAB to analyze spatiotemporal patterns
 
