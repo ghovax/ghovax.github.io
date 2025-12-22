@@ -43,9 +43,13 @@
     </nav>
 
     {% if contact_info %}
-    <div class="post-summary summary-text">
-        {{ contact_info|safe }}
-    </div>
+    <article class="post-item" style="margin-top: -15px !important; padding-top: 0 !important;">
+        <div class="post-summary">
+            <div class="summary-text">
+                {{ contact_info|safe }}
+            </div>
+        </div>
+    </article>
     {% endif %}
 
     {% if about_me %}
