@@ -1,6 +1,6 @@
 I've been learning PyTorch extensively and believe the best approach is to combine physics with machine learning. My goal in this article is to show how to model a lens while enforcing physical constraints, so it reproduces a custom pattern via caustics, that is, the rays of light passing through the lens and focusing in specific directions. This problem appears simple but conceals considerable mathematical complexity, which I will explain step by step. The code is publicly available at the following [link](https://github.com/ghovax/CausticsPyTorch).
 
-![](final_results.gif)
+![](final_results2.gif)
 
 The setup: a lens with a two free-form surfaces, thickness $t_{lens}$, and radius $r_{lens}$ is positioned at distance $d_{back}$ from a screen where the caustics are projected. The reference axis is defined so that the axis through the lens center is positive when moving away from the screen; thus $z = 0$ is the screen and increases toward the back of the lens. A parallel bundle of rays from infinity strikes the lens under geometric optics, so we treat light only by refraction (Snell's law), neglecting diffraction because the aperture is much larger than the wavelength. We seek the mathematical formulation, subject to physical constraints, for the front surface height $h_{front}(x,y)$ that produces the desired screen pattern; the lens is glass with refractive index $n_{lens} \approx 1.49$.
 
