@@ -90,6 +90,33 @@ def load_about_me():
         return ""
 
 
+def load_contact_info():
+    """Load and convert contact info markdown to HTML using pandoc"""
+    contact_path = os.path.join(os.path.dirname(__file__), "contact-info.md")
+    try:
+        result = subprocess.run(
+            [
+                "pandoc",
+                "-f",
+                "markdown",
+                "-t",
+                "html",
+                "--mathml",
+                contact_path,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return result.stdout
+    except FileNotFoundError:
+        logger.warning("Contact info file not found")
+        return ""
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error converting contact info markdown: {e.stderr if e.stderr else str(e)}")
+        return ""
+
+
 def gen_blog():
     """Generate the blog homepage"""
     posts_data = get_blog_posts()
@@ -131,10 +158,14 @@ def gen_page(posts, path):
     # Load About Me section only for the main index page
     about_me_html = load_about_me() if path == "index.html" else ""
 
+    # Load contact info for individual post pages
+    contact_info_html = load_contact_info() if path != "index.html" else ""
+
     start = time.time()
     rendered = template.render(
         news_list=posts,  # Keep name for template compatibility
         about_me=about_me_html,
+        contact_info=contact_info_html,
         last_updated=datetime.utcnow(),
         path=urljoin(config.site + "/", path.rstrip("index.html")),
     )

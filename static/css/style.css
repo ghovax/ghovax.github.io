@@ -96,9 +96,25 @@
   padding-left: 0;
 }
 
+.navbar {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .post-item {
   height: 100% !important;
-  margin: 5px;
+  margin: 0;
+  padding: 0;
+}
+
+.about-me-section {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.contact-info-section {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 .post-item .post-title {

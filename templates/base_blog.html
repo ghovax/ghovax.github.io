@@ -42,6 +42,12 @@
         </div>
     </nav>
 
+    {% if contact_info %}
+    <div class="post-summary summary-text">
+        {{ contact_info|safe }}
+    </div>
+    {% endif %}
+
     {% if about_me %}
     <style>
         .about-me-section .summary-text > :first-child {
@@ -60,9 +66,6 @@
 
     {% set pinned_posts = news_list | selectattr('pinned', 'equalto', True) | list %}
     {% if pinned_posts %}
-    <div style="margin-top: 20px; margin-bottom: 15px;">
-        <h2 style="font-size: 24px; font-weight: 500; margin-bottom: 15px; color: #333;">Featured Projects</h2>
-    </div>
     {% for news in pinned_posts %}
         <article class="post-item" data-rank="{{ loop.index0 }}">
             <div class="post-title">
@@ -131,7 +134,7 @@
     {% set all_posts = news_list | rejectattr('pinned', 'equalto', True) | list if pinned_posts else news_list %}
     {% if all_posts %}
     <div style="margin-top: 30px; margin-bottom: 15px;">
-        <h2 style="font-size: 24px; font-weight: 500; margin-bottom: 15px; color: #333;">{% if pinned_posts %}Other Projects{% else %}All Projects{% endif %}</h2>
+        <h2 style="font-size: 24px; font-weight: 500; margin-bottom: 15px; color: #333;">{% if pinned_posts %}Other Projects{% else %}Other Projects{% endif %}</h2>
     </div>
     {% endif %}
 
