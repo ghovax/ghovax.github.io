@@ -94,7 +94,7 @@ I follow Formula 1 and MotoGP racing.
 - 📧 **Email:** [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn:** [linkedin.com/in/giovanni-gravili](https://www.linkedin.com/in/giovanni-gravili)
 - 🌐 **GitHub:** [github.com/ghovax](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1ubD1n3t8TzslA8OnjgwKHEmBuC2VWElx/view?usp=sharing)
+- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/15groBVHbU8bH3PS5016e13TJaX3JqKiJ/view?usp=sharing)
 
 ---
 
