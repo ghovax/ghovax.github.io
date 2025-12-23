@@ -10,7 +10,7 @@ I build full-stack applications, end-to-end data analysis pipelines, and machine
 
 - **Languages:** Python, Rust, C/C++, Go, TypeScript/JS, Julia, Mathematica, MATLAB, Bash
 - **ML & Data:** PyTorch, NumPy, Pandas, Scikit-learn, RAG (Embeddings, Vector Search)
-- **Backend & APIs:** REST, gRPC, Redis, SQL, NoSQL (Firestore)
+- **Backend & APIs:** REST, Flask, gRPC, Redis, SQL, NoSQL (Firestore), Firebase, OAuth
 - **Infrastructure:** Docker, CI/CD (GitHub Actions), Google Cloud Storage (GCS), Linux Admin
 - **Frontend:** React, Next.js, HTML/CSS, Responsive Design
 - **Testing:** Pytest, Unit, Integration, & Regression Testing
@@ -19,22 +19,22 @@ I build full-stack applications, end-to-end data analysis pipelines, and machine
 ### 💼 Professional Experience
 
 - **Technical Lead, Bequire (EdTech Startup Project)**, March–September 2025, Izmir, Turkey
-
-Led technical development of an AI-powered study platform during a seven-month incubation program. Competed against 90 teams and won first place among 11 finalists at Demo Day.
-
-- Built a multi-stage AI pipeline converting lecture recordings and slides into study materials
-- Developed a Node.js/TypeScript backend with BullMQ for parallel job processing
-- Created an algorithm to sync audio transcripts with slides, cutting costs and errors
-- Deployed containerized services to Google Cloud with automated CI/CD pipelines
-- Led code reviews, sprint planning, and stakeholder communication
+    - Led technical development of an AI-powered study platform during a seven-month incubation program. Competed against 90 teams and won first place among 11 finalists at Demo Day.
+    - Built a multi-stage AI pipeline converting lecture recordings and slides into study materials
+    - Developed a Node.js/TypeScript backend with BullMQ for parallel job processing
+    - Created an algorithm to sync audio transcripts with slides, cutting costs and errors
+    - Deployed containerized services to Google Cloud with automated CI/CD pipelines
+    - Led code reviews, sprint planning, and stakeholder communication
 
 ### 🔬 Research Internships Experience
 
-- **Master's Thesis Research Internship, University of Bologna**, _"Tribochemical Reactions of ZDDP Lubricant Additive via Machine-Learning Molecular Dynamics"_, March–September 2025
+- **Master's Thesis Research Internship, University of Bologna**, March–September 2025
+  - _"Tribochemical Reactions of ZDDP Lubricant Additive via Machine-Learning Molecular Dynamics"_
   - Ran large-scale molecular dynamics simulations on Cineca LEONARDO supercomputer
   - Built Python pipelines to process and analyze simulation output data
   - Developed visualizations that contributed to a peer-reviewed publication
-- **Bachelor's Thesis Research Internship, University of Bologna**, _"Faulting Processes in a Poro-Elastic Half-Space"_, September–December 2023
+- **Bachelor's Thesis Research Internship, University of Bologna**, September–December 2023
+  - _"Faulting Processes in a Poro-Elastic Half-Space"_
   - Implemented time-resolved numerical simulations of earthquake fault dynamics
   - Created visualization tools in Python, Mathematica, and MATLAB for pattern analysis
 
@@ -84,7 +84,7 @@ Led technical development of an AI-powered study platform during a seven-month i
 - **Professional**: Spanish (B2/C1)
 - **Conversational**: French (B1/B2), Turkish (A2/B1), Japanese (A2/B1)
 
-### ⚡ Interests
+### ⚡️ Interests
 
 I follow Formula 1 and MotoGP racing.
 
