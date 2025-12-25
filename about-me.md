@@ -98,6 +98,6 @@ I follow Formula 1 and MotoGP racing.
 
 ---
 
-## 👨🏻‍🏫 Projects
+## 👨🏻‍🏫 My Projects
 
 Below you may find a collection of write-ups about my research projects.
