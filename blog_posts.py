@@ -19,6 +19,21 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
+        "title": "Building a Scriptable Molecular Analysis Toolkit",
+        "emoji": "🧬",
+        "url": "#",
+        "folder": "pdb-viz-rust",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2025, 12, 25, 19, 50, 0),
+        "image_url": None,
+        "tags": ["Rust", "GPU Programming", "Lua", "Bioinformatics"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
+        "pinned": True,
+    },
+    {
         "title": "Computational Design of Caustic Optics using PyTorch",
         "emoji": "💠",
         "url": "#",

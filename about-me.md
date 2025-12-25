@@ -19,12 +19,12 @@ I build full-stack applications, end-to-end data analysis pipelines, and machine
 ### 💼 Professional Experience
 
 - **Technical Lead, Bequire (EdTech Startup Project)**, March–September 2025, Izmir, Turkey
-    - **Role:** Led technical development of an AI-powered study platform during a seven-month incubation program. Competed against 90 teams and won first place among 11 finalists at Demo Day.
-    - Built a multi-stage AI pipeline converting lecture recordings and slides into study materials
-    - Developed a Node.js/TypeScript backend with BullMQ for parallel job processing
-    - Created an algorithm to sync audio transcripts with slides, cutting costs and errors
-    - Deployed containerized services to Google Cloud with automated CI/CD pipelines
-    - Led code reviews, sprint planning, and stakeholder communication
+  - **Role:** Led technical development of an AI-powered study platform during a seven-month incubation program. Competed against 90 teams and won first place among 11 finalists at Demo Day.
+  - Built a multi-stage AI pipeline converting lecture recordings and slides into study materials
+  - Developed a Node.js/TypeScript backend with BullMQ for parallel job processing
+  - Created an algorithm to sync audio transcripts with slides, cutting costs and errors
+  - Deployed containerized services to Google Cloud with automated CI/CD pipelines
+  - Led code reviews, sprint planning, and stakeholder communication
 
 ### 🔬 Research Internships Experience
 
