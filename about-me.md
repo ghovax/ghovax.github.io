@@ -15,7 +15,7 @@ Software Engineer with expertise in Full-Stack and Systems development. Track re
 
 ### 💼 Professional Experience
 
-- **Technical Lead, Bequire (EdTech Startup)**, March–Sept. 2025
+- **Technical Lead, Bequire (EdTech Startup)**, March–Oct. 2025
   - *Concurrent with Master's Thesis. Won 1st place among 90 teams in incubation program.*
   - Architected and deployed a full-stack platform, serving as the sole engineering lead.
   - Built a scalable backend using Node.js/TypeScript with BullMQ for asynchronous job queues.
