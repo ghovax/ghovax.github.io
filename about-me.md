@@ -23,7 +23,7 @@ Software Engineer with expertise in Full-Stack and Systems development. Track re
   - Implemented automated CI/CD pipelines via GitHub Actions, reducing deployment time by half.
   - Engineered audio-sync algorithms to align transcripts with slides, cutting manual editing costs.
 
-- **Graduate Research Fellow, University of Bologna**, Feb.–Sept. 2025
+- **Graduate Research Fellow, University of Bologna**, February–Sept. 2025
   - _**Thesis Topic:**_ Large-Scale Simulation Data Pipelines on HPC Infrastructure.
   - Ran massive parallel simulations on Cineca LEONARDO (EuroHPC supercomputer).
   - Developed Python data pipelines to process gigabytes of simulation output efficiently.
