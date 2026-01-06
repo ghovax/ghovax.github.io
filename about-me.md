@@ -28,33 +28,6 @@ Software Engineer with expertise in Full-Stack and Systems development. Track re
   - Ran massive parallel simulations on Cineca LEONARDO (EuroHPC supercomputer).
   - Developed Python data pipelines to process gigabytes of simulation output efficiently.
 
-### 🚀 Selected Engineering Projects
-
-- **Scriptable Molecular Analysis Toolkit**, Jan. 2026
-  - _**Tech Stack:**_ Rust, WebGPU, Lua.
-  - High-performance engine for 3D visualization and automated scientific analysis.
-  - Developed GPU-accelerated pipelines using WebGPU/WGSL for molecular surface rendering.
-  - Built a custom DSL with AST parsing for complex spatial atom queries.
-  - Integrated a hot-reloading Lua layer for programmable scientific workflows.
-
-- **PDF Generation Library**, Oct. 2024
-  - _**Tech Stack:**_ Rust.
-  - **Over 9,000 downloads on crates.io.**
-  - Implemented the raw PDF binary specification from scratch without external dependencies.
-  - Engineered deterministic output to ensure byte-level reproducibility for regression testing.
-  - Built a custom TTF font parser for CID mapping and Unicode normalization.
-
-- **Differentiable Ray-Tracing Engine**, Dec. 2025
-  - _**Tech Stack:**_ Python, PyTorch.
-  - Built a differentiable physics engine for inverse optical design via gradient descent.
-  - Designed custom loss functions combining optimal transport theory with manufacturing.
-
-- **Arduino-CNN Digit Classifier**, Dec. 2024
-  - _**Tech Stack:**_ C++, Python, TensorFlow, Flask, Arduino CLI.
-  - Built a real-time digit recognizer using an Arduino Nano 33 BLE and OV7670 camera.
-  - Designed a CNN in TensorFlow (98.5% accuracy) with a Flask-based serial data pipeline.
-  - Developed a Next.js frontend with live logging and real-time inference probability charts.
-
 ### 🎓 Education
 
 - **M.Sc. in Material Physics and Nanoscience**, University of Bologna, 2023–2025, GPA: 107/110
