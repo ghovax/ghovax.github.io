@@ -1,6 +1,6 @@
 # 👨🏻‍💻 Hi, I'm Giovanni Gravili
 
-**Systems & Cloud Architecture SWE**
+### **Systems & Cloud Architecture SWE**
 
 Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com  
 
