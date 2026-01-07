@@ -4,4 +4,4 @@
 - 📧 **Email:** [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn:** [linkedin.com/in/giovanni-gravili](https://www.linkedin.com/in/giovanni-gravili)
 - 🌐 **GitHub:** [github.com/ghovax](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1j2918bgDUqTPepgQniV1dAXiWfoTqEqS/view?usp=drive_link)
+- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1q0gT03g_85lLvvxWTCuxRUn3Jskua0V3/view?usp=sharing)
