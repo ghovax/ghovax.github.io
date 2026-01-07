@@ -1,4 +1,4 @@
-# 👨‍💻 Giovanni Gravili
+# 👨‍💻 Hi, I'm Giovanni Gravili
 
 **Systems & Cloud Architecture SWE**
 
