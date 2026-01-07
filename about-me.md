@@ -22,12 +22,14 @@ Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com
 ### 💼 Professional Experience
 
 **Engineering Lead**, Bequire (EdTech Startup), *Izmir, Turkey (Remote)*, March–October 2025
+
 * Won 1st/90 teams in incubation program and delivered market-ready MVP as sole engineer.
 * Managed full-stack deployment from React frontend to GCP backend.
 * Cut deployment time by 50% via automated CI/CD and BullMQ async job scaling.
 * Automated audio-to-slide alignment via signal processing, eliminating manual editing costs.
 
 **Graduate Research Fellow**, University of Bologna, *Bologna, Italy*, February–September 2025
+
 * Architected high-throughput Python pipelines to process GB-scale data on LEONARDO (EuroHPC).
 * Managed SLURM workloads to optimize parallel compute efficiency and minimize processing time.
 * Automated statistical validation for simulation outputs to ensure data integrity and reproducibility.
