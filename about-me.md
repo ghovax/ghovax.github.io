@@ -4,8 +4,6 @@
 
 Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com  
 
-- 💼 **Digital Portfolio**: [View My Portfolio](https://ghovax.github.io)
-
 * Software Engineer with a background in Computational Physics, building scalable backends, frontends and performance-critical software (Python, Rust, TypeScript), working across the full stack.
 * My focus has been on the software lifecycle, from HPC data pipelines to cloud backends (Node.js, gRPC, Redis, GCP, AWS). I worked on complex architectures as an open-source author with thousands of users.
 * I build production-grade tools and infrastructures, delivering responsive frontends (React) and backend logic, including multi-agent AI (RAG, LLMs), with proven experience as Engineering Lead for a startup.
