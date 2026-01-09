@@ -1,16 +1,16 @@
 # 👨🏻‍💻 Hi, I'm Giovanni Gravili
 
-### Systems & Cloud Architecture SWE
+### Systems & Infrastructure SWE
 
 Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com  
 
-* Software Engineer with a background in Computational Physics, building scalable backends, frontends and performance-critical software (Python, Rust, TypeScript), working across the full stack.
-* My focus has been on the software lifecycle, from HPC data pipelines to cloud backends (Node.js, gRPC, Redis, GCP, AWS). I worked on complex architectures as an open-source author with thousands of users.
-* I build production-grade tools and infrastructures, delivering responsive frontends (React) and backend logic, including multi-agent AI (RAG, LLMs), with proven experience as Engineering Lead for a startup.
+* **Software Engineer with a background in Computational Physics** — I developed scalable backends (Python, C/C++, Rust) and responsive frontends (React, Next.js) while building performance-critical software in strict adherence to technical specifications.
+* **Open-source author and contributor** — I worked on complex codebases for thousands of users and managed the software lifecycle, from architecting HPC data pipelines to managing cloud backends and infrastructure (Node.js, gRPC, Redis, GCP, AWS).
+* **Former startup Engineering Lead** — I built production-grade tools and extensive infrastructure, delivering sophisticated multi-agent AI systems (RAG, LLMs) and robust backend logic supported by extensive documentation.
 
 ### 🛠 Technical Skills
 
-* **Languages:** Python, Rust, TypeScript/JS, C/C++, Go, SQL, Bash
+* **Languages:** Python, C/C++, Rust, TypeScript/JS, Go, SQL, Bash
 * **Backend:** Node.js (gRPC/Redis), Flask, SQL/NoSQL (Firestore), REST APIs, OAuth
 * **Frontend:** React, Next.js, Vue.js, Tailwind CSS
 * **AI & Data:** LangChain, RAG, Vector DBs, Multi-agent Systems, HPC (SLURM)
@@ -19,16 +19,19 @@ Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com
 
 ### 💼 Professional Experience
 
-**Engineering Lead**, Bequire (EdTech Startup), *Izmir, Turkey (Remote)*, March–October 2025
+**Engineering Lead**, Bequire (EdTech Startup), *Izmir (Remote)*, March–October 2025
 
-* Won 1st/90 teams in incubation program and delivered market-ready MVP as sole engineer.
+_Won 1st/90 teams in incubation program and delivered market-ready MVP as sole engineer._
+
+* Architected a layered LLM pipeline to automate study guide generation from recordings and slides.
 * Managed full-stack deployment from React frontend to GCP backend.
 * Cut deployment time by 50% via automated CI/CD and BullMQ async job scaling.
-* Automated audio-to-slide alignment via signal processing, eliminating manual editing costs.
 
 **Graduate Research Fellow**, University of Bologna, *Bologna, Italy*, February–September 2025
 
-* Architected high-throughput Python pipelines to process GB-scale data on LEONARDO (EuroHPC).
+Architected high-throughput Python pipelines to process GB-scale data on LEONARDO (EuroHPC).
+
+* Engineered high-throughput Python pipelines to process GB-scale data on LEONARDO HPC.
 * Managed SLURM workloads to optimize parallel compute efficiency and minimize processing time.
 * Automated statistical validation for simulation outputs to ensure data integrity and reproducibility.
 
@@ -41,7 +44,7 @@ Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com
 ### 🏆 Publications & Awards
 
 * **First Place**, General Entrepreneurship Program (DEPARK Bambu Incubator), November 2025
-* **Publication:** Unraveling the Pathways of Tribochemical Reactions, AMS Acta, November 2025
+* **Publication:** Unraveling the Pathways of Tribochemical Reactions Involving the ZDDP Lubricant Additive by Machine-Learning-Informed Molecular Dynamics, AMS Acta, DOI: [10.6092/unibo/amsacta/8604](https://amsacta.unibo.it/id/eprint/8604/), November 2025
 
 ### 🌐 Languages
 
@@ -53,4 +56,4 @@ Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com
 - 📧 **Email:** [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
 - 🔗 **LinkedIn:** [linkedin.com/in/giovanni-gravili](https://www.linkedin.com/in/giovanni-gravili)
 - 🌐 **GitHub:** [github.com/ghovax](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/1q0gT03g_85lLvvxWTCuxRUn3Jskua0V3/view?usp=sharing)
+- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/18gRhSSLwmUjEi_qGgUBQnrDwnmh8po2H/view?usp=sharing)
