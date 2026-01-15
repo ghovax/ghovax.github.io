@@ -1,59 +1,86 @@
 # 👨🏻‍💻 Hi, I'm Giovanni Gravili
 
-### Systems & Infrastructure SWE
+### Systems & Cloud Infrastructure SWE
 
-Bologna, Italy, (+39) 366 4207296, giovannigravili112@gmail.com  
+* 🎯 **Seeking Roles:** Research or industry roles where I can leverage my multi-disciplinary toolkit, combining low-level systems logic, machine learning workflows, and modern web architecture, to solve real-world problems in engineering, finance, and adjacent fields.
+* 📝 **CV / Resume:** [View my Resume](https://drive.google.com/file/d/17NGN_2tsFXxrATlzfmwiSRQYpBn6TcJ9/view?usp=sharing)
+* 📍 **Location:** Bologna, Italy
+* 📱 **Phone:** (+39) 366 4207296
+* 📧 **Email:** [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
+* 🔗 **LinkedIn:** [linkedin.com/in/giovanni-gravili](https://www.linkedin.com/in/giovanni-gravili)
+* 🐙 **GitHub:** [github.com/ghovax](https://github.com/ghovax)
 
-* **Software Engineer with a background in Computational Physics** — I developed scalable backends (Python, C/C++, Rust) and responsive frontends (React, Next.js) while building performance-critical software in strict adherence to technical specifications.
-* **Open-source author and contributor** — I worked on complex codebases for thousands of users and managed the software lifecycle, from architecting HPC data pipelines to managing cloud backends and infrastructure (Node.js, gRPC, Redis, GCP, AWS).
-* **Former startup Engineering Lead** — I built production-grade tools and extensive infrastructure, delivering sophisticated multi-agent AI systems (RAG, LLMs) and robust backend logic supported by extensive documentation.
+### 📖 Professional Summary
+
+* **Systems-Focused Developer:** Translated technical specifications into code to build tools used in production for performance-critical distributed systems, deploying backends and databases on cloud infrastructure in Python, Rust and C++, paired with modern React/Next.js frontends.
+* **Open-Source Maintainer:** Shipped and continue to maintain fully-tested and documented open-source libraries, taking full ownership of the codebase, addressing contributions and feedback.
+* **Distributed Computing & Cloud:** Built high-performance data pipelines on distributed architectures like LEONARDO (EuroHPC), integrating databases and cloud-native services on GCP and AWS via Docker, Redis, and CI/CD to ensure their long-term reliability.
 
 ### 🛠 Technical Skills
 
-* **Languages:** Python, C/C++, Rust, TypeScript/JS, Go, SQL, Bash
+* **Languages:** Python, C/C++, C#, Java, Rust, TypeScript/JavaScript, Go, SQL, Bash
 * **Backend:** Node.js (gRPC/Redis), Flask, SQL/NoSQL (Firestore), REST APIs, OAuth
+* **Cloud & DevOps:** GCP (Cloud Run/Compute, GCS), AWS, Docker, CI/CD (GitHub Actions), Linux
+* **AI & LLMs:** LangChain, RAG
 * **Frontend:** React, Next.js, Vue.js, Tailwind CSS
-* **AI & Data:** LangChain, RAG, Vector DBs, Multi-agent Systems, HPC (SLURM)
-* **Cloud/DevOps:** GCP (Cloud Run/GCS), AWS, Docker, CI/CD (GitHub Actions), Linux
-* **Engineering:** System Design, Pytest/Jest, Git, Reverse Engineering, WebGPU/WGSL
 
 ### 💼 Professional Experience
 
-**Engineering Lead**, Bequire (EdTech Startup), *Izmir (Remote)*, March–October 2025
+* **Engineering Lead, Bequire (EdTech Startup)**, *March–Oct. 2025, Izmir, Türkiye (Remote)*, 🌐 [Read More](https://ghovax.github.io/posts/2da559.html)
+    * **Tools:** React, REST APIs, GCP (Firestore, Cloud Run/Compute)
+    * **Core Achievement:** Delivered a market-ready MVP as sole engineer, winning 1st of 90 teams at an international competition by transitioning a prototype into a production-grade platform.
+    * Developed a layered LLM pipeline to automate the writing of study guides from recordings and slides, handling the full development cycle from backend to frontend and deployment to GCP.
+    * Scaled backend throughput and reliability by offloading tasks to BullMQ/Redis and automating the release cycle via CI/CD, halving deployment costs and time.
 
-_Won 1st/90 teams in incubation program and delivered market-ready MVP as sole engineer._
+* **Graduate Research Fellow, University of Bologna**, *Feb.–Sept. 2025, Bologna, Italy*
+    * **Tools:** Python, HPC (SLURM), TensorFlow
+    * **Core Achievement:** Deployed high-throughput data pipelines on the LEONARDO (EuroHPC) distributed architecture, enabling efficient processing of GB-scale simulation datasets.
+    * Managed distributed workloads to optimize compute efficiency under limited resources, significantly reducing processing time and costs for large-scale tasks.
+    * Standardized environments using containerization and version-controlled configurations, ensuring the portability of the pipeline and its reproducibility across distributed compute nodes.
 
-* Architected a layered LLM pipeline to automate study guide generation from recordings and slides.
-* Managed full-stack deployment from React frontend to GCP backend.
-* Cut deployment time by 50% via automated CI/CD and BullMQ async job scaling.
+### 💡 Selected Technical Projects
 
-**Graduate Research Fellow**, University of Bologna, *Bologna, Italy*, February–September 2025
+* **Portable Document Format (PDF) Implementation Library**, *Oct. 2024*, 🌐 [Read More](https://ghovax.github.io/posts/eb50ba.html)
+    * **Tools:** Rust, FPDF Specification
+    * **Core Achievement:** Implemented and fully tested a library from specification to provide users with precise control over document structure and binary encoding without external dependencies.
+    * Trusted by thousands of users for production reliability, achieved through extensive automated fuzzy-testing for memory safety and a clear, well-documented open-source API.
+    * Ensured universal document compatibility by building a built-in font embedding system that guarantees text and layouts appear identical on any device.
 
-Architected high-throughput Python pipelines to process GB-scale data on LEONARDO (EuroHPC).
+* **Scriptable Molecular Analysis Toolkit**, *Dec. 2025*, 🌐 [Read More](https://ghovax.github.io/posts/be16e6.html)
+    * **Tools:** Rust, Lua, WebGPU
+    * **Core Achievement:** Developed a toolkit for researchers to execute complex analysis on protein datasets via a custom language and visualizer implemented from technical specification.
+    * Built a programmable spatial query interface to isolate and analyze molecular regions, replacing manual selection with a parsed language for precise data filtering.
+    * Developed an extensible analysis framework by integrating a Lua scripting runtime for automated complex batch-processing pipelines.
 
-* Engineered high-throughput Python pipelines to process GB-scale data on LEONARDO HPC.
-* Managed SLURM workloads to optimize parallel compute efficiency and minimize processing time.
-* Automated statistical validation for simulation outputs to ensure data integrity and reproducibility.
+* **Differentiable Inverse Optical Design Engine**, *Nov. 2025*, 🌐 [Read More](https://ghovax.github.io/posts/1c4926.html)
+    * **Tools:** Python, PyTorch
+    * **Core Achievement:** Built an optimization engine to automate optical component design, replacing trial-and-error modeling with a fully differentiable physics system.
+    * Eliminated manual design bottlenecks by engineering a custom ray-tracing framework that programmatically optimizes physical geometries via gradient descent.
+    * Resolved light-shaping errors by implementing mathematical constraints to produce realistic, manufacturable light patterns.
+
+* **Systems Engineering & Applied ML Projects**, *2024–2025*, 🌐 [Read More](https://ghovax.github.io/)
+    * **Tools:** C++, Ghidra, Python, RAG, Embedded/IoT
+    * Decoded Tobii Eye Tracker 5 hardware protocols by reverse engineering via Ghidra to enable third-party integration and recreated a surface API.
+    * Built a multimodal RAG pipeline using Python and Gemini to automate information retrieval from unstructured documents with local vector storage.
+    * Trained and integrated a CNN image classification model into an Arduino Nano 33 BLE with a Next.js interface and Python control panel.
 
 ### 🎓 Education
 
-* **Master's in Material Physics and Nanoscience**, University of Bologna, 2023–2025
-* **Bachelor's in Physics**, University of Bologna, 2019–2023
+* **Master's in Material Physics and Nanoscience**, University of Bologna (2023–2025)
+* **Bachelor's in Physics**, University of Bologna (2019–2023)
 * **Coursework:** ML Force Fields, Computational Materials Modeling (DFT, MD), Solid-State Physics, Electronic Transport, Cleanroom Fabrication & Characterization.
 
-### 🏆 Publications & Awards
+### 🏅 Publications & Awards
 
-* **First Place**, General Entrepreneurship Program (DEPARK Bambu Incubator), November 2025
-* **Publication:** Unraveling the Pathways of Tribochemical Reactions Involving the ZDDP Lubricant Additive by Machine-Learning-Informed Molecular Dynamics, AMS Acta, DOI: [10.6092/unibo/amsacta/8604](https://amsacta.unibo.it/id/eprint/8604/), November 2025
+* **"Unraveling the Pathways of Tribochemical Reactions Involving the ZDDP Lubricant Additive by Machine-Learning-Informed Molecular Dynamics"**, AMS Acta (Nov. 2025)
+    * DOI: [10.6092/unibo/amsacta/8604](https://amsacta.unibo.it/id/eprint/8604/)
+    * Project: Advancing Solid Interfaces and Lubricants by First Principles Material Design
 
-### 🌐 Languages
+* **First Place**, General Entrepreneurship Program (DEPARK Bambu Incubator), Nov. 2025
 
-**English** (C2), **Italian** (Native), **Spanish** (B2/C1), **French** (B1/B2)
+### 🌍 Languages
 
-### 👨🏻‍🔬 Connect With Me
-
-- 🎯 **Seeking Roles:** Research or industry roles where I can leverage my multi-disciplinary toolkit, combining low-level systems logic, machine learning workflows, and modern web architecture, to solve real-world problems in engineering, finance, and adjacent fields.
-- 📧 **Email:** [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
-- 🔗 **LinkedIn:** [linkedin.com/in/giovanni-gravili](https://www.linkedin.com/in/giovanni-gravili)
-- 🌐 **GitHub:** [github.com/ghovax](https://github.com/ghovax)
-- 📄 **CV / Resume**: [View My Resume](https://drive.google.com/file/d/18gRhSSLwmUjEi_qGgUBQnrDwnmh8po2H/view?usp=sharing)
+* 🇬🇧 **English:** C2 (Fluent)
+* 🇮🇹 **Italian:** Native
+* 🇪🇸 **Spanish:** B2/C1
+* 🇫🇷 **French:** B1/B2
