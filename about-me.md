@@ -3,7 +3,7 @@
 ### Systems & Cloud Infrastructure SWE
 
 * 🎯 **Seeking Roles:** Research or industry roles where I can leverage my multi-disciplinary toolkit, combining low-level systems logic, machine learning workflows, and modern web architecture, to solve real-world problems in engineering, finance, and adjacent fields.
-* 📝 **CV / Resume:** [View my Resume](https://drive.google.com/file/d/17NGN_2tsFXxrATlzfmwiSRQYpBn6TcJ9/view?usp=sharing)
+* 📝 **CV / Resume:** [View my Resume](https://drive.google.com/file/d/1-_B50GDc0Yi4LElnTBe6TEFL9dPs7rH8/view?usp=sharing)
 * 📍 **Location:** Bologna, Italy
 * 📱 **Phone:** (+39) 366 4207296
 * 📧 **Email:** [giovannigravili112@gmail.com](mailto:giovannigravili112@gmail.com)
@@ -28,13 +28,13 @@
 
 * **Engineering Lead, Bequire (EdTech Startup)**, *March–Oct. 2025, Izmir, Türkiye (Remote)*, 🌐 [Read More](https://ghovax.github.io/posts/2da559.html)
     * **Tools:** React, REST APIs, GCP (Firestore, Cloud Run/Compute)
-    * **Core Achievement:** Delivered a market-ready MVP as sole engineer, winning 1st of 90 teams at an international competition by transitioning a prototype into a production-grade platform.
+    * **Contribution:** Delivered a market-ready MVP as sole engineer, winning 1st of 90 teams at an international competition by transitioning a prototype into a production-grade platform.
     * Developed a layered LLM pipeline to automate the writing of study guides from recordings and slides, handling the full development cycle from backend to frontend and deployment to GCP.
     * Scaled backend throughput and reliability by offloading tasks to BullMQ/Redis and automating the release cycle via CI/CD, halving deployment costs and time.
 
 * **Graduate Research Fellow, University of Bologna**, *Feb.–Sept. 2025, Bologna, Italy*
     * **Tools:** Python, HPC (SLURM), TensorFlow
-    * **Core Achievement:** Deployed high-throughput data pipelines on the LEONARDO (EuroHPC) distributed architecture, enabling efficient processing of GB-scale simulation datasets.
+    * **Contribution:** Deployed high-throughput data pipelines on the LEONARDO (EuroHPC) distributed architecture, enabling efficient processing of GB-scale simulation datasets.
     * Managed distributed workloads to optimize compute efficiency under limited resources, significantly reducing processing time and costs for large-scale tasks.
     * Standardized environments using containerization and version-controlled configurations, ensuring the portability of the pipeline and its reproducibility across distributed compute nodes.
 
@@ -42,19 +42,19 @@
 
 * **Portable Document Format (PDF) Implementation Library**, *Oct. 2024*, 🌐 [Read More](https://ghovax.github.io/posts/eb50ba.html)
     * **Tools:** Rust, FPDF Specification
-    * **Core Achievement:** Implemented and fully tested a library from specification to provide users with precise control over document structure and binary encoding without external dependencies.
+    * **Contribution:** Implemented and fully tested a library from specification to provide users with precise control over document structure and binary encoding without external dependencies.
     * Trusted by thousands of users for production reliability, achieved through extensive automated fuzzy-testing for memory safety and a clear, well-documented open-source API.
     * Ensured universal document compatibility by building a built-in font embedding system that guarantees text and layouts appear identical on any device.
 
 * **Scriptable Molecular Analysis Toolkit**, *Dec. 2025*, 🌐 [Read More](https://ghovax.github.io/posts/be16e6.html)
     * **Tools:** Rust, Lua, WebGPU
-    * **Core Achievement:** Developed a toolkit for researchers to execute complex analysis on protein datasets via a custom language and visualizer implemented from technical specification.
+    * **Contribution:** Developed a toolkit for researchers to execute complex analysis on protein datasets via a custom language and visualizer implemented from technical specification.
     * Built a programmable spatial query interface to isolate and analyze molecular regions, replacing manual selection with a parsed language for precise data filtering.
     * Developed an extensible analysis framework by integrating a Lua scripting runtime for automated complex batch-processing pipelines.
 
 * **Differentiable Inverse Optical Design Engine**, *Nov. 2025*, 🌐 [Read More](https://ghovax.github.io/posts/1c4926.html)
     * **Tools:** Python, PyTorch
-    * **Core Achievement:** Built an optimization engine to automate optical component design, replacing trial-and-error modeling with a fully differentiable physics system.
+    * **Contribution:** Built an optimization engine to automate optical component design, replacing trial-and-error modeling with a fully differentiable physics system.
     * Eliminated manual design bottlenecks by engineering a custom ray-tracing framework that programmatically optimizes physical geometries via gradient descent.
     * Resolved light-shaping errors by implementing mathematical constraints to produce realistic, manufacturable light patterns.
 
