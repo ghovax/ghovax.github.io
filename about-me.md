@@ -1,6 +1,6 @@
 # 👨🏻‍💻 Hi, I'm Giovanni Gravili
 
-### Systems & Cloud Infrastructure SWE
+### Systems, Cloud & HPC Infrastructure SWE
 
 * 🎯 **Seeking Roles:** Research or industry roles where I can leverage my multi-disciplinary toolkit, combining low-level systems logic, machine learning workflows, and modern web architecture, to solve real-world problems in engineering, finance, and adjacent fields.
 * 📝 **CV / Resume:** [View my Resume](https://drive.google.com/file/d/1-_B50GDc0Yi4LElnTBe6TEFL9dPs7rH8/view?usp=sharing)
