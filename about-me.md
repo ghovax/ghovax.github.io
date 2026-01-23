@@ -38,32 +38,6 @@
     - Managed distributed workloads to optimize compute efficiency under limited resources, significantly reducing processing time and costs for large-scale tasks.
     - Standardized environments using containerization and version-controlled configurations, ensuring the portability of the pipeline and its reproducibility across distributed compute nodes.
 
-### 💡 Selected Technical Projects
-
-- **Portable Document Format (PDF) Implementation Library**, _Oct. 2024_, 🌐 [Read More](https://ghovax.github.io/posts/eb50ba.html)
-  - **Tools:** Rust, FPDF Specification
-  - **Contribution:** Implemented and fully tested a library from specification to provide users with precise control over document structure and binary encoding without external dependencies.
-    - Trusted by thousands of users for production reliability, achieved through extensive automated fuzzy-testing for memory safety and a clear, well-documented open-source API.
-    - Ensured universal document compatibility by building a built-in font embedding system that guarantees text and layouts appear identical on any device.
-
-- **Scriptable Molecular Analysis Toolkit**, _Dec. 2025_, 🌐 [Read More](https://ghovax.github.io/posts/be16e6.html)
-  - **Tools:** Rust, Lua, WebGPU
-  - **Contribution:** Developed a toolkit for researchers to execute complex analysis on protein datasets via a custom language and visualizer implemented from technical specification.
-    - Built a programmable spatial query interface to isolate and analyze molecular regions, replacing manual selection with a parsed language for precise data filtering.
-    - Developed an extensible analysis framework by integrating a Lua scripting runtime for automated complex batch-processing pipelines.
-
-- **Differentiable Inverse Optical Design Engine**, _Nov. 2025_, 🌐 [Read More](https://ghovax.github.io/posts/1c4926.html)
-  - **Tools:** Python, PyTorch
-  - **Contribution:** Built an optimization engine to automate optical component design, replacing trial-and-error modeling with a fully differentiable physics system.
-    - Eliminated manual design bottlenecks by engineering a custom ray-tracing framework that programmatically optimizes physical geometries via gradient descent.
-    - Resolved light-shaping errors by implementing mathematical constraints to produce realistic, manufacturable light patterns.
-
-- **Systems Engineering & Applied ML Projects**, _2024–2025_, 🌐 [Read More](https://ghovax.github.io/)
-  - **Tools:** C++, Ghidra, Python, RAG, Embedded/IoT
-    - **Multimodal RAG Pipeline:** Built a retrieval-augmented generation system using Python and Gemini to automate data extraction from unstructured documents via local vector storage.
-    - **Edge ML Classification:** Trained and integrated a CNN image classification model into an Arduino Nano 33 BLE, including a Python control panel for automated device flashing.
-    - **Hardware Protocol Reverse Engineering:** Decoded Tobii Eye Tracker 5 protocols via Ghidra to enable third-party integration, recreating a surface API for raw device data access.
-
 ### 🎓 Education
 
 - **Master's in Material Physics and Nanoscience**, University of Bologna (2023–2025)
