@@ -19,6 +19,21 @@ MARKDOWN_DIR = os.path.join(os.path.dirname(__file__), "posts/markdown")
 
 BLOG_POSTS = [
     {
+        "title": "Multi-View HLS Stream Synchronization",
+        "emoji": "🎥",
+        "url": "#",
+        "folder": "multi-view-engine",
+        "author": "Giovanni Gravili",
+        "author_link": "https://github.com/ghovax",
+        "submit_time": datetime(2026, 1, 23, 13, 12, 0),
+        "image_url": None,
+        "tags": ["TypeScript", "Go", "WebAssembly", "HLS", "Video Streaming"],
+        "comment_url": None,
+        "points": 0,
+        "comment_count": 0,
+        "pinned": True,
+    },
+    {
         "title": "Building a Scriptable Molecular Analysis Toolkit",
         "emoji": "🧬",
         "url": "#",
