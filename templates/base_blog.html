@@ -1,0 +1,475 @@
+{#
+  Blogger "Simple" template, ported to Jinja.
+
+  The markup mirrors the DOM the Blogger export produces, because the skin
+  CSS selects against it: the cap/fauxborder/fauxcolumn wrappers, the
+  region-inner shells, and the date-outer > date-posts > post-outer > post
+  nesting all carry style.
+
+  The show_* flags below are the b:widget-settings from the export's Blog1
+  widget. Flip one to true to surface that line in the post footer.
+#}
+{% set show_date_header = true %}
+{% set show_author = false %}
+{% set show_timestamp = false %}
+{% set show_labels = false %}
+{% set show_location = false %}
+{% set show_comment_link = false %}
+{% set show_share_buttons = false %}
+{% macro render_post(post) %}
+    <div class="post hentry uncustomized-post-template">
+        <a name="{{ post.slug() }}"></a>
+        <h3 class="post-title entry-title">
+            {% if is_index %}
+                <a href="/posts/{{ post.slug() }}.html">{{ post.title }}</a>
+            {% else %}
+                {{ post.title }}
+            {% endif %}
+        </h3>
+
+        <div class="post-header">
+            <div class="post-header-line-1"></div>
+        </div>
+
+        <div class="post-body entry-content" id="post-body-{{ post.slug() }}">
+            {% if post.image_url %}
+                <a class="feature-image" href="{{ post.image_url }}" target="_blank">
+                    <img src="{{ post.image_url }}" alt="{{ post.title }}" loading="lazy"/>
+                </a>
+            {% endif %}
+            {{ post.summary|safe }}
+            <div style="clear: both;"></div>
+        </div>
+
+        <div class="post-footer">
+            <div class="post-footer-line post-footer-line-1">
+                <span class="post-author vcard">
+                    {% if show_author and post.author %}
+                        Posted by
+                        {% if post.author_link %}
+                            <a class="g-profile" href="{{ post.author_link }}" rel="author" target="_blank">{{ post.author }}</a>
+                        {% else %}
+                            {{ post.author }}
+                        {% endif %}
+                    {% endif %}
+                </span>
+                <span class="post-timestamp">
+                    {% if show_timestamp %}
+                        at
+                        <a class="timestamp-link" href="/posts/{{ post.slug() }}.html" rel="bookmark">
+                            <abbr class="published" title="{{ post.submit_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}">{{ post.submit_time.strftime('%H:%M') }}</abbr>
+                        </a>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="post-footer-line post-footer-line-2">
+                <span class="post-labels">
+                    {% if show_labels and post.tags %}
+                        Labels:
+                        {% for tag in post.tags %}<a href="/search/label/{{ tag }}" rel="tag">{{ tag }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="post-footer-line post-footer-line-3">
+                <span class="post-location"></span>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    {% block head %}
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=1100"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{{ title }}</title>
+        <link rel="alternate" type="application/atom+xml" title="{{ title }}" href="/feed.xml"/>
+        <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+        <meta name="apple-mobile-web-app-title" content="Blog">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/css/blogger-simple.css">
+    {% endblock head %}
+</head>
+
+<body class="loading">
+
+<div class="body-fauxcolumns">
+    <div class="fauxcolumn-outer body-fauxcolumn-outer">
+        <div class="cap-top">
+            <div class="cap-left"></div>
+            <div class="cap-right"></div>
+        </div>
+        <div class="fauxborder-left">
+            <div class="fauxborder-right"></div>
+            <div class="fauxcolumn-inner"></div>
+        </div>
+        <div class="cap-bottom">
+            <div class="cap-left"></div>
+            <div class="cap-right"></div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="content-fauxcolumns">
+        <div class="fauxcolumn-outer content-fauxcolumn-outer">
+            <div class="cap-top">
+                <div class="cap-left"></div>
+                <div class="cap-right"></div>
+            </div>
+            <div class="fauxborder-left">
+                <div class="fauxborder-right"></div>
+                <div class="fauxcolumn-inner"></div>
+            </div>
+            <div class="cap-bottom">
+                <div class="cap-left"></div>
+                <div class="cap-right"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-outer">
+        <div class="content-cap-top cap-top">
+            <div class="cap-left"></div>
+            <div class="cap-right"></div>
+        </div>
+        <div class="fauxborder-left content-fauxborder-left">
+            <div class="fauxborder-right content-fauxborder-right"></div>
+            <div class="content-inner">
+
+                <header>
+                    <div class="header-outer">
+                        <div class="header-cap-top cap-top">
+                            <div class="cap-left"></div>
+                            <div class="cap-right"></div>
+                        </div>
+                        <div class="fauxborder-left header-fauxborder-left">
+                            <div class="fauxborder-right header-fauxborder-right"></div>
+                            <div class="region-inner header-inner">
+                                <div class="section header" id="header">
+                                    <div class="widget Header" id="Header1">
+                                        <div id="header-inner">
+                                            <div class="titlewrapper">
+                                                <h1 class="title">
+                                                    {% if is_index %}{{ blog_title }}{% else %}<a href="{{ config.site }}/">{{ blog_title }}</a>{% endif %}
+                                                </h1>
+                                            </div>
+                                            <div class="descriptionwrapper">
+                                                {% if blog_subtitle %}
+                                                    <p class="description"><span>{{ blog_subtitle }}</span></p>
+                                                {% endif %}
+                                                {% if blog_description %}
+                                                    <p class="description-detail"><span>{{ blog_description }}</span></p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="header-cap-bottom cap-bottom">
+                            <div class="cap-left"></div>
+                            <div class="cap-right"></div>
+                        </div>
+                    </div>
+                </header>
+
+                {# A bar holding nothing but "Home" is a bar for its own sake.
+                   It returns on its own once there is a second page. #}
+                {% if page_links | length > 1 %}
+                    <div class="tabs-outer">
+                        <div class="tabs-cap-top cap-top">
+                            <div class="cap-left"></div>
+                            <div class="cap-right"></div>
+                        </div>
+                        <div class="fauxborder-left tabs-fauxborder-left">
+                            <div class="fauxborder-right tabs-fauxborder-right"></div>
+                            <div class="region-inner tabs-inner">
+                                <div class="section tabs" id="crosscol">
+                                    <div class="widget PageList" id="PageList1">
+                                        <div class="widget-content">
+                                            <ul>
+                                                {% for link in page_links %}
+                                                    <li{% if link.current %} class="selected"{% endif %}>
+                                                        <a href="{{ link.href }}"{% if link.external %} target="_blank"{% endif %}>{{ link.title }}</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="section tabs" id="crosscol-overflow"></div>
+                            </div>
+                        </div>
+                        <div class="tabs-cap-bottom cap-bottom">
+                            <div class="cap-left"></div>
+                            <div class="cap-right"></div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="main-outer">
+                    <div class="main-cap-top cap-top">
+                        <div class="cap-left"></div>
+                        <div class="cap-right"></div>
+                    </div>
+
+                    <div class="fauxborder-left main-fauxborder-left">
+                        <div class="fauxborder-right main-fauxborder-right"></div>
+                        <div class="region-inner main-inner">
+
+                            <div class="columns fauxcolumns">
+
+                                <div class="fauxcolumn-outer fauxcolumn-center-outer">
+                                    <div class="cap-top">
+                                        <div class="cap-left"></div>
+                                        <div class="cap-right"></div>
+                                    </div>
+                                    <div class="fauxborder-left">
+                                        <div class="fauxborder-right"></div>
+                                        <div class="fauxcolumn-inner"></div>
+                                    </div>
+                                    <div class="cap-bottom">
+                                        <div class="cap-left"></div>
+                                        <div class="cap-right"></div>
+                                    </div>
+                                </div>
+
+                                <div class="fauxcolumn-outer fauxcolumn-left-outer">
+                                    <div class="cap-top">
+                                        <div class="cap-left"></div>
+                                        <div class="cap-right"></div>
+                                    </div>
+                                    <div class="fauxborder-left">
+                                        <div class="fauxborder-right"></div>
+                                        <div class="fauxcolumn-inner"></div>
+                                    </div>
+                                    <div class="cap-bottom">
+                                        <div class="cap-left"></div>
+                                        <div class="cap-right"></div>
+                                    </div>
+                                </div>
+
+                                <div class="fauxcolumn-outer fauxcolumn-right-outer">
+                                    <div class="cap-top">
+                                        <div class="cap-left"></div>
+                                        <div class="cap-right"></div>
+                                    </div>
+                                    <div class="fauxborder-left">
+                                        <div class="fauxborder-right"></div>
+                                        <div class="fauxcolumn-inner"></div>
+                                    </div>
+                                    <div class="cap-bottom">
+                                        <div class="cap-left"></div>
+                                        <div class="cap-right"></div>
+                                    </div>
+                                </div>
+
+                                <div class="columns-inner">
+
+                                    <div class="column-center-outer">
+                                        <div class="column-center-inner">
+                                            <div class="section main" id="main">
+
+                                                {% if about_me %}
+                                                    <div class="widget Text" id="Text1">
+                                                        <div class="widget-content">
+                                                            {{ about_me|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+
+                                                <div class="widget Blog" id="Blog1">
+
+                                                    <div class="blog-posts hfeed">
+                                                        {% if heading %}
+                                                            <div class="status-msg-wrap">
+                                                                <div class="status-msg-body">{{ heading }}</div>
+                                                                <div class="status-msg-border">
+                                                                    <div class="status-msg-bg">
+                                                                        <div class="status-msg-hidden">{{ heading }}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div style="clear: both;"></div>
+                                                        {% endif %}
+                                                        {% for group in post_groups %}
+                                                            <div class="date-outer">
+                                                                {% if show_date_header %}
+                                                                    <h2 class="date-header"><span>{{ group.date_header }}</span></h2>
+                                                                {% endif %}
+                                                                <div class="date-posts">
+                                                                    {% for post in group.posts %}
+                                                                        <div class="post-outer">
+                                                                            {{ render_post(post) }}
+                                                                        </div>
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+
+                                                    {% block pager %}{% endblock %}
+
+                                                    <div class="blog-feeds">
+                                                        <div class="feed-links">
+                                                            Subscribe to:
+                                                            <a class="feed-link" href="/feed.xml" type="application/atom+xml" target="_blank">Posts (Atom)</a>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="column-left-outer">
+                                        <div class="column-left-inner">
+                                            <aside></aside>
+                                        </div>
+                                    </div>
+
+                                    <div class="column-right-outer">
+                                        <div class="column-right-inner">
+                                            <aside>
+                                                <div class="section sidebar" id="sidebar-right-1">
+
+                                                    {% if contact_info %}
+                                                        <div class="widget Text" id="Text2">
+                                                            <h2>Contact</h2>
+                                                            <div class="widget-content">
+                                                                {{ contact_info|safe }}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+
+                                                    <div class="widget Label" id="Label1">
+                                                        <h2>Categories</h2>
+                                                        <div class="widget-content list-label-widget-content">
+                                                            <ul>
+                                                                {% for label in labels %}
+                                                                    <li>
+                                                                        <a dir="ltr" href="{{ label.url }}">{{ label.name }}</a>
+                                                                    </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="widget BlogArchive" id="BlogArchive1">
+                                                        <h2>Archives</h2>
+                                                        <div class="widget-content">
+                                                            <div id="ArchiveList">
+                                                                {% for year in archive %}
+                                                                    <ul class="hierarchy">
+                                                                        <li class="archivedate expanded">
+                                                                            <a class="toggle" href="javascript:void(0)">
+                                                                                <span class="zippy toggle-open">&#9660;&#160;</span>
+                                                                            </a>
+                                                                            <a class="post-count-link" href="{{ year.url }}">{{ year.name }}</a>
+                                                                            <span class="post-count" dir="ltr">({{ year.count }})</span>
+                                                                            {% for month in year.months %}
+                                                                                <ul class="hierarchy">
+                                                                                    <li class="archivedate expanded">
+                                                                                        <a class="toggle" href="javascript:void(0)">
+                                                                                            <span class="zippy toggle-open">&#9660;&#160;</span>
+                                                                                        </a>
+                                                                                        <a class="post-count-link" href="{{ month.url }}">{{ month.name }}</a>
+                                                                                        <span class="post-count" dir="ltr">({{ month.count }})</span>
+                                                                                        <ul class="posts">
+                                                                                            {% for post in month.posts %}
+                                                                                                <li><a href="/posts/{{ post.slug() }}.html">{{ post.title }}</a></li>
+                                                                                            {% endfor %}
+                                                                                        </ul>
+                                                                                    </li>
+                                                                                </ul>
+                                                                            {% endfor %}
+                                                                        </li>
+                                                                    </ul>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {% if page_links | length > 1 %}
+                                                        <div class="widget PageList" id="PageList2">
+                                                            <h2>Pages</h2>
+                                                            <div class="widget-content">
+                                                                <ul>
+                                                                    {% for link in page_links %}
+                                                                        <li{% if link.current %} class="selected"{% endif %}>
+                                                                            <a href="{{ link.href }}"{% if link.external %} target="_blank"{% endif %}>{{ link.title }}</a>
+                                                                        </li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+
+                                                </div>
+                                            </aside>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div style="clear: both"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="main-cap-bottom cap-bottom">
+                        <div class="cap-left"></div>
+                        <div class="cap-right"></div>
+                    </div>
+                </div>
+
+                <footer>
+                    <div class="footer-outer">
+                        <div class="footer-cap-top cap-top">
+                            <div class="cap-left"></div>
+                            <div class="cap-right"></div>
+                        </div>
+                        <div class="fauxborder-left footer-fauxborder-left">
+                            <div class="fauxborder-right footer-fauxborder-right"></div>
+                            <div class="region-inner footer-inner">
+                                <div class="section foot" id="footer-3">
+                                    <div class="widget Attribution" id="Attribution1">
+                                        <div class="widget-content" style="text-align: center;">
+                                            <a href="/feed.xml">RSS</a>
+                                            &centerdot;
+                                            <a href="https://github.com/ghovax" title="My GitHub" target="_blank">GitHub</a>
+                                            {% if last_updated %}
+                                                &centerdot;
+                                                Last updated: {{ last_updated.replace(microsecond=0) }} UTC
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footer-cap-bottom cap-bottom">
+                            <div class="cap-left"></div>
+                            <div class="cap-right"></div>
+                        </div>
+                    </div>
+                </footer>
+
+            </div>
+        </div>
+        <div class="content-cap-bottom cap-bottom">
+            <div class="cap-left"></div>
+            <div class="cap-right"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    window.setTimeout(function () {
+        document.body.className = document.body.className.replace('loading', '');
+    }, 10);
+</script>
+</body>
+</html>

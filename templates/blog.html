@@ -1,0 +1,21 @@
+{% extends "base_blog.html" %}
+
+{% set title = post_groups[0].posts[0].title if not is_index and post_groups else blog_title -%}
+
+{% block head %}
+    {{ super() }}
+    <meta name="description" content="{{ blog_description }}">
+    <link rel="canonical" href="{{ canonical_url }}"/>
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="{{ title }}"/>
+    <meta name="twitter:description" content="{{ blog_description }}"/>
+{% endblock %}
+
+{% block pager %}
+    <div class="blog-pager" id="blog-pager">
+        {% if not is_index %}
+            <a class="home-link" href="{{ config.site }}/">Home</a>
+        {% endif %}
+    </div>
+    <div class="clear"></div>
+{% endblock %}
