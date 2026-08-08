@@ -12,9 +12,7 @@ site = 'https://ghovax.github.io'
 blog_title = "Hello, I'm Giovanni Gravili"
 blog_subtitle = 'SWE & PhD Researcher @ YCU (Tokyo)'
 blog_description = (
-    "Collection of some off-script write-ups on software and my research progress; "
-    "honorable mentions include: high-performance computing, and computational physics. "
-    "Feel free to take a peek and connect with me via the contacts on the side."
+    "Collection of some off-script honorable mentions include: high-performance computing, and computational physics. Feel free to take a peek and connect with me via the contacts on the side."
 )
 
 logging.basicConfig(
