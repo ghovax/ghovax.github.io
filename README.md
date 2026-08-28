@@ -1,7 +1,6 @@
 # Giovanni's Portfolio
 
-[![Github Pages](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml/badge.svg)](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml)
-[![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Github Pages](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml/badge.svg)](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml) [![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 A simple, clean personal blog built with Python and static site generation.
 
