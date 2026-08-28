@@ -1,6 +1,7 @@
 # Giovanni's Portfolio
 
-[![Github Pages](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml/badge.svg)](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml) [![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Github Pages](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml/badge.svg)](https://github.com/ghovax/ghovax.github.io/actions/workflows/static.yml)
+[![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 A simple, clean personal blog built with Python and static site generation.
 
@@ -68,7 +69,7 @@ Commit and push to GitHub - the blog will automatically rebuild and deploy!
    cd ghovax.github.io
    ```
 
-2. Install dependencies:
+1. Install dependencies:
 
    ```bash
    # Install uv
@@ -81,7 +82,8 @@ Commit and push to GitHub - the blog will automatically rebuild and deploy!
    sudo apt-get install pandoc
    ```
 
-3. (Optional) Create a `.env` file from the example:
+1. (Optional) Create a `.env` file from the example:
+
    ```bash
    cp .env.example .env
    ```
@@ -107,10 +109,10 @@ python3 -m http.server 8000  # Serve it locally
 ### Making Changes
 
 1. Edit `blog_posts.py` to add/modify blog posts
-2. Run `make blog` to regenerate the site
-3. Check your changes locally
-4. Commit and push to GitHub
-5. GitHub Actions will automatically deploy your changes
+1. Run `make blog` to regenerate the site
+1. Check your changes locally
+1. Commit and push to GitHub
+1. GitHub Actions will automatically deploy your changes
 
 ## Deployment
 
@@ -119,8 +121,8 @@ The site automatically deploys to GitHub Pages when you push to the `main` branc
 The GitHub Actions workflow:
 
 1. Installs Python dependencies
-2. Generates the blog from `blog_posts.py`
-3. Deploys to GitHub Pages
+1. Generates the blog from `blog_posts.py`
+1. Deploys to GitHub Pages
 
 You can also manually trigger deployment from the Actions tab in your GitHub repository.
 
@@ -129,8 +131,8 @@ You can also manually trigger deployment from the Actions tab in your GitHub rep
 Make sure GitHub Pages is enabled in your repository settings:
 
 1. Go to Settings > Pages
-2. Source: "GitHub Actions"
-3. Your blog will be available at `https://ghovax.github.io/`
+1. Source: "GitHub Actions"
+1. Your blog will be available at `https://ghovax.github.io/`
 
 ## Customization
 
